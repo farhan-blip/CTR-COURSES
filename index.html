@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CTR — Program Pelaut Malaysia</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<title>CTR — Malaysia Seafarer Program</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
 
-<!-- FIREBASE SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
@@ -20,7 +19,7 @@
     projectId: "ctr-courses",
     storageBucket: "ctr-courses.firebasestorage.app",
     messagingSenderId: "189612991607",
-    appId: "1:189612991607:web:b2ba96f42af1a6d1325272"
+    appId: "1:189612991607:web:c16220144e9079a5325272"
   };
 
   const app  = initializeApp(firebaseConfig);
@@ -32,12 +31,12 @@
     const navUser   = document.getElementById('nav-user');
     const userEmail = document.getElementById('user-email');
     if (user) {
-      navAuth.style.display  = 'none';
-      navUser.style.display  = 'flex';
-      userEmail.textContent  = user.email;
+      navAuth.style.display = 'none';
+      navUser.style.display = 'flex';
+      userEmail.textContent = user.email;
     } else {
-      navAuth.style.display  = 'flex';
-      navUser.style.display  = 'none';
+      navAuth.style.display = 'flex';
+      navUser.style.display = 'none';
     }
   });
 
@@ -52,22 +51,22 @@
     const agree = document.getElementById('r-agree').checked;
     const errEl = document.getElementById('r-error');
     errEl.textContent = '';
-    if (!name || !email || !pass) { errEl.textContent = '⚠ Sila lengkapkan semua maklumat.'; return; }
-    if (pass !== pass2)           { errEl.textContent = '⚠ Kata laluan tidak sepadan.'; return; }
-    if (pass.length < 6)          { errEl.textContent = '⚠ Kata laluan sekurang-kurangnya 6 aksara.'; return; }
-    if (!agree)                   { errEl.textContent = '⚠ Sila bersetuju dengan terma & syarat.'; return; }
+    if (!name || !email || !pass) { errEl.textContent = '⚠ Please fill in all required fields.'; return; }
+    if (pass !== pass2)           { errEl.textContent = '⚠ Passwords do not match.'; return; }
+    if (pass.length < 6)          { errEl.textContent = '⚠ Password must be at least 6 characters.'; return; }
+    if (!agree)                   { errEl.textContent = '⚠ Please agree to the terms & conditions.'; return; }
     const btn = document.getElementById('r-btn');
-    btn.textContent = 'Sedang mendaftar...'; btn.disabled = true;
+    btn.textContent = 'Creating account...'; btn.disabled = true;
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await addDoc(collection(db, 'users'), { uid: cred.user.uid, name, kp, email, phone, uni, createdAt: serverTimestamp() });
       closeM('register');
-      showToast('✓ Akaun berjaya dicipta! Selamat datang, ' + name + '!');
+      showToast('✓ Account created successfully! Welcome, ' + name + '!');
     } catch (e) {
-      if (e.code === 'auth/email-already-in-use') errEl.textContent = '⚠ E-mel ini sudah didaftarkan.';
-      else if (e.code === 'auth/invalid-email')   errEl.textContent = '⚠ Format e-mel tidak sah.';
-      else errEl.textContent = '⚠ Ralat: ' + e.message;
-    } finally { btn.textContent = 'Cipta Akaun →'; btn.disabled = false; }
+      if (e.code === 'auth/email-already-in-use') errEl.textContent = '⚠ This email is already registered.';
+      else if (e.code === 'auth/invalid-email')   errEl.textContent = '⚠ Invalid email format.';
+      else errEl.textContent = '⚠ Error: ' + e.message;
+    } finally { btn.textContent = 'Create Account →'; btn.disabled = false; }
   };
 
   window.doLogin = async function() {
@@ -75,371 +74,402 @@
     const pass  = document.getElementById('l-pass').value;
     const errEl = document.getElementById('l-error');
     errEl.textContent = '';
-    if (!email || !pass) { errEl.textContent = '⚠ Sila masukkan e-mel dan kata laluan.'; return; }
+    if (!email || !pass) { errEl.textContent = '⚠ Please enter your email and password.'; return; }
     const btn = document.getElementById('l-btn');
-    btn.textContent = 'Sedang log masuk...'; btn.disabled = true;
+    btn.textContent = 'Signing in...'; btn.disabled = true;
     try {
       await signInWithEmailAndPassword(auth, email, pass);
       closeM('login');
-      showToast('✓ Berjaya log masuk! Selamat datang kembali.');
+      showToast('✓ Signed in successfully! Welcome back.');
     } catch (e) {
-      errEl.textContent = '⚠ E-mel atau kata laluan tidak betul.';
-    } finally { btn.textContent = 'Log Masuk →'; btn.disabled = false; }
+      errEl.textContent = '⚠ Invalid email or password.';
+    } finally { btn.textContent = 'Sign In →'; btn.disabled = false; }
   };
 
   window.doLogout = async function() {
     await signOut(auth);
-    showToast('✓ Berjaya log keluar.');
+    showToast('✓ Signed out successfully.');
   };
 
-  window.submitBk = async function() {
-    const nama   = document.getElementById('b-nama').value.trim();
-    const kp     = document.getElementById('b-kp').value.trim();
-    const tel    = document.getElementById('b-tel').value.trim();
-    const emel   = document.getElementById('b-emel').value.trim();
+  window.submitBooking = async function() {
+    const name   = document.getElementById('b-name').value.trim();
+    const ic     = document.getElementById('b-ic').value.trim();
+    const phone  = document.getElementById('b-phone').value.trim();
+    const email  = document.getElementById('b-email').value.trim();
     const uni    = document.getElementById('b-uni').value.trim();
-    const pakej  = document.getElementById('b-pakej').value;
-    const tarikh = document.getElementById('b-tarikh').value;
-    const nota   = document.getElementById('b-nota').value.trim();
+    const pkg    = document.getElementById('b-pkg').value;
+    const date   = document.getElementById('b-date').value;
+    const notes  = document.getElementById('b-notes').value.trim();
     const agree  = document.getElementById('b-agree').checked;
     const errEl  = document.getElementById('bk-error');
     errEl.textContent = '';
-    if (!nama)  { errEl.textContent = '⚠ Sila masukkan nama penuh.'; return; }
-    if (!kp)    { errEl.textContent = '⚠ Sila masukkan No. KP.'; return; }
-    if (!tel)   { errEl.textContent = '⚠ Sila masukkan no. telefon.'; return; }
-    if (!emel)  { errEl.textContent = '⚠ Sila masukkan e-mel.'; return; }
-    if (!pakej) { errEl.textContent = '⚠ Sila pilih pakej program.'; return; }
-    if (!agree) { errEl.textContent = '⚠ Sila bersetuju dengan terma & syarat.'; return; }
+    if (!name)  { errEl.textContent = '⚠ Please enter your full name.'; return; }
+    if (!ic)    { errEl.textContent = '⚠ Please enter your IC / Passport number.'; return; }
+    if (!phone) { errEl.textContent = '⚠ Please enter your phone number.'; return; }
+    if (!email) { errEl.textContent = '⚠ Please enter your email address.'; return; }
+    if (!pkg)   { errEl.textContent = '⚠ Please select a program package.'; return; }
+    if (!agree) { errEl.textContent = '⚠ Please agree to the terms & conditions.'; return; }
     const btn = document.getElementById('bk-btn');
-    btn.textContent = 'Menghantar...'; btn.disabled = true;
+    btn.textContent = 'Submitting...'; btn.disabled = true;
     try {
-      await addDoc(collection(db, 'pendaftaran'), { nama, kp, tel, emel, uni, pakej, tarikh, nota, status: 'Baru', submittedAt: serverTimestamp(), uid: auth.currentUser ? auth.currentUser.uid : 'guest' });
-      document.getElementById('bk-ok').style.display = 'block';
-      showToast('✓ Pendaftaran berjaya disimpan dalam database!');
+      await addDoc(collection(db, 'registrations'), { name, ic, phone, email, uni, pkg, date, notes, status: 'New', submittedAt: serverTimestamp(), uid: auth.currentUser ? auth.currentUser.uid : 'guest' });
+      document.getElementById('bk-success').style.display = 'block';
+      showToast('✓ Registration saved to database!');
       setTimeout(()=>document.getElementById('payment').scrollIntoView({behavior:'smooth'}),1200);
     } catch (e) {
-      errEl.textContent = '⚠ Ralat: ' + e.message;
-    } finally { btn.textContent = 'Hantar Pendaftaran →'; btn.disabled = false; }
+      errEl.textContent = '⚠ Error: ' + e.message;
+    } finally { btn.textContent = 'Submit Registration →'; btn.disabled = false; }
   };
 
-  window.submitPay = async function() {
-    const total   = document.getElementById('pp-tot').textContent;
-    const program = document.getElementById('pp-prog').textContent;
-    const method  = document.getElementById('pp-meth').textContent;
-    const nama    = document.getElementById('pay-nama').value.trim();
-    const tel     = document.getElementById('pay-tel').value.trim();
+  window.submitPayment = async function() {
+    const total   = document.getElementById('pp-total').textContent;
+    const program = document.getElementById('pp-pkg').textContent;
+    const method  = document.getElementById('pp-method').textContent;
+    const name    = document.getElementById('pay-name').value.trim();
+    const phone   = document.getElementById('pay-phone').value.trim();
     const errEl   = document.getElementById('pay-error');
     errEl.textContent = '';
-    if (total === '—') { errEl.textContent = '⚠ Sila pilih pakej program terlebih dahulu.'; return; }
-    if (!nama)         { errEl.textContent = '⚠ Sila masukkan nama penuh.'; return; }
-    if (!tel)          { errEl.textContent = '⚠ Sila masukkan no. telefon.'; return; }
+    if (total === '—') { errEl.textContent = '⚠ Please select a program package first.'; return; }
+    if (!name)         { errEl.textContent = '⚠ Please enter your full name.'; return; }
+    if (!phone)        { errEl.textContent = '⚠ Please enter your phone number.'; return; }
     const btn = document.getElementById('pay-btn');
-    btn.textContent = 'Memproses...'; btn.disabled = true;
+    btn.textContent = 'Processing...'; btn.disabled = true;
     try {
-      await addDoc(collection(db, 'bayaran'), { nama, tel, program, method, jumlah: total, status: 'Pending', submittedAt: serverTimestamp(), uid: auth.currentUser ? auth.currentUser.uid : 'guest' });
+      await addDoc(collection(db, 'payments'), { name, phone, program, method, amount: total, status: 'Pending', submittedAt: serverTimestamp(), uid: auth.currentUser ? auth.currentUser.uid : 'guest' });
       document.getElementById('pay-success').style.display = 'block';
-      showToast('✓ Rekod bayaran disimpan! Jumlah: ' + total);
+      showToast('✓ Payment record saved! Amount: ' + total);
     } catch (e) {
-      errEl.textContent = '⚠ Ralat: ' + e.message;
-    } finally { btn.textContent = 'Bayar Sekarang →'; btn.disabled = false; }
+      errEl.textContent = '⚠ Error: ' + e.message;
+    } finally { btn.textContent = 'Pay Now →'; btn.disabled = false; }
   };
 </script>
 
 <style>
   :root {
-    --navy:       #0b2d5e;
-    --blue:       #1351a8;
-    --blue-mid:   #1a6fd4;
-    --blue-light: #3b8ef0;
-    --blue-pale:  #e8f1fc;
-    --blue-xpale: #f2f7ff;
-    --white:      #ffffff;
-    --off-white:  #f5f8ff;
-    --text-dark:  #0d1e3a;
-    --text-body:  #2c4470;
-    --text-muted: #6b88b0;
-    --border:     #c8daf5;
-    --border-dark:#a0bce8;
-    --card:       #ffffff;
-    --success:    #0a9e6a;
-    --error:      #d93025;
-    --shadow:     rgba(11,45,94,0.10);
-    --shadow-md:  rgba(11,45,94,0.15);
+    --navy:      #0b2d5e;
+    --blue:      #1351a8;
+    --blue-mid:  #1a6fd4;
+    --blue-lt:   #3b8ef0;
+    --pale:      #edf4ff;
+    --pale2:     #f5f9ff;
+    --white:     #ffffff;
+    --text:      #0d1e3a;
+    --text2:     #2c4470;
+    --muted:     #6b88b0;
+    --border:    #ccddf5;
+    --success:   #0a9e6a;
+    --error:     #d93025;
+    --shadow:    rgba(11,45,94,0.09);
+    --shadow-lg: rgba(11,45,94,0.15);
   }
 
-  * { margin:0; padding:0; box-sizing:border-box; }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior:smooth; }
-  body { background:var(--off-white); color:var(--text-dark); font-family:'Barlow',sans-serif; overflow-x:hidden; }
+  body { background:var(--pale2); color:var(--text); font-family:'DM Sans',sans-serif; overflow-x:hidden; line-height:1.6; }
 
-  /* NAV */
+  /* ── NAV ── */
   nav {
     position:fixed; top:0; left:0; right:0; z-index:100;
-    height:66px; display:flex; align-items:center; justify-content:space-between;
-    padding:0 5%; background:var(--white);
-    border-bottom:2px solid var(--blue-pale);
-    box-shadow:0 2px 16px var(--shadow);
+    height:64px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 6%; background:var(--white);
+    border-bottom:1px solid var(--border);
+    box-shadow:0 1px 12px var(--shadow);
   }
 
-  .nav-brand { display:flex; align-items:center; gap:0.9rem; }
-  .nav-logo-box { width:42px; height:42px; background:linear-gradient(135deg,var(--navy),var(--blue)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; color:white; box-shadow:0 4px 12px var(--shadow-md); }
-  .nav-logo-text { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:4px; color:var(--navy); line-height:1; }
-  .nav-logo-sub { font-size:0.6rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); }
+  .brand { display:flex; align-items:center; gap:0.8rem; text-decoration:none; }
+  .brand-mark { width:38px; height:38px; background:linear-gradient(135deg,var(--navy),var(--blue-mid)); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-family:'Bebas Neue',sans-serif; font-size:0.85rem; letter-spacing:1px; }
+  .brand-name { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:3px; color:var(--navy); }
+  .brand-sub { font-size:0.58rem; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-top:-2px; }
 
   .nav-links { display:flex; gap:2rem; }
-  .nav-links a { color:var(--text-body); text-decoration:none; font-size:0.8rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; transition:color 0.2s; }
+  .nav-links a { color:var(--text2); text-decoration:none; font-size:0.82rem; font-weight:600; letter-spacing:0.3px; transition:color 0.2s; }
   .nav-links a:hover { color:var(--blue-mid); }
 
-  #nav-auth { display:flex; gap:0.7rem; }
+  #nav-auth { display:flex; gap:0.6rem; align-items:center; }
   #nav-user { display:none; align-items:center; gap:1rem; }
-  .user-info { font-size:0.8rem; color:var(--text-muted); }
-  .user-info span { color:var(--blue); font-weight:700; }
+  .u-email { font-size:0.8rem; color:var(--muted); }
+  .u-email strong { color:var(--blue); }
 
-  .btn-ghost { padding:0.45rem 1.2rem; border:2px solid var(--border-dark); background:transparent; color:var(--blue); font-family:'Barlow',sans-serif; font-size:0.78rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; border-radius:5px; transition:all 0.2s; }
-  .btn-ghost:hover { background:var(--blue-pale); border-color:var(--blue-mid); }
-  .btn-ghost.red { border-color:#f5c6c6; color:#c0392b; }
-  .btn-ghost.red:hover { background:#fff0f0; }
+  .btn-line { padding:0.4rem 1.1rem; border:1.5px solid var(--border); background:transparent; color:var(--text2); font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:600; cursor:pointer; border-radius:6px; transition:all 0.2s; }
+  .btn-line:hover { border-color:var(--blue-mid); color:var(--blue-mid); background:var(--pale); }
+  .btn-line.danger { border-color:#fcc; color:#c0392b; }
+  .btn-line.danger:hover { background:#fff5f5; }
 
-  .btn-cta { padding:0.45rem 1.4rem; background:linear-gradient(90deg,var(--navy),var(--blue-mid)); color:white; font-family:'Barlow',sans-serif; font-size:0.78rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; border:none; border-radius:5px; transition:all 0.2s; box-shadow:0 4px 12px var(--shadow-md); }
-  .btn-cta:hover { background:linear-gradient(90deg,var(--blue),var(--blue-light)); transform:translateY(-1px); }
+  .btn-fill { padding:0.4rem 1.2rem; background:var(--navy); color:white; font-family:'DM Sans',sans-serif; font-size:0.78rem; font-weight:600; cursor:pointer; border:none; border-radius:6px; transition:all 0.2s; }
+  .btn-fill:hover { background:var(--blue-mid); transform:translateY(-1px); }
 
-  /* HERO */
+  @media(max-width:900px){ .nav-links{display:none} }
+
+  /* ── HERO ── */
   #hero {
-    min-height:100vh; position:relative;
-    display:flex; align-items:center;
-    padding:90px 5% 60px; overflow:hidden;
-    background:linear-gradient(135deg, var(--navy) 0%, var(--blue) 50%, var(--blue-mid) 100%);
+    min-height:100vh; padding:90px 6% 70px;
+    background:linear-gradient(150deg, var(--navy) 0%, var(--blue) 55%, var(--blue-mid) 100%);
+    display:flex; align-items:center; position:relative; overflow:hidden;
   }
 
   #hero::before {
-    content:''; position:absolute; inset:0; pointer-events:none;
-    background-image: repeating-linear-gradient(0deg,rgba(255,255,255,0.04) 0px,rgba(255,255,255,0.04) 1px,transparent 1px,transparent 55px),
-      repeating-linear-gradient(90deg,rgba(255,255,255,0.04) 0px,rgba(255,255,255,0.04) 1px,transparent 1px,transparent 55px);
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(ellipse 70% 60% at 80% 20%, rgba(255,255,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 10% 80%, rgba(255,255,255,0.04) 0%, transparent 55%);
   }
 
-  .hero-blob { position:absolute; border-radius:50%; filter:blur(70px); pointer-events:none; }
-  .hb1 { width:550px; height:550px; top:-180px; right:-80px; background:rgba(255,255,255,0.08); }
-  .hb2 { width:350px; height:350px; bottom:-80px; left:5%; background:rgba(255,255,255,0.05); }
+  .hero-inner { position:relative; z-index:2; display:grid; grid-template-columns:1.1fr 0.9fr; gap:5rem; align-items:center; max-width:1160px; margin:0 auto; width:100%; }
+  @media(max-width:900px){ .hero-inner{grid-template-columns:1fr} .hero-cards{display:none} }
 
-  .hero-wrap { position:relative; z-index:2; display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; width:100%; max-width:1200px; margin:0 auto; }
-  @media(max-width:900px){ .hero-wrap{grid-template-columns:1fr} .hero-right{display:none} .nav-links{display:none} }
+  .hero-eyebrow { display:inline-flex; align-items:center; gap:0.5rem; padding:0.3rem 1rem; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:20px; font-size:0.7rem; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.85); margin-bottom:1.4rem; animation:up 0.7s ease both; }
 
-  .hero-badge { display:inline-flex; align-items:center; gap:0.6rem; padding:0.3rem 1rem; border:1px solid rgba(255,255,255,0.35); background:rgba(255,255,255,0.12); border-radius:20px; font-size:0.72rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.9); margin-bottom:1.5rem; animation:fadeUp 0.7s ease both; }
+  .hero-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(3.8rem,8.5vw,7.5rem); line-height:0.9; letter-spacing:3px; color:white; margin-bottom:1.4rem; animation:up 0.7s 0.1s ease both; }
+  .hero-title em { font-style:normal; color:rgba(180,215,255,1); display:block; }
 
-  .hero-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(4rem,9vw,8rem); line-height:0.88; letter-spacing:4px; margin-bottom:1.5rem; animation:fadeUp 0.7s 0.1s ease both; color:white; }
-  .hero-title .l2 { color:rgba(255,255,255,0.7); display:block; }
-  .hero-title .l3 { color:rgba(180,215,255,1); display:block; }
+  .hero-desc { font-size:1rem; color:rgba(255,255,255,0.72); line-height:1.75; max-width:460px; margin-bottom:2.2rem; font-weight:400; animation:up 0.7s 0.2s ease both; }
 
-  .hero-desc { font-size:1rem; color:rgba(255,255,255,0.75); line-height:1.8; max-width:480px; margin-bottom:2.5rem; animation:fadeUp 0.7s 0.2s ease both; }
-  .hero-btns { display:flex; gap:1rem; flex-wrap:wrap; animation:fadeUp 0.7s 0.3s ease both; }
+  .hero-actions { display:flex; gap:0.9rem; flex-wrap:wrap; animation:up 0.7s 0.3s ease both; }
 
-  .btn-hero-p { padding:0.9rem 2.2rem; background:white; color:var(--navy); font-family:'Barlow',sans-serif; font-size:0.88rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; border:none; border-radius:6px; cursor:pointer; transition:all 0.2s; box-shadow:0 6px 20px rgba(0,0,0,0.2); }
-  .btn-hero-p:hover { background:var(--blue-pale); transform:translateY(-2px); }
+  .btn-white { padding:0.85rem 2rem; background:white; color:var(--navy); font-family:'DM Sans',sans-serif; font-size:0.87rem; font-weight:700; border:none; border-radius:7px; cursor:pointer; transition:all 0.2s; box-shadow:0 4px 16px rgba(0,0,0,0.15); }
+  .btn-white:hover { background:var(--pale); transform:translateY(-2px); }
 
-  .btn-hero-o { padding:0.9rem 2.2rem; background:transparent; color:white; font-family:'Barlow',sans-serif; font-size:0.88rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; border:2px solid rgba(255,255,255,0.45); border-radius:6px; cursor:pointer; transition:all 0.2s; }
-  .btn-hero-o:hover { border-color:white; background:rgba(255,255,255,0.1); }
+  .btn-ghost-w { padding:0.85rem 2rem; background:transparent; color:white; font-family:'DM Sans',sans-serif; font-size:0.87rem; font-weight:600; border:1.5px solid rgba(255,255,255,0.4); border-radius:7px; cursor:pointer; transition:all 0.2s; }
+  .btn-ghost-w:hover { border-color:white; background:rgba(255,255,255,0.08); }
 
-  .hero-right { display:flex; flex-direction:column; gap:1.2rem; animation:fadeUp 0.7s 0.4s ease both; }
-  .hero-stat-row { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
-  .hero-stat { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); border-radius:12px; padding:1.5rem; text-align:center; backdrop-filter:blur(10px); }
-  .hero-stat .num { font-family:'Bebas Neue',sans-serif; font-size:2.8rem; color:white; line-height:1; letter-spacing:2px; }
-  .hero-stat .lbl { font-size:0.68rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.65); margin-top:0.3rem; }
-  .hero-info { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.25); border-radius:12px; padding:1.5rem; backdrop-filter:blur(10px); }
-  .hero-info h4 { font-size:0.7rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(180,215,255,1); margin-bottom:0.75rem; }
-  .hero-info p { font-size:0.87rem; color:rgba(255,255,255,0.8); line-height:1.6; }
+  .hero-cards { display:flex; flex-direction:column; gap:1rem; animation:up 0.7s 0.4s ease both; }
 
-  /* SHARED */
-  .section-inner { max-width:1200px; margin:0 auto; padding:6rem 5%; }
+  .h-stat-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
 
-  .sec-eyebrow { display:inline-block; padding:0.25rem 0.9rem; background:var(--blue-pale); border:1px solid var(--border); color:var(--blue); font-size:0.68rem; font-weight:800; letter-spacing:3px; text-transform:uppercase; border-radius:4px; margin-bottom:0.9rem; }
-  .sec-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.5rem,5vw,4rem); letter-spacing:3px; line-height:1; color:var(--text-dark); margin-bottom:0.8rem; }
-  .sec-title .accent { color:var(--blue); }
-  .sec-sub { font-size:0.95rem; color:var(--text-muted); line-height:1.7; max-width:520px; margin-bottom:3rem; font-weight:400; }
+  .h-stat { background:rgba(255,255,255,0.13); border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:1.4rem; text-align:center; backdrop-filter:blur(8px); }
+  .h-stat .val { font-family:'Bebas Neue',sans-serif; font-size:2.6rem; color:white; line-height:1; letter-spacing:2px; }
+  .h-stat .lbl { font-size:0.65rem; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.6); margin-top:0.3rem; }
 
-  /* SYARAT */
-  #syarat { background:var(--white); }
+  .h-info { background:rgba(255,255,255,0.13); border:1px solid rgba(255,255,255,0.2); border-radius:12px; padding:1.3rem 1.5rem; backdrop-filter:blur(8px); }
+  .h-info-label { font-size:0.65rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(180,215,255,0.9); margin-bottom:0.5rem; }
+  .h-info p { font-size:0.84rem; color:rgba(255,255,255,0.75); line-height:1.55; }
 
-  .syarat-intro { background:linear-gradient(135deg,var(--blue-xpale),var(--blue-pale)); border:1px solid var(--border); border-radius:14px; padding:2rem; margin-bottom:3rem; display:flex; align-items:flex-start; gap:1.5rem; }
-  .si-icon { width:52px; height:52px; background:linear-gradient(135deg,var(--navy),var(--blue)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex-shrink:0; box-shadow:0 4px 14px var(--shadow-md); }
-  .syarat-intro h3 { font-family:'Barlow Condensed',sans-serif; font-size:1.1rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--navy); margin-bottom:0.4rem; }
-  .syarat-intro p { font-size:0.9rem; color:var(--text-body); line-height:1.6; }
+  /* ── LAYOUT ── */
+  .page-section { padding:5rem 6%; }
+  .section-wrap { max-width:1160px; margin:0 auto; }
 
-  .syarat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:1.5rem; }
-  .s-card { background:var(--white); border:2px solid var(--border); border-radius:12px; overflow:hidden; transition:transform 0.3s,border-color 0.3s,box-shadow 0.3s; }
-  .s-card:hover { transform:translateY(-5px); border-color:var(--blue-mid); box-shadow:0 12px 35px var(--shadow-md); }
-  .s-card-top { background:linear-gradient(135deg,var(--navy),var(--blue-mid)); padding:1.4rem; display:flex; align-items:center; gap:1rem; }
-  .s-icon { width:46px; height:46px; background:rgba(255,255,255,0.18); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
-  .s-card-top h3 { font-family:'Barlow Condensed',sans-serif; font-size:1rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:white; }
-  .s-card-top .tag { font-size:0.65rem; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.6); margin-top:0.15rem; }
-  .s-card-body { padding:1.5rem; }
-  .s-item { display:flex; align-items:flex-start; gap:0.75rem; padding:0.6rem 0; border-bottom:1px solid var(--blue-pale); font-size:0.87rem; color:var(--text-body); line-height:1.5; }
-  .s-item:last-of-type { border-bottom:none; }
-  .s-item .dot { width:7px; height:7px; background:var(--blue-mid); border-radius:50%; flex-shrink:0; margin-top:5px; }
-  .s-note { margin-top:1rem; padding:0.75rem 1rem; background:var(--blue-xpale); border-left:3px solid var(--blue-mid); border-radius:0 6px 6px 0; font-size:0.78rem; color:var(--blue); line-height:1.5; }
+  .section-header { margin-bottom:3rem; }
+  .eyebrow { display:inline-block; padding:0.22rem 0.85rem; background:var(--pale); border:1px solid var(--border); color:var(--blue); font-size:0.65rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; border-radius:4px; margin-bottom:0.7rem; }
+  .section-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.2rem,4vw,3.5rem); letter-spacing:2px; color:var(--text); line-height:1; margin-bottom:0.6rem; }
+  .section-title span { color:var(--blue); }
+  .section-desc { font-size:0.95rem; color:var(--muted); max-width:500px; line-height:1.7; }
 
-  /* FASA */
-  #fasa { background:var(--off-white); }
-  .fasa-tabs { display:flex; border-radius:10px; overflow:hidden; border:2px solid var(--border); margin-bottom:3rem; }
-  .f-tab { flex:1; padding:1.4rem 2rem; background:var(--white); cursor:pointer; transition:all 0.3s; border-right:2px solid var(--border); }
-  .f-tab:last-child { border-right:none; }
-  .f-tab.active { background:linear-gradient(135deg,var(--navy),var(--blue-mid)); }
-  .f-tab-num { font-size:0.68rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; margin-bottom:0.3rem; }
-  .f-tab:not(.active) .f-tab-num { color:var(--text-muted); }
-  .f-tab.active .f-tab-num { color:rgba(255,255,255,0.6); }
-  .f-tab h3 { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:2px; }
-  .f-tab:not(.active) h3 { color:var(--text-dark); }
-  .f-tab.active h3 { color:white; }
-  .f-tab p { font-size:0.78rem; margin-top:0.2rem; }
-  .f-tab:not(.active) p { color:var(--text-muted); }
-  .f-tab.active p { color:rgba(255,255,255,0.7); }
+  /* ── ELIGIBILITY ── */
+  #eligibility { background:var(--white); }
 
-  .f-panel { display:none; }
-  .f-panel.active { display:block; }
+  .intro-banner { background:linear-gradient(135deg,var(--pale),var(--pale2)); border:1px solid var(--border); border-radius:12px; padding:1.8rem 2rem; margin-bottom:2.5rem; display:flex; align-items:flex-start; gap:1.4rem; }
+  .intro-icon { width:48px; height:48px; background:linear-gradient(135deg,var(--navy),var(--blue-mid)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
+  .intro-banner h3 { font-size:0.95rem; font-weight:700; color:var(--navy); margin-bottom:0.35rem; }
+  .intro-banner p { font-size:0.88rem; color:var(--text2); line-height:1.6; }
 
-  .f1-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; }
-  @media(max-width:700px){ .f1-grid{grid-template-columns:1fr} }
+  .elig-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(255px,1fr)); gap:1.2rem; }
 
-  .doc-card { background:var(--white); border:2px solid var(--border); border-radius:10px; overflow:hidden; transition:border-color 0.3s,box-shadow 0.3s; }
-  .doc-card:hover { border-color:var(--blue-mid); box-shadow:0 8px 24px var(--shadow); }
-  .doc-head { background:linear-gradient(90deg,var(--navy),var(--blue)); padding:1.2rem 1.5rem; display:flex; align-items:center; gap:1rem; }
-  .doc-head .dicon { font-size:1.5rem; background:rgba(255,255,255,0.18); width:42px; height:42px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .doc-head h4 { font-family:'Barlow Condensed',sans-serif; font-size:1rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:white; }
-  .doc-head p { font-size:0.73rem; color:rgba(255,255,255,0.65); margin-top:0.1rem; }
-  .doc-body { padding:1.4rem; }
-  .doc-item { display:flex; gap:0.75rem; padding:0.6rem 0; border-bottom:1px solid var(--blue-pale); font-size:0.86rem; color:var(--text-body); line-height:1.5; }
-  .doc-item:last-child { border-bottom:none; }
-  .doc-item .ck { color:var(--success); font-weight:700; flex-shrink:0; }
+  .elig-card { background:var(--white); border:1.5px solid var(--border); border-radius:12px; overflow:hidden; transition:transform 0.25s,border-color 0.25s,box-shadow 0.25s; }
+  .elig-card:hover { transform:translateY(-4px); border-color:var(--blue-mid); box-shadow:0 10px 30px var(--shadow-lg); }
 
-  .f1-warn { background:#fff8f8; border:2px solid #f5c6c6; border-radius:10px; padding:1.5rem; display:flex; gap:1rem; align-items:flex-start; }
-  .f1-warn .wi { font-size:1.5rem; flex-shrink:0; }
-  .f1-warn h4 { font-family:'Barlow Condensed',sans-serif; font-size:1rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#c0392b; margin-bottom:0.3rem; }
-  .f1-warn p { font-size:0.84rem; color:#8b3a3a; line-height:1.6; }
+  .elig-top { background:linear-gradient(135deg,var(--navy),var(--blue-mid)); padding:1.2rem 1.4rem; display:flex; align-items:center; gap:0.9rem; }
+  .elig-icon { width:42px; height:42px; background:rgba(255,255,255,0.18); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+  .elig-top h3 { font-size:0.9rem; font-weight:700; color:white; letter-spacing:0.2px; }
+  .elig-top .tag { font-size:0.62rem; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.55); margin-top:0.1rem; }
 
-  .pakej-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
-  @media(max-width:700px){ .pakej-grid{grid-template-columns:1fr} }
+  .elig-body { padding:1.2rem 1.4rem; }
+  .elig-item { display:flex; align-items:flex-start; gap:0.7rem; padding:0.5rem 0; border-bottom:1px solid var(--pale); font-size:0.85rem; color:var(--text2); line-height:1.5; }
+  .elig-item:last-of-type { border-bottom:none; }
+  .elig-item .dot { width:6px; height:6px; background:var(--blue-mid); border-radius:50%; flex-shrink:0; margin-top:6px; }
+  .elig-note { margin-top:0.9rem; padding:0.65rem 0.9rem; background:var(--pale); border-left:2.5px solid var(--blue-mid); border-radius:0 5px 5px 0; font-size:0.77rem; color:var(--blue); line-height:1.5; }
 
-  .p-box { background:var(--white); border:2px solid var(--border); border-radius:12px; overflow:hidden; transition:border-color 0.3s,box-shadow 0.3s,transform 0.3s; }
-  .p-box:hover { border-color:var(--blue-mid); box-shadow:0 14px 40px var(--shadow-md); transform:translateY(-4px); }
-  .p-box.feat { border-color:var(--blue-mid); }
+  /* ── PROGRAM ── */
+  #program { background:var(--pale2); }
 
-  .p-head { background:linear-gradient(135deg,var(--navy),var(--blue-mid)); padding:1.8rem; position:relative; }
-  .p-box.feat .p-head { background:linear-gradient(135deg,var(--blue),var(--blue-light)); }
+  .phase-tabs { display:flex; border-radius:10px; overflow:hidden; border:1.5px solid var(--border); margin-bottom:2.5rem; background:var(--white); }
+  .p-tab { flex:1; padding:1.2rem 1.8rem; cursor:pointer; transition:all 0.25s; border-right:1.5px solid var(--border); }
+  .p-tab:last-child { border-right:none; }
+  .p-tab.active { background:linear-gradient(135deg,var(--navy),var(--blue-mid)); }
+  .p-tab-label { font-size:0.62rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; margin-bottom:0.25rem; }
+  .p-tab:not(.active) .p-tab-label { color:var(--muted); }
+  .p-tab.active .p-tab-label { color:rgba(255,255,255,0.55); }
+  .p-tab h3 { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:2px; }
+  .p-tab:not(.active) h3 { color:var(--text); }
+  .p-tab.active h3 { color:white; }
+  .p-tab p { font-size:0.75rem; margin-top:0.15rem; }
+  .p-tab:not(.active) p { color:var(--muted); }
+  .p-tab.active p { color:rgba(255,255,255,0.65); }
 
-  .p-badge { position:absolute; top:1rem; right:1rem; padding:0.2rem 0.8rem; background:white; color:var(--blue); font-size:0.62rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; border-radius:20px; }
+  .phase-panel { display:none; }
+  .phase-panel.active { display:block; }
 
-  .p-num { font-size:0.68rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.65); margin-bottom:0.3rem; }
-  .p-head h3 { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:2px; color:white; }
-  .p-price { margin-top:0.5rem; font-size:0.8rem; color:rgba(255,255,255,0.7); }
-  .p-price strong { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; color:white; letter-spacing:1px; }
+  /* Phase 1 */
+  .doc-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.2rem; }
+  @media(max-width:680px){ .doc-grid{grid-template-columns:1fr} }
 
-  .p-body { padding:1.5rem; }
-  .p-feat { display:flex; align-items:flex-start; gap:0.75rem; padding:0.65rem 0; border-bottom:1px solid var(--blue-pale); font-size:0.87rem; color:var(--text-body); line-height:1.4; }
-  .p-feat:last-of-type { border-bottom:none; }
-  .p-feat .ck { color:var(--success); font-weight:700; flex-shrink:0; font-size:1rem; }
-  .p-feat .cx { color:#ccc; flex-shrink:0; font-size:1rem; }
-  .p-feat .sub { font-size:0.74rem; color:var(--text-muted); margin-top:0.15rem; }
-  .p-highlight { margin-top:1rem; padding:0.8rem 1rem; background:var(--blue-xpale); border:1px solid var(--border); border-radius:6px; font-size:0.8rem; color:var(--blue); font-weight:700; }
-  .p-foot { padding:0 1.5rem 1.5rem; }
+  .doc-card { background:var(--white); border:1.5px solid var(--border); border-radius:10px; overflow:hidden; transition:border-color 0.25s,box-shadow 0.25s; }
+  .doc-card:hover { border-color:var(--blue-mid); box-shadow:0 6px 20px var(--shadow); }
+  .doc-card-head { background:linear-gradient(90deg,var(--navy),var(--blue)); padding:1.1rem 1.3rem; display:flex; align-items:center; gap:0.9rem; }
+  .doc-card-head .ico { font-size:1.3rem; background:rgba(255,255,255,0.18); width:38px; height:38px; border-radius:7px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .doc-card-head h4 { font-size:0.88rem; font-weight:700; color:white; }
+  .doc-card-head p { font-size:0.7rem; color:rgba(255,255,255,0.6); margin-top:0.1rem; }
+  .doc-card-body { padding:1.2rem 1.3rem; }
+  .doc-point { display:flex; gap:0.7rem; padding:0.5rem 0; border-bottom:1px solid var(--pale); font-size:0.84rem; color:var(--text2); line-height:1.5; }
+  .doc-point:last-child { border-bottom:none; }
+  .doc-point .tick { color:var(--success); font-weight:700; flex-shrink:0; }
 
-  /* BOOKING */
-  #booking { background:var(--white); }
-  .bk-layout { display:grid; grid-template-columns:1fr 1.5fr; gap:3.5rem; align-items:start; }
-  @media(max-width:900px){ .bk-layout{grid-template-columns:1fr} }
-  .bk-steps { margin-top:2rem; }
-  .bk-step { display:flex; gap:1.2rem; padding:1.2rem 0; border-bottom:1px solid var(--border); align-items:flex-start; }
-  .bk-step:last-child { border-bottom:none; }
-  .bk-num { width:36px; height:36px; background:linear-gradient(135deg,var(--navy),var(--blue)); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1.1rem; flex-shrink:0; box-shadow:0 4px 12px var(--shadow-md); }
-  .bk-step h4 { font-size:0.92rem; font-weight:700; color:var(--text-dark); margin-bottom:0.25rem; }
-  .bk-step p { font-size:0.82rem; color:var(--text-muted); line-height:1.5; }
+  .alert-box { background:#fff8f8; border:1.5px solid #f5c6c6; border-radius:10px; padding:1.3rem 1.5rem; display:flex; gap:1rem; align-items:flex-start; }
+  .alert-box .ico { font-size:1.3rem; flex-shrink:0; margin-top:1px; }
+  .alert-box h4 { font-size:0.85rem; font-weight:700; color:#c0392b; margin-bottom:0.25rem; }
+  .alert-box p { font-size:0.82rem; color:#8b3a3a; line-height:1.6; }
 
-  .form-card { background:var(--white); border:2px solid var(--border); border-radius:14px; padding:2.5rem; box-shadow:0 6px 30px var(--shadow); position:relative; overflow:hidden; }
-  .form-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--navy),var(--blue-light)); }
-  .fc-title { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:3px; color:var(--navy); margin-bottom:0.3rem; }
-  .fc-sub { font-size:0.82rem; color:var(--text-muted); margin-bottom:2rem; }
+  /* Phase 2 packages */
+  .pkg-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+  @media(max-width:680px){ .pkg-grid{grid-template-columns:1fr} }
 
-  .f-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-  @media(max-width:600px){ .f-row{grid-template-columns:1fr} }
-  .f-g { margin-bottom:1rem; }
-  .f-g label { display:block; font-size:0.7rem; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:0.45rem; }
-  .f-g input, .f-g select, .f-g textarea { width:100%; padding:0.75rem 1rem; background:var(--off-white); border:2px solid var(--border); color:var(--text-dark); font-family:'Barlow',sans-serif; font-size:0.9rem; border-radius:7px; outline:none; transition:border-color 0.2s,background 0.2s; -webkit-appearance:none; }
-  .f-g select option { background:white; }
-  .f-g input:focus, .f-g select:focus, .f-g textarea:focus { border-color:var(--blue-mid); background:white; }
-  .f-g input::placeholder, .f-g textarea::placeholder { color:#bbb; }
+  .pkg-card { background:var(--white); border:1.5px solid var(--border); border-radius:14px; overflow:hidden; transition:transform 0.25s,border-color 0.25s,box-shadow 0.25s; }
+  .pkg-card:hover { transform:translateY(-4px); border-color:var(--blue-mid); box-shadow:0 14px 40px var(--shadow-lg); }
+  .pkg-card.recommended { border-color:var(--blue); }
 
-  .btn-blue { width:100%; padding:1rem; background:linear-gradient(90deg,var(--navy),var(--blue-mid)); color:white; font-family:'Barlow',sans-serif; font-size:0.9rem; font-weight:800; letter-spacing:2px; text-transform:uppercase; border:none; border-radius:7px; cursor:pointer; margin-top:0.5rem; transition:all 0.2s; box-shadow:0 4px 16px var(--shadow-md); }
-  .btn-blue:hover:not(:disabled) { background:linear-gradient(90deg,var(--blue),var(--blue-light)); transform:translateY(-2px); box-shadow:0 8px 24px var(--shadow-md); }
-  .btn-blue:disabled { opacity:0.5; cursor:not-allowed; }
+  .pkg-head { background:linear-gradient(135deg,var(--navy),var(--blue-mid)); padding:1.6rem; position:relative; }
+  .pkg-card.recommended .pkg-head { background:linear-gradient(135deg,var(--blue),var(--blue-lt)); }
 
-  .success-box { display:none; padding:1.2rem 1.5rem; background:#e8f8f2; border:2px solid #a8e6ce; border-radius:8px; margin-bottom:1.5rem; font-size:0.88rem; color:var(--success); font-weight:700; }
-  .error-msg { font-size:0.82rem; color:var(--error); margin-top:0.5rem; min-height:1.2rem; }
+  .pkg-badge { position:absolute; top:1rem; right:1rem; padding:0.2rem 0.75rem; background:white; color:var(--blue); font-size:0.6rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; border-radius:20px; }
 
-  /* PAYMENT */
-  #payment { background:var(--off-white); }
-  .pay-methods { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.2rem; margin-bottom:3rem; }
-  .pay-m { background:var(--white); border:2px solid var(--border); border-radius:10px; padding:1.4rem; cursor:pointer; transition:all 0.2s; display:flex; align-items:flex-start; gap:1rem; }
-  .pay-m:hover { border-color:var(--blue-mid); box-shadow:0 6px 20px var(--shadow); }
-  .pay-m.active { border-color:var(--blue); background:var(--blue-xpale); }
-  .pay-m-icon { width:44px; height:44px; background:var(--blue-pale); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
-  .pay-m.active .pay-m-icon { background:var(--blue-pale); }
-  .pay-m h4 { font-size:0.88rem; font-weight:800; color:var(--text-dark); margin-bottom:0.3rem; }
-  .pay-m p { font-size:0.76rem; color:var(--text-muted); line-height:1.4; }
-  .pay-chk { margin-left:auto; width:22px; height:22px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:transparent; transition:all 0.2s; }
-  .pay-m.active .pay-chk { background:var(--blue); border-color:var(--blue); color:white; }
+  .pkg-tag { font-size:0.62rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.55); margin-bottom:0.3rem; }
+  .pkg-head h3 { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; letter-spacing:2px; color:white; }
+  .pkg-price { margin-top:0.5rem; font-size:0.78rem; color:rgba(255,255,255,0.65); }
+  .pkg-price strong { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; color:white; letter-spacing:1px; }
 
-  .pay-bottom { display:grid; grid-template-columns:1fr 1.4fr; gap:2rem; align-items:start; }
+  .pkg-body { padding:1.4rem; }
+
+  .pkg-item { display:flex; align-items:flex-start; gap:0.75rem; padding:0.6rem 0; border-bottom:1px solid var(--pale); font-size:0.85rem; color:var(--text2); line-height:1.4; }
+  .pkg-item:last-of-type { border-bottom:none; }
+  .pkg-item .yes { color:var(--success); font-weight:700; flex-shrink:0; }
+  .pkg-item .no  { color:#ccc; flex-shrink:0; }
+  .pkg-item .sub { font-size:0.72rem; color:var(--muted); margin-top:0.12rem; }
+  .pkg-item.disabled { opacity:0.45; }
+
+  .pkg-note { margin-top:1rem; padding:0.75rem 1rem; background:var(--pale); border-radius:7px; font-size:0.78rem; color:var(--blue); font-weight:600; }
+
+  .pkg-foot { padding:0 1.4rem 1.4rem; }
+
+  /* ── REGISTRATION ── */
+  #registration { background:var(--white); }
+
+  .reg-layout { display:grid; grid-template-columns:1fr 1.6fr; gap:4rem; align-items:start; }
+  @media(max-width:900px){ .reg-layout{grid-template-columns:1fr} }
+
+  .reg-steps { margin-top:1.8rem; }
+  .reg-step { display:flex; gap:1.1rem; padding:1.1rem 0; border-bottom:1px solid var(--border); align-items:flex-start; }
+  .reg-step:last-child { border-bottom:none; }
+  .step-num { width:34px; height:34px; background:linear-gradient(135deg,var(--navy),var(--blue)); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:1rem; flex-shrink:0; box-shadow:0 3px 10px var(--shadow-lg); }
+  .reg-step h4 { font-size:0.88rem; font-weight:700; color:var(--text); margin-bottom:0.2rem; }
+  .reg-step p { font-size:0.8rem; color:var(--muted); line-height:1.5; }
+
+  .form-box { background:var(--white); border:1.5px solid var(--border); border-radius:14px; padding:2.2rem; box-shadow:0 4px 24px var(--shadow); position:relative; overflow:hidden; }
+  .form-box::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--navy),var(--blue-lt)); }
+
+  .form-title { font-family:'Bebas Neue',sans-serif; font-size:1.7rem; letter-spacing:2px; color:var(--navy); margin-bottom:0.25rem; }
+  .form-sub { font-size:0.8rem; color:var(--muted); margin-bottom:1.8rem; }
+
+  .f2 { display:grid; grid-template-columns:1fr 1fr; gap:0.9rem; }
+  @media(max-width:580px){ .f2{grid-template-columns:1fr} }
+
+  .field { margin-bottom:0.9rem; }
+  .field label { display:block; font-size:0.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:0.4rem; }
+  .field input, .field select, .field textarea { width:100%; padding:0.7rem 0.95rem; background:var(--pale2); border:1.5px solid var(--border); color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.88rem; border-radius:7px; outline:none; transition:border-color 0.2s,background 0.2s; -webkit-appearance:none; }
+  .field select option { background:white; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color:var(--blue-mid); background:white; }
+  .field input::placeholder, .field textarea::placeholder { color:#bcc8dc; }
+
+  .btn-primary { width:100%; padding:0.95rem; background:linear-gradient(90deg,var(--navy),var(--blue-mid)); color:white; font-family:'DM Sans',sans-serif; font-size:0.88rem; font-weight:700; letter-spacing:0.5px; border:none; border-radius:7px; cursor:pointer; margin-top:0.5rem; transition:all 0.2s; box-shadow:0 4px 14px var(--shadow-lg); }
+  .btn-primary:hover:not(:disabled) { background:linear-gradient(90deg,var(--blue),var(--blue-lt)); transform:translateY(-2px); }
+  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+
+  .success-msg { display:none; padding:1.1rem 1.3rem; background:#e6f9f2; border:1.5px solid #a0dfc4; border-radius:8px; margin-bottom:1.3rem; font-size:0.86rem; color:var(--success); font-weight:600; }
+  .error-msg { font-size:0.8rem; color:var(--error); margin-top:0.4rem; min-height:1.1rem; }
+
+  /* ── PAYMENT ── */
+  #payment { background:var(--pale2); }
+
+  .pay-methods { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:1rem; margin-bottom:2.5rem; }
+
+  .pay-opt { background:var(--white); border:1.5px solid var(--border); border-radius:10px; padding:1.3rem; cursor:pointer; transition:all 0.2s; display:flex; align-items:flex-start; gap:0.9rem; }
+  .pay-opt:hover { border-color:var(--blue-mid); box-shadow:0 4px 16px var(--shadow); }
+  .pay-opt.active { border-color:var(--blue); background:var(--pale); }
+
+  .pay-ico { width:42px; height:42px; background:var(--pale); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+  .pay-opt.active .pay-ico { background:var(--pale2); }
+  .pay-opt h4 { font-size:0.85rem; font-weight:700; color:var(--text); margin-bottom:0.25rem; }
+  .pay-opt p { font-size:0.74rem; color:var(--muted); line-height:1.4; }
+
+  .pay-dot { margin-left:auto; width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:transparent; transition:all 0.2s; }
+  .pay-opt.active .pay-dot { background:var(--blue); border-color:var(--blue); color:white; }
+
+  .pay-bottom { display:grid; grid-template-columns:1fr 1.5fr; gap:1.8rem; align-items:start; }
   @media(max-width:900px){ .pay-bottom{grid-template-columns:1fr} }
 
-  .pay-sum { background:var(--white); border:2px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:0 4px 20px var(--shadow); }
-  .pay-sum-head { background:linear-gradient(90deg,var(--navy),var(--blue)); padding:1.2rem 1.5rem; font-family:'Bebas Neue',sans-serif; font-size:1.2rem; letter-spacing:3px; color:white; }
-  .pay-sum-body { padding:1.5rem; }
-  .pay-r { display:flex; justify-content:space-between; align-items:center; padding:0.65rem 0; font-size:0.87rem; border-bottom:1px solid var(--blue-pale); }
-  .pay-r:last-child { border-bottom:none; padding-top:1rem; }
-  .pay-r .l { color:var(--text-muted); }
-  .pay-r .v { font-weight:700; color:var(--text-dark); }
-  .pay-r.tot .v { color:var(--navy); font-size:1.5rem; font-family:'Bebas Neue',sans-serif; letter-spacing:2px; }
+  .pay-summary { background:var(--white); border:1.5px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:0 3px 16px var(--shadow); }
+  .pay-sum-head { background:linear-gradient(90deg,var(--navy),var(--blue)); padding:1.1rem 1.4rem; }
+  .pay-sum-head h3 { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:2px; color:white; }
+  .pay-sum-body { padding:1.4rem; }
+  .sum-row { display:flex; justify-content:space-between; align-items:center; padding:0.55rem 0; font-size:0.85rem; border-bottom:1px solid var(--pale); }
+  .sum-row:last-child { border-bottom:none; padding-top:0.8rem; }
+  .sum-row .lbl { color:var(--muted); }
+  .sum-row .val { font-weight:700; color:var(--text); }
+  .sum-row.total .val { color:var(--navy); font-size:1.4rem; font-family:'Bebas Neue',sans-serif; letter-spacing:1px; }
 
-  .pay-form { background:var(--white); border:2px solid var(--border); border-radius:12px; padding:2rem; box-shadow:0 4px 20px var(--shadow); position:relative; overflow:hidden; }
-  .pay-form::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--navy),var(--blue-light)); }
+  .pay-form-box { background:var(--white); border:1.5px solid var(--border); border-radius:12px; padding:1.8rem; box-shadow:0 3px 16px var(--shadow); position:relative; overflow:hidden; }
+  .pay-form-box::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--navy),var(--blue-lt)); }
 
-  /* FOOTER */
-  footer { background:var(--navy); color:white; padding:4rem 5% 2rem; }
-  .footer-inner { max-width:1200px; margin:0 auto; }
+  /* ── FOOTER ── */
+  footer { background:var(--navy); color:white; padding:4rem 6% 2rem; }
+  .footer-inner { max-width:1160px; margin:0 auto; }
   .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem; margin-bottom:3rem; }
   @media(max-width:800px){ .footer-grid{grid-template-columns:1fr 1fr} }
-  .f-logo { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:4px; color:white; margin-bottom:1rem; }
-  .footer-brand p { font-size:0.84rem; color:rgba(255,255,255,0.6); line-height:1.7; max-width:280px; }
-  .f-contact { margin-top:1.5rem; }
-  .f-contact div { font-size:0.82rem; color:rgba(255,255,255,0.6); margin-bottom:0.5rem; display:flex; align-items:flex-start; gap:0.5rem; }
-  .footer-col h4 { font-size:0.7rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:rgba(255,255,255,0.35); margin-bottom:1.2rem; }
-  .footer-col a { display:block; font-size:0.84rem; color:rgba(255,255,255,0.65); text-decoration:none; margin-bottom:0.6rem; transition:color 0.2s; cursor:pointer; }
-  .footer-col a:hover { color:white; }
-  .footer-btm { border-top:1px solid rgba(255,255,255,0.1); padding-top:1.5rem; display:flex; justify-content:space-between; align-items:center; font-size:0.76rem; color:rgba(255,255,255,0.35); flex-wrap:wrap; gap:0.5rem; }
-  .uitm-tag { padding:0.3rem 0.9rem; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:20px; font-size:0.7rem; color:rgba(255,255,255,0.7); font-weight:700; }
 
-  /* MODALS */
-  .overlay { display:none; position:fixed; inset:0; background:rgba(11,45,94,0.5); backdrop-filter:blur(8px); z-index:999; align-items:center; justify-content:center; padding:1rem; }
+  .foot-logo { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:4px; color:white; margin-bottom:0.8rem; }
+  .foot-desc { font-size:0.83rem; color:rgba(255,255,255,0.55); line-height:1.7; max-width:270px; margin-bottom:1.4rem; }
+  .foot-contact div { font-size:0.8rem; color:rgba(255,255,255,0.55); margin-bottom:0.45rem; display:flex; align-items:flex-start; gap:0.5rem; }
+
+  .foot-col h4 { font-size:0.65rem; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:rgba(255,255,255,0.3); margin-bottom:1rem; }
+  .foot-col a { display:block; font-size:0.83rem; color:rgba(255,255,255,0.6); text-decoration:none; margin-bottom:0.55rem; transition:color 0.2s; cursor:pointer; }
+  .foot-col a:hover { color:white; }
+
+  .foot-bottom { border-top:1px solid rgba(255,255,255,0.08); padding-top:1.4rem; display:flex; justify-content:space-between; align-items:center; font-size:0.74rem; color:rgba(255,255,255,0.3); flex-wrap:wrap; gap:0.5rem; }
+  .foot-tag { padding:0.25rem 0.8rem; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:20px; font-size:0.67rem; color:rgba(255,255,255,0.55); font-weight:600; }
+
+  /* ── MODALS ── */
+  .overlay { display:none; position:fixed; inset:0; background:rgba(11,45,94,0.45); backdrop-filter:blur(8px); z-index:999; align-items:center; justify-content:center; padding:1rem; }
   .overlay.open { display:flex; }
-  .modal { background:white; border-radius:16px; padding:2.5rem; width:100%; max-width:440px; position:relative; box-shadow:0 25px 70px rgba(11,45,94,0.25); animation:popIn 0.3s ease; overflow:hidden; }
-  .modal::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--navy),var(--blue-light)); }
-  @keyframes popIn { from{opacity:0;transform:scale(0.93) translateY(18px)} to{opacity:1;transform:none} }
-  .m-close { position:absolute; top:1.2rem; right:1.2rem; width:30px; height:30px; background:var(--blue-pale); border:none; border-radius:50%; cursor:pointer; font-size:0.9rem; color:var(--blue); display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
-  .m-close:hover { background:var(--border); }
-  .m-logo-wrap { display:flex; align-items:center; gap:0.9rem; margin-bottom:2rem; }
-  .m-logo-box { width:40px; height:40px; background:linear-gradient(135deg,var(--navy),var(--blue)); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-family:'Bebas Neue',sans-serif; font-size:0.9rem; letter-spacing:2px; }
-  .m-logo-text { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:4px; color:var(--navy); }
-  .m-logo-sub { font-size:0.6rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); }
-  .modal h2 { font-family:'Bebas Neue',sans-serif; font-size:2rem; letter-spacing:3px; color:var(--text-dark); margin-bottom:1.8rem; }
-  .m-footer { text-align:center; margin-top:1.5rem; font-size:0.82rem; color:var(--text-muted); }
-  .m-footer a { color:var(--blue-mid); cursor:pointer; font-weight:700; }
 
-  /* TOAST */
-  .toast { position:fixed; bottom:2rem; right:2rem; padding:1rem 1.5rem; background:var(--navy); color:white; border-radius:10px; font-size:0.87rem; font-weight:600; z-index:9999; transform:translateY(80px); opacity:0; transition:all 0.35s; max-width:320px; box-shadow:0 10px 30px rgba(11,45,94,0.3); }
+  .modal { background:white; border-radius:16px; padding:2.2rem; width:100%; max-width:420px; position:relative; box-shadow:0 24px 60px rgba(11,45,94,0.22); animation:pop 0.28s ease; overflow:hidden; }
+  .modal.wide { max-width:500px; }
+  .modal::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--navy),var(--blue-lt)); }
+
+  @keyframes pop { from{opacity:0;transform:scale(0.94) translateY(16px)} to{opacity:1;transform:none} }
+
+  .modal-close { position:absolute; top:1.1rem; right:1.1rem; width:28px; height:28px; background:var(--pale); border:none; border-radius:50%; cursor:pointer; font-size:0.85rem; color:var(--muted); display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+  .modal-close:hover { background:var(--border); color:var(--text); }
+
+  .modal-brand { display:flex; align-items:center; gap:0.75rem; margin-bottom:1.6rem; }
+  .modal-mark { width:36px; height:36px; background:linear-gradient(135deg,var(--navy),var(--blue)); border-radius:7px; display:flex; align-items:center; justify-content:center; color:white; font-family:'Bebas Neue',sans-serif; font-size:0.8rem; letter-spacing:1px; }
+  .modal-brand-text { font-family:'Bebas Neue',sans-serif; font-size:1.2rem; letter-spacing:3px; color:var(--navy); }
+  .modal-brand-sub { font-size:0.58rem; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-top:-2px; }
+
+  .modal h2 { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; letter-spacing:2px; color:var(--text); margin-bottom:1.6rem; }
+  .modal-foot { text-align:center; margin-top:1.3rem; font-size:0.8rem; color:var(--muted); }
+  .modal-foot a { color:var(--blue-mid); cursor:pointer; font-weight:600; }
+
+  /* ── TOAST ── */
+  .toast { position:fixed; bottom:1.8rem; right:1.8rem; padding:0.9rem 1.3rem; background:var(--navy); color:white; border-radius:9px; font-size:0.85rem; font-weight:600; z-index:9999; transform:translateY(80px); opacity:0; transition:all 0.3s; max-width:300px; box-shadow:0 8px 25px rgba(11,45,94,0.28); }
   .toast.show { transform:translateY(0); opacity:1; }
 
-  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:none} }
-  .fade-up { opacity:0; transform:translateY(20px); transition:opacity 0.6s ease,transform 0.6s ease; }
-  .fade-up.vis { opacity:1; transform:none; }
+  /* ── DIVIDER ── */
+  .divider { height:1px; background:var(--border); margin:0; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes up { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+  .fade { opacity:0; transform:translateY(18px); transition:opacity 0.55s ease,transform 0.55s ease; }
+  .fade.in { opacity:1; transform:none; }
+
   ::-webkit-scrollbar { width:5px; }
-  ::-webkit-scrollbar-track { background:#e8f1fc; }
+  ::-webkit-scrollbar-track { background:var(--pale2); }
   ::-webkit-scrollbar-thumb { background:var(--blue-mid); border-radius:3px; }
 </style>
 </head>
@@ -447,295 +477,355 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-brand">
-    <div class="nav-logo-box">CTR</div>
+  <a class="brand" href="#">
+    <div class="brand-mark">CTR</div>
     <div>
-      <div class="nav-logo-text">CTR</div>
-      <div class="nav-logo-sub">Central Tech Resources</div>
+      <div class="brand-name">CTR</div>
+      <div class="brand-sub">Central Tech Resources</div>
     </div>
-  </div>
+  </a>
   <div class="nav-links">
-    <a href="#syarat">Syarat</a>
-    <a href="#fasa">Program</a>
-    <a href="#booking">Daftar</a>
-    <a href="#payment">Bayaran</a>
+    <a href="#eligibility">Eligibility</a>
+    <a href="#program">Program</a>
+    <a href="#registration">Register</a>
+    <a href="#payment">Payment</a>
   </div>
   <div id="nav-auth">
-    <button class="btn-ghost" onclick="openM('login')">Log Masuk</button>
-    <button class="btn-cta" onclick="openM('register')">Daftar Sekarang</button>
+    <button class="btn-line" onclick="openM('login')">Sign In</button>
+    <button class="btn-fill" onclick="openM('register')">Register Now</button>
   </div>
   <div id="nav-user">
-    <div class="user-info">Hai, <span id="user-email"></span></div>
-    <button class="btn-ghost red" onclick="doLogout()">Log Keluar</button>
+    <div class="u-email">Hello, <strong id="user-email"></strong></div>
+    <button class="btn-line danger" onclick="doLogout()">Sign Out</button>
   </div>
 </nav>
 
 <!-- HERO -->
 <section id="hero">
-  <div class="hero-blob hb1"></div>
-  <div class="hero-blob hb2"></div>
-  <div class="hero-wrap">
+  <div class="hero-inner">
     <div>
-      <div class="hero-badge">⚓ Program Maritim Bertauliah</div>
+      <div class="hero-eyebrow">⚓ Certified Maritime Training</div>
       <h1 class="hero-title">
-        Program<br>
-        <span class="l2">Pelaut</span>
-        <span class="l3">Malaysia</span>
+        Malaysia<br>
+        <em>Seafarer</em>
+        Program
       </h1>
-      <p class="hero-desc">Program latihan komprehensif oleh Central Tech Resources untuk melahirkan pelaut profesional bertaraf antarabangsa. Terbuka kepada semua individu yang berminat dalam bidang perkapalan.</p>
-      <div class="hero-btns">
-        <button class="btn-hero-p" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Mohon Sekarang</button>
-        <button class="btn-hero-o" onclick="document.getElementById('fasa').scrollIntoView({behavior:'smooth'})">Lihat Program →</button>
+      <p class="hero-desc">A comprehensive maritime training program by Central Tech Resources, developing world-class professional seafarers. Open to all individuals interested in a career at sea.</p>
+      <div class="hero-actions">
+        <button class="btn-white" onclick="document.getElementById('registration').scrollIntoView({behavior:'smooth'})">Apply Now</button>
+        <button class="btn-ghost-w" onclick="document.getElementById('program').scrollIntoView({behavior:'smooth'})">View Program →</button>
       </div>
     </div>
-    <div class="hero-right">
-      <div class="hero-stat-row">
-        <div class="hero-stat"><div class="num">18–35</div><div class="lbl">Lingkungan Umur</div></div>
-        <div class="hero-stat"><div class="num">6 BLN</div><div class="lbl">Praktikal Di Kapal</div></div>
+    <div class="hero-cards">
+      <div class="h-stat-row">
+        <div class="h-stat"><div class="val">18–35</div><div class="lbl">Age Range</div></div>
+        <div class="h-stat"><div class="val">6 MO</div><div class="lbl">Practical Placement</div></div>
       </div>
-      <div class="hero-info">
-        <h4>📍 Lokasi Pusat Latihan</h4>
+      <div class="h-info">
+        <div class="h-info-label">📍 Training Centre</div>
         <p>A31, Tingkat 1, IM 5/2, Jalan Persiaran Sultan Abu Bakar, Indera Mahkota, 25200 Kuantan, Pahang</p>
       </div>
-      <div class="hero-info">
-        <h4>📞 Hubungi Kami</h4>
+      <div class="h-info">
+        <div class="h-info-label">📞 Contact Us</div>
         <p>013-8047141 &nbsp;|&nbsp; 09-5729971<br>info@centraltech.com.my</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- SYARAT -->
-<section id="syarat">
-  <div class="section-inner">
-    <div class="fade-up">
-      <div class="sec-eyebrow">Kelayakan</div>
-      <h2 class="sec-title">Syarat-Syarat <span class="accent">Pendaftaran</span></h2>
-      <p class="sec-sub">Semak kelayakan anda sebelum membuat permohonan. Semua syarat mesti dipenuhi sepenuhnya.</p>
+<!-- ELIGIBILITY -->
+<section id="eligibility" class="page-section">
+  <div class="section-wrap">
+    <div class="section-header fade">
+      <div class="eyebrow">Eligibility</div>
+      <h2 class="section-title">Enrollment <span>Requirements</span></h2>
+      <p class="section-desc">Please review all requirements carefully before submitting your application. All criteria must be fully met.</p>
     </div>
-    <div class="syarat-intro fade-up">
-      <div class="si-icon">📋</div>
+
+    <div class="intro-banner fade">
+      <div class="intro-icon">📋</div>
       <div>
-        <h3>Tentang Program Ini</h3>
-        <p>Program Pelaut Malaysia adalah program latihan maritim yang terbuka kepada individu yang berminat menceburi dalam bidang perkapalan. Program ini merangkumi latihan teknikal, sijil profesional dan penempatan praktikal di atas kapal atau feri selama 6 bulan bagi pakej lengkap.</p>
+        <h3>About This Program</h3>
+        <p>The Malaysia Seafarer Program is a certified maritime training program open to all individuals interested in a seafaring career. The program covers technical training, professional certifications, and a 6-month practical placement onboard a vessel or ferry for the Complete Package.</p>
       </div>
     </div>
-    <div class="syarat-grid fade-up">
-      <div class="s-card">
-        <div class="s-card-top"><div class="s-icon">🎂</div><div><h3>Umur 18 – 35 Tahun</h3><div class="tag">Had Umur</div></div></div>
-        <div class="s-card-body">
-          <div class="s-item"><div class="dot"></div>Calon mestilah berumur sekurang-kurangnya <strong>18 tahun</strong> pada tarikh pendaftaran.</div>
-          <div class="s-item"><div class="dot"></div>Had umur maksimum adalah <strong>35 tahun</strong> semasa memohon program.</div>
-          <div class="s-item"><div class="dot"></div>Umur dikira berdasarkan tarikh lahir dalam MyKad atau Pasport.</div>
-          <div class="s-item"><div class="dot"></div>Calon yang hampir mencapai 35 tahun digalakkan mendaftar segera.</div>
-          <div class="s-note">💡 Dokumen diperlukan: Salinan MyKad atau Pasport yang masih sah.</div>
+
+    <div class="elig-grid fade">
+
+      <div class="elig-card">
+        <div class="elig-top"><div class="elig-icon">🎂</div><div><h3>Age 18 – 35 Years</h3><div class="tag">Age Requirement</div></div></div>
+        <div class="elig-body">
+          <div class="elig-item"><div class="dot"></div>Applicant must be at least <strong>18 years old</strong> on the date of registration.</div>
+          <div class="elig-item"><div class="dot"></div>Maximum age is <strong>35 years old</strong> at the time of application.</div>
+          <div class="elig-item"><div class="dot"></div>Age is verified based on the National ID (MyKad) or Passport date of birth.</div>
+          <div class="elig-item"><div class="dot"></div>Applicants approaching 35 are encouraged to register promptly as seats are limited.</div>
+          <div class="elig-note">💡 Required document: Copy of valid MyKad or Passport.</div>
         </div>
       </div>
-      <div class="s-card">
-        <div class="s-card-top"><div class="s-icon">👁️</div><div><h3>Tidak Rabun Warna</h3><div class="tag">Ujian Penglihatan</div></div></div>
-        <div class="s-card-body">
-          <div class="s-item"><div class="dot"></div>Calon mesti lulus ujian <strong>Ishihara Colour Vision Test</strong> — ujian standard maritim.</div>
-          <div class="s-item"><div class="dot"></div>Keperluan wajib mengikut standard <strong>STCW</strong> antarabangsa.</div>
-          <div class="s-item"><div class="dot"></div>Rabun warna boleh menjejaskan keselamatan dalam mengenali lampu isyarat maritim.</div>
-          <div class="s-item"><div class="dot"></div>Ujian dijalankan oleh doktor bertauliah semasa Medical Check Up Fasa 1.</div>
-          <div class="s-note">💡 Ujian penglihatan dilakukan secara automatik semasa pemeriksaan perubatan Fasa 1.</div>
+
+      <div class="elig-card">
+        <div class="elig-top"><div class="elig-icon">👁️</div><div><h3>No Colour Blindness</h3><div class="tag">Vision Test</div></div></div>
+        <div class="elig-body">
+          <div class="elig-item"><div class="dot"></div>Applicant must pass the <strong>Ishihara Colour Vision Test</strong> — standard maritime vision screening.</div>
+          <div class="elig-item"><div class="dot"></div>Mandatory requirement under international <strong>STCW</strong> (Standards of Training, Certification and Watchkeeping).</div>
+          <div class="elig-item"><div class="dot"></div>Colour blindness can pose serious safety risks when identifying navigation lights and maritime signals.</div>
+          <div class="elig-item"><div class="dot"></div>Test is conducted by a certified doctor during the Phase 1 Medical Check Up.</div>
+          <div class="elig-note">💡 Vision test is automatically conducted during the Phase 1 medical examination.</div>
         </div>
       </div>
-      <div class="s-card">
-        <div class="s-card-top"><div class="s-icon">📖</div><div><h3>Boleh Membaca, Menulis & Mengira</h3><div class="tag">Kemahiran Asas</div></div></div>
-        <div class="s-card-body">
-          <div class="s-item"><div class="dot"></div>Berkebolehan membaca dan memahami teks dalam <strong>Bahasa Malaysia</strong> dan/atau Bahasa Inggeris.</div>
-          <div class="s-item"><div class="dot"></div>Boleh menulis dengan jelas untuk tujuan laporan dan rekod pelayaran.</div>
-          <div class="s-item"><div class="dot"></div>Berkebolehan mengira asas untuk keperluan navigasi dan rekod kerja harian.</div>
-          <div class="s-item"><div class="dot"></div>Kemahiran Bahasa Inggeris adalah kelebihan untuk dokumentasi maritim antarabangsa.</div>
-          <div class="s-note">💡 Tiada keperluan kelulusan akademik minimum — kemahiran asas sudah mencukupi.</div>
+
+      <div class="elig-card">
+        <div class="elig-top"><div class="elig-icon">📖</div><div><h3>Literate & Numerate</h3><div class="tag">Basic Skills</div></div></div>
+        <div class="elig-body">
+          <div class="elig-item"><div class="dot"></div>Able to read and understand text in <strong>Bahasa Malaysia</strong> and/or basic <strong>English</strong>.</div>
+          <div class="elig-item"><div class="dot"></div>Able to write clearly for ship logbooks, reports and daily records.</div>
+          <div class="elig-item"><div class="dot"></div>Basic numeracy skills required for navigation, measurements and operational records.</div>
+          <div class="elig-item"><div class="dot"></div>Basic English is an advantage as international maritime documentation uses English.</div>
+          <div class="elig-note">💡 No minimum academic qualification required — basic literacy is sufficient to enroll.</div>
         </div>
       </div>
-      <div class="s-card">
-        <div class="s-card-top"><div class="s-icon">💪</div><div><h3>Sihat Tubuh Badan</h3><div class="tag">Kesihatan Fizikal & Mental</div></div></div>
-        <div class="s-card-body">
-          <div class="s-item"><div class="dot"></div>Bebas daripada penyakit kronik yang boleh menjejaskan prestasi kerja di atas kapal.</div>
-          <div class="s-item"><div class="dot"></div>Tidak mengalami masalah kesihatan mental yang serius.</div>
-          <div class="s-item"><div class="dot"></div>Berupaya melakukan kerja fizikal dalam pelbagai keadaan cuaca.</div>
-          <div class="s-item"><div class="dot"></div>Bebas daripada pergantungan dadah dan alkohol.</div>
-          <div class="s-item"><div class="dot"></div>Sijil <strong>Medical Fitness Certificate</strong> dikeluarkan oleh doktor bertauliah KKM.</div>
-          <div class="s-note">💡 Pemeriksaan kesihatan penuh dijalankan dalam Fasa 1 sebelum kursus bermula.</div>
+
+      <div class="elig-card">
+        <div class="elig-top"><div class="elig-icon">💪</div><div><h3>Physically Fit</h3><div class="tag">Health & Fitness</div></div></div>
+        <div class="elig-body">
+          <div class="elig-item"><div class="dot"></div>Free from chronic illnesses that may affect performance onboard a vessel.</div>
+          <div class="elig-item"><div class="dot"></div>No serious mental health conditions that could affect safety at sea.</div>
+          <div class="elig-item"><div class="dot"></div>Able to perform physical tasks — climbing, lifting equipment and working in varied weather.</div>
+          <div class="elig-item"><div class="dot"></div>Free from drug and alcohol dependency. Drug screening will be conducted.</div>
+          <div class="elig-item"><div class="dot"></div><strong>Medical Fitness Certificate</strong> issued by a MOH-certified physician is required.</div>
+          <div class="elig-note">💡 Full medical examination is conducted during Phase 1 before training commences.</div>
         </div>
       </div>
+
     </div>
   </div>
 </section>
 
-<!-- FASA -->
-<section id="fasa">
-  <div class="section-inner">
-    <div class="fade-up">
-      <div class="sec-eyebrow">Struktur Program</div>
-      <h2 class="sec-title">Fasa & Pakej <span class="accent">Latihan</span></h2>
-      <p class="sec-sub">Program dibahagikan kepada dua fasa. Fasa 1 adalah persediaan wajib sebelum memasuki Fasa 2.</p>
+<div class="divider"></div>
+
+<!-- PROGRAM -->
+<section id="program" class="page-section">
+  <div class="section-wrap">
+    <div class="section-header fade">
+      <div class="eyebrow">Program Structure</div>
+      <h2 class="section-title">Training <span>Phases & Packages</span></h2>
+      <p class="section-desc">The program is divided into two phases. Phase 1 must be completed before enrolling in Phase 2.</p>
     </div>
-    <div class="fasa-tabs fade-up">
-      <div class="f-tab active" onclick="switchFasa(0)"><div class="f-tab-num">Fasa 01</div><h3>Persediaan Asas</h3><p>Dokumen wajib sebelum kursus</p></div>
-      <div class="f-tab" onclick="switchFasa(1)"><div class="f-tab-num">Fasa 02</div><h3>Latihan Teknikal</h3><p>Pilih Pakej 1 atau Pakej 2</p></div>
+
+    <div class="phase-tabs fade">
+      <div class="p-tab active" onclick="switchPhase(0)">
+        <div class="p-tab-label">Phase 01</div>
+        <h3>Pre-Training</h3>
+        <p>Mandatory documents before course</p>
+      </div>
+      <div class="p-tab" onclick="switchPhase(1)">
+        <div class="p-tab-label">Phase 02</div>
+        <h3>Technical Training</h3>
+        <p>Choose Package 1 or Package 2</p>
+      </div>
     </div>
-    <div class="f-panel active" id="panel-0">
-      <div class="f1-grid">
+
+    <!-- PHASE 1 -->
+    <div class="phase-panel active" id="phase-0">
+      <div class="doc-grid">
         <div class="doc-card">
-          <div class="doc-head"><div class="dicon">🏥</div><div><h4>Marine Medical Check Up</h4><p>Pemeriksaan Perubatan Maritim</p></div></div>
-          <div class="doc-body">
-            <div class="doc-item"><span class="ck">✓</span>Pemeriksaan fizikal menyeluruh oleh doktor bertauliah maritim.</div>
-            <div class="doc-item"><span class="ck">✓</span>Ujian penglihatan termasuk ujian warna (Ishihara Test).</div>
-            <div class="doc-item"><span class="ck">✓</span>Ujian pendengaran dan tekanan darah.</div>
-            <div class="doc-item"><span class="ck">✓</span>Ujian makmal asas (darah dan air kencing).</div>
-            <div class="doc-item"><span class="ck">✓</span>Sijil Medical Fitness diiktiraf oleh Jabatan Laut Malaysia (JLM).</div>
-            <div class="doc-item"><span class="ck">✓</span>Sijil sah selama 2 tahun dari tarikh pemeriksaan.</div>
+          <div class="doc-card-head"><div class="ico">🏥</div><div><h4>Marine Medical Check Up</h4><p>Maritime Medical Examination</p></div></div>
+          <div class="doc-card-body">
+            <div class="doc-point"><span class="tick">✓</span>Comprehensive physical examination by a certified maritime physician.</div>
+            <div class="doc-point"><span class="tick">✓</span>Vision test including colour vision (Ishihara Test).</div>
+            <div class="doc-point"><span class="tick">✓</span>Hearing test and blood pressure assessment.</div>
+            <div class="doc-point"><span class="tick">✓</span>Basic laboratory tests (blood and urine analysis).</div>
+            <div class="doc-point"><span class="tick">✓</span>Medical Fitness Certificate recognised by Jabatan Laut Malaysia (JLM).</div>
+            <div class="doc-point"><span class="tick">✓</span>Certificate is valid for 2 years from date of examination.</div>
           </div>
         </div>
         <div class="doc-card">
-          <div class="doc-head"><div class="dicon">🪪</div><div><h4>Seaman Card</h4><p>Kad Kelasi / Buku Pelaut</p></div></div>
-          <div class="doc-body">
-            <div class="doc-item"><span class="ck">✓</span>Kad pengenalan rasmi pelaut Malaysia dikeluarkan oleh Jabatan Laut Malaysia.</div>
-            <div class="doc-item"><span class="ck">✓</span>Diperlukan untuk menaiki kapal dan menjalani penempatan praktikal.</div>
-            <div class="doc-item"><span class="ck">✓</span>Dokumen diperlukan: MyKad, gambar pasport terbaru, sijil perubatan.</div>
-            <div class="doc-item"><span class="ck">✓</span>Proses permohonan mengambil masa 1–2 minggu bekerja.</div>
-            <div class="doc-item"><span class="ck">✓</span>Mesti sah dan aktif sebelum mendaftar kursus Fasa 2.</div>
-            <div class="doc-item"><span class="ck">✓</span>CTR boleh membantu proses permohonan Seaman Card anda.</div>
+          <div class="doc-card-head"><div class="ico">🪪</div><div><h4>Seaman Card</h4><p>Seafarer Identity Document</p></div></div>
+          <div class="doc-card-body">
+            <div class="doc-point"><span class="tick">✓</span>Official seafarer identity card issued by Jabatan Laut Malaysia.</div>
+            <div class="doc-point"><span class="tick">✓</span>Required to board a vessel and undertake practical placement.</div>
+            <div class="doc-point"><span class="tick">✓</span>Required documents: MyKad, passport-sized photo, medical certificate.</div>
+            <div class="doc-point"><span class="tick">✓</span>Application process takes approximately 1–2 working weeks.</div>
+            <div class="doc-point"><span class="tick">✓</span>Must be valid and active before enrolling in Phase 2 courses.</div>
+            <div class="doc-point"><span class="tick">✓</span>CTR can assist with the Seaman Card application process.</div>
           </div>
         </div>
       </div>
-      <div class="f1-warn">
-        <div class="wi">⚠️</div>
+      <div class="alert-box">
+        <div class="ico">⚠️</div>
         <div>
-          <h4>Penting — Sila Baca Sebelum Mendaftar</h4>
-          <p>Kedua-dua dokumen dalam Fasa 1 <strong>(Marine Medical Check Up dan Seaman Card)</strong> mesti disediakan dan disahkan <strong>sebelum</strong> mendaftar untuk kursus Fasa 2. Hubungi CTR untuk panduan lanjut.</p>
+          <h4>Important — Please Read Before Registering</h4>
+          <p>Both Phase 1 documents <strong>(Marine Medical Check Up and Seaman Card)</strong> must be obtained and verified <strong>before</strong> you can enroll in Phase 2 courses. Registration for Phase 2 cannot be processed without these documents. Contact CTR for guidance.</p>
         </div>
       </div>
     </div>
-    <div class="f-panel" id="panel-1">
-      <div class="pakej-grid">
-        <div class="p-box">
-          <div class="p-head"><div class="p-num">Pakej 01 — Lengkap</div><h3>Pakej Lengkap</h3><div class="p-price">Mulai dari <strong>RM 3,500</strong></div></div>
-          <div class="p-body">
-            <div class="p-feat"><span class="ck">✓</span><div><div>Basic Training (BT)</div><div class="sub">Latihan asas keselamatan dan survival di laut</div></div></div>
-            <div class="p-feat"><span class="ck">✓</span><div><div>Designated Security Duties (DSD)</div><div class="sub">Latihan tugas keselamatan kapal ISPS Code</div></div></div>
-            <div class="p-feat"><span class="ck">✓</span><div><div>BTOCT (Tanker)</div><div class="sub">Latihan asas kapal tangki minyak / kimia</div></div></div>
-            <div class="p-feat"><span class="ck">✓</span><div><div>Crowd Management</div><div class="sub">Pengurusan penumpang dalam situasi kecemasan</div></div></div>
-            <div class="p-feat"><span class="ck">✓</span><div><div>Penempatan Praktikal 6 Bulan</div><div class="sub">Di atas kapal @ feri — pengalaman sebenar industri</div></div></div>
-            <div class="p-highlight">🎓 Semua 4 sijil STCW + pengalaman praktikal penuh</div>
+
+    <!-- PHASE 2 -->
+    <div class="phase-panel" id="phase-1">
+      <div class="pkg-grid">
+
+        <div class="pkg-card">
+          <div class="pkg-head">
+            <div class="pkg-tag">Package 01 — Complete</div>
+            <h3>Complete Package</h3>
+            <div class="pkg-price">Starting from <strong>RM 3,500</strong></div>
           </div>
-          <div class="p-foot"><button class="btn-blue" onclick="pilihPakej('Pakej 1 — Lengkap',3500)">Pilih Pakej Ini →</button></div>
-        </div>
-        <div class="p-box feat">
-          <div class="p-head"><div class="p-badge">⭐ Popular</div><div class="p-num">Pakej 02 — Asas</div><h3>Pakej Asas</h3><div class="p-price">Mulai dari <strong>RM 2,800</strong></div></div>
-          <div class="p-body">
-            <div class="p-feat"><span class="ck">✓</span><div><div>Basic Training (BT)</div><div class="sub">Latihan asas keselamatan dan survival di laut</div></div></div>
-            <div class="p-feat"><span class="ck">✓</span><div><div>Designated Security Duties (DSD)</div><div class="sub">Latihan tugas keselamatan kapal ISPS Code</div></div></div>
-            <div class="p-feat"><span class="ck">✓</span><div><div>BTOCT (Tanker)</div><div class="sub">Latihan asas kapal tangki minyak / kimia</div></div></div>
-            <div class="p-feat"><span class="cx">✗</span><div style="color:#bbb"><div>Crowd Management</div><div class="sub">Tidak termasuk dalam pakej ini</div></div></div>
-            <div class="p-feat"><span class="cx">✗</span><div style="color:#bbb"><div>Penempatan Praktikal</div><div class="sub">Tidak termasuk — boleh ditambah kemudian</div></div></div>
-            <div class="p-highlight">💰 Sesuai untuk bermula — jimat kos awal</div>
+          <div class="pkg-body">
+            <div class="pkg-item"><span class="yes">✓</span><div><div>Basic Training (BT)</div><div class="sub">Basic safety and survival training at sea</div></div></div>
+            <div class="pkg-item"><span class="yes">✓</span><div><div>Designated Security Duties (DSD)</div><div class="sub">Vessel security duties under ISPS Code</div></div></div>
+            <div class="pkg-item"><span class="yes">✓</span><div><div>BTOCT (Tanker)</div><div class="sub">Basic training for oil and chemical tankers</div></div></div>
+            <div class="pkg-item"><span class="yes">✓</span><div><div>Ship Security Awareness (SSA)</div><div class="sub">Maritime security awareness certification</div></div></div>
+            <div class="pkg-item"><span class="yes">✓</span><div><div>Crowd Management</div><div class="sub">Passenger management in emergency situations</div></div></div>
+            <div class="pkg-item"><span class="yes">✓</span><div><div>6-Month Practical Placement</div><div class="sub">Onboard a vessel or ferry — real industry experience</div></div></div>
+            <div class="pkg-note">🎓 All 5 STCW certificates + full practical placement</div>
           </div>
-          <div class="p-foot"><button class="btn-blue" onclick="pilihPakej('Pakej 2 — Asas',2800)">Pilih Pakej Ini →</button></div>
+          <div class="pkg-foot"><button class="btn-primary" onclick="selectPkg('Complete Package', 3500)">Select This Package →</button></div>
         </div>
+
+        <div class="pkg-card recommended">
+          <div class="pkg-head">
+            <div class="pkg-badge">⭐ Popular</div>
+            <div class="pkg-tag">Package 02 — Essential</div>
+            <h3>Essential Package</h3>
+            <div class="pkg-price">Starting from <strong>RM 2,800</strong></div>
+          </div>
+          <div class="pkg-body">
+            <div class="pkg-item"><span class="yes">✓</span><div><div>Basic Training (BT)</div><div class="sub">Basic safety and survival training at sea</div></div></div>
+            <div class="pkg-item"><span class="yes">✓</span><div><div>Designated Security Duties (DSD)</div><div class="sub">Vessel security duties under ISPS Code</div></div></div>
+            <div class="pkg-item"><span class="yes">✓</span><div><div>BTOCT (Tanker)</div><div class="sub">Basic training for oil and chemical tankers</div></div></div>
+            <div class="pkg-item"><span class="yes">✓</span><div><div>Ship Security Awareness (SSA)</div><div class="sub">Maritime security awareness certification</div></div></div>
+            <div class="pkg-item disabled"><span class="no">✗</span><div><div>Crowd Management</div><div class="sub">Not included in this package</div></div></div>
+            <div class="pkg-item disabled"><span class="no">✗</span><div><div>Practical Placement</div><div class="sub">Not included — can be added later</div></div></div>
+            <div class="pkg-note">💡 Best for getting started — lower upfront cost</div>
+          </div>
+          <div class="pkg-foot"><button class="btn-primary" onclick="selectPkg('Essential Package', 2800)">Select This Package →</button></div>
+        </div>
+
       </div>
     </div>
   </div>
 </section>
 
-<!-- BOOKING -->
-<section id="booking">
-  <div class="section-inner">
-    <div class="bk-layout">
-      <div class="fade-up">
-        <div class="sec-eyebrow">Pendaftaran</div>
-        <h2 class="sec-title">Daftar <span class="accent">Program</span></h2>
-        <p class="sec-sub">Isi borang untuk menempah tempat anda. Data disimpan selamat dalam Firebase.</p>
-        <div class="bk-steps">
-          <div class="bk-step"><div class="bk-num">1</div><div><h4>Isi Borang Pendaftaran</h4><p>Lengkapkan semua maklumat peribadi dan pilih pakej.</p></div></div>
-          <div class="bk-step"><div class="bk-num">2</div><div><h4>Sediakan Dokumen Fasa 1</h4><p>Medical Check Up dan Seaman Card mesti sedia sebelum kursus.</p></div></div>
-          <div class="bk-step"><div class="bk-num">3</div><div><h4>Bayar Deposit</h4><p>Bayar deposit untuk mengesahkan tempahan anda.</p></div></div>
-          <div class="bk-step"><div class="bk-num">4</div><div><h4>Mula Latihan</h4><p>Terima pengesahan dan sertai program pada tarikh ditetapkan.</p></div></div>
+<div class="divider"></div>
+
+<!-- REGISTRATION -->
+<section id="registration" class="page-section">
+  <div class="section-wrap">
+    <div class="reg-layout">
+
+      <div class="fade">
+        <div class="eyebrow">Registration</div>
+        <h2 class="section-title">Apply for the <span>Program</span></h2>
+        <p class="section-desc">Fill in the form to reserve your place. Seats are limited each intake.</p>
+        <div class="reg-steps">
+          <div class="reg-step"><div class="step-num">1</div><div><h4>Complete Registration Form</h4><p>Fill in all personal details and select your preferred package.</p></div></div>
+          <div class="reg-step"><div class="step-num">2</div><div><h4>Prepare Phase 1 Documents</h4><p>Medical Check Up and Seaman Card must be ready before training starts.</p></div></div>
+          <div class="reg-step"><div class="step-num">3</div><div><h4>Pay Deposit</h4><p>Pay your deposit to confirm and secure your place.</p></div></div>
+          <div class="reg-step"><div class="step-num">4</div><div><h4>Start Training</h4><p>Receive confirmation and join the program on the scheduled date.</p></div></div>
         </div>
       </div>
-      <div class="form-card fade-up">
-        <div class="fc-title">Borang Pendaftaran</div>
-        <div class="fc-sub">Data anda disimpan selamat dalam Firebase 🔒</div>
-        <div class="success-box" id="bk-ok">✅ Pendaftaran berjaya disimpan! Kami akan menghubungi anda dalam masa 1-2 hari bekerja.</div>
-        <div class="f-row">
-          <div class="f-g"><label>Nama Penuh</label><input type="text" id="b-nama" placeholder="Ahmad bin Ali"></div>
-          <div class="f-g"><label>No. KP / Pasport</label><input type="text" id="b-kp" placeholder="XXXXXX-XX-XXXX"></div>
+
+      <div class="form-box fade">
+        <div class="form-title">Registration Form</div>
+        <div class="form-sub">Your data is securely stored in Firebase. 🔒</div>
+        <div class="success-msg" id="bk-success">✅ Registration submitted successfully! We will contact you within 1–2 working days.</div>
+        <div class="f2">
+          <div class="field"><label>Full Name *</label><input type="text" id="b-name" placeholder="Ahmad bin Ali"></div>
+          <div class="field"><label>IC / Passport No. *</label><input type="text" id="b-ic" placeholder="XXXXXX-XX-XXXX"></div>
         </div>
-        <div class="f-row">
-          <div class="f-g"><label>No. Telefon</label><input type="tel" id="b-tel" placeholder="01X-XXXXXXXX"></div>
-          <div class="f-g"><label>E-mel</label><input type="email" id="b-emel" placeholder="nama@email.com"></div>
+        <div class="f2">
+          <div class="field"><label>Phone Number *</label><input type="tel" id="b-phone" placeholder="01X-XXXXXXXX"></div>
+          <div class="field"><label>Email Address *</label><input type="email" id="b-email" placeholder="name@email.com"></div>
         </div>
-        <div class="f-g"><label>Universiti / Institusi</label><input type="text" id="b-uni" placeholder="e.g. UiTM Shah Alam"></div>
-        <div class="f-row">
-          <div class="f-g">
-            <label>Pilihan Pakej</label>
-            <select id="b-pakej">
-              <option value="">-- Pilih Pakej --</option>
-              <option>Fasa 1 Sahaja</option>
-              <option>Fasa 2 — Pakej 1 Lengkap (RM 3,500)</option>
-              <option>Fasa 2 — Pakej 2 Asas (RM 2,800)</option>
-              <option>Fasa 1 + Pakej 1</option>
-              <option>Fasa 1 + Pakej 2</option>
+        <div class="field"><label>University / Institution</label><input type="text" id="b-uni" placeholder="e.g. UiTM Shah Alam, Polytechnic, etc."></div>
+        <div class="f2">
+          <div class="field">
+            <label>Package Selection *</label>
+            <select id="b-pkg">
+              <option value="">-- Select Package --</option>
+              <option>Phase 1 Only</option>
+              <option>Phase 2 — Complete Package (RM 3,500)</option>
+              <option>Phase 2 — Essential Package (RM 2,800)</option>
+              <option>Phase 1 + Complete Package</option>
+              <option>Phase 1 + Essential Package</option>
             </select>
           </div>
-          <div class="f-g"><label>Tarikh Mula Pilihan</label><input type="date" id="b-tarikh"></div>
+          <div class="field"><label>Preferred Start Date</label><input type="date" id="b-date"></div>
         </div>
-        <div class="f-g"><label>Maklumat Tambahan</label><textarea rows="3" id="b-nota" placeholder="Soalan atau maklumat lain..."></textarea></div>
-        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem">
-          <input type="checkbox" id="b-agree" style="width:16px;height:16px;accent-color:var(--blue)">
-          <label for="b-agree" style="font-size:0.8rem;color:var(--text-muted);cursor:pointer">Saya bersetuju dengan <a href="#" style="color:var(--blue-mid)">terma &amp; syarat</a> program CTR.</label>
+        <div class="field"><label>Additional Notes</label><textarea rows="3" id="b-notes" placeholder="Questions, special requirements, or other information..."></textarea></div>
+        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.4rem">
+          <input type="checkbox" id="b-agree" style="width:15px;height:15px;accent-color:var(--blue);flex-shrink:0">
+          <label for="b-agree" style="font-size:0.78rem;color:var(--muted);cursor:pointer">I agree to the <a href="#" style="color:var(--blue-mid)">Terms & Conditions</a> of the CTR program.</label>
         </div>
         <div class="error-msg" id="bk-error"></div>
-        <button class="btn-blue" id="bk-btn" onclick="submitBk()">Hantar Pendaftaran →</button>
+        <button class="btn-primary" id="bk-btn" onclick="submitBooking()">Submit Registration →</button>
       </div>
+
     </div>
   </div>
 </section>
 
+<div class="divider"></div>
+
 <!-- PAYMENT -->
-<section id="payment">
-  <div class="section-inner">
-    <div class="fade-up">
-      <div class="sec-eyebrow">Bayaran</div>
-      <h2 class="sec-title">Pilihan <span class="accent">Pembayaran</span></h2>
-      <p class="sec-sub">Pilih kaedah pembayaran yang sesuai. Rekod disimpan dalam Firebase.</p>
+<section id="payment" class="page-section">
+  <div class="section-wrap">
+    <div class="section-header fade">
+      <div class="eyebrow">Payment</div>
+      <h2 class="section-title">Payment <span>Options</span></h2>
+      <p class="section-desc">Choose your preferred payment method. All payment records are saved securely in Firebase.</p>
     </div>
-    <div class="pay-methods fade-up">
-      <div class="pay-m active" onclick="selPay(this,'FPX / Online Banking')"><div class="pay-m-icon">🏦</div><div><h4>FPX / Online Banking</h4><p>Maybank2u, CIMB Clicks, RHB dan lain-lain.</p></div><div class="pay-chk">✓</div></div>
-      <div class="pay-m" onclick="selPay(this,'Kad Kredit / Debit')"><div class="pay-m-icon">💳</div><div><h4>Kad Kredit / Debit</h4><p>Visa, Mastercard & Amex diterima.</p></div><div class="pay-chk">✓</div></div>
-      <div class="pay-m" onclick="selPay(this,'DuitNow / QR')"><div class="pay-m-icon">📱</div><div><h4>DuitNow / QR</h4><p>Imbas QR melalui aplikasi bank anda.</p></div><div class="pay-chk">✓</div></div>
-      <div class="pay-m" onclick="selPay(this,'PTPK / MARA / Biasiswa')"><div class="pay-m-icon">🎓</div><div><h4>PTPK / MARA / Biasiswa</h4><p>Diiktiraf untuk pinjaman & biasiswa kerajaan.</p></div><div class="pay-chk">✓</div></div>
+
+    <div class="pay-methods fade">
+      <div class="pay-opt active" onclick="selPay(this,'FPX / Online Banking')">
+        <div class="pay-ico">🏦</div>
+        <div><h4>FPX / Online Banking</h4><p>Maybank2u, CIMB Clicks, RHB, Hong Leong and more.</p></div>
+        <div class="pay-dot">✓</div>
+      </div>
+      <div class="pay-opt" onclick="selPay(this,'Credit / Debit Card')">
+        <div class="pay-ico">💳</div>
+        <div><h4>Credit / Debit Card</h4><p>Visa, Mastercard & Amex accepted.</p></div>
+        <div class="pay-dot">✓</div>
+      </div>
+      <div class="pay-opt" onclick="selPay(this,'DuitNow / QR')">
+        <div class="pay-ico">📱</div>
+        <div><h4>DuitNow / QR</h4><p>Scan QR code via your banking app.</p></div>
+        <div class="pay-dot">✓</div>
+      </div>
+      <div class="pay-opt" onclick="selPay(this,'PTPK / MARA / Scholarship')">
+        <div class="pay-ico">🎓</div>
+        <div><h4>PTPK / MARA / Scholarship</h4><p>Recognised for government loans & scholarships.</p></div>
+        <div class="pay-dot">✓</div>
+      </div>
     </div>
-    <div class="pay-bottom fade-up">
-      <div class="pay-sum">
-        <div class="pay-sum-head">Ringkasan Bayaran</div>
+
+    <div class="pay-bottom fade">
+      <div class="pay-summary">
+        <div class="pay-sum-head"><h3>Payment Summary</h3></div>
         <div class="pay-sum-body">
-          <div class="pay-r"><span class="l">Program Dipilih</span><span class="v" id="pp-prog">—</span></div>
-          <div class="pay-r"><span class="l">Kaedah Bayaran</span><span class="v" id="pp-meth">FPX / Online Banking</span></div>
-          <div class="pay-r"><span class="l">Harga Penuh</span><span class="v" id="pp-full">—</span></div>
-          <div class="pay-r"><span class="l">Deposit (30%)</span><span class="v" id="pp-dep">—</span></div>
-          <div class="pay-r tot"><span class="l">Bayar Hari Ini</span><span class="v" id="pp-tot">—</span></div>
+          <div class="sum-row"><span class="lbl">Selected Package</span><span class="val" id="pp-pkg">—</span></div>
+          <div class="sum-row"><span class="lbl">Payment Method</span><span class="val" id="pp-method">FPX / Online Banking</span></div>
+          <div class="sum-row"><span class="lbl">Full Price</span><span class="val" id="pp-full">—</span></div>
+          <div class="sum-row"><span class="lbl">Deposit (30%)</span><span class="val" id="pp-deposit">—</span></div>
+          <div class="sum-row total"><span class="lbl">Pay Today</span><span class="val" id="pp-total">—</span></div>
         </div>
       </div>
-      <div class="pay-form">
-        <div class="fc-title" style="font-size:1.4rem;margin-bottom:0.3rem">Maklumat Bayaran</div>
-        <div class="fc-sub" style="margin-bottom:1.5rem">Rekod bayaran disimpan dalam Firebase 🔒</div>
-        <div class="success-box" id="pay-success">✅ Rekod bayaran berjaya disimpan! Pihak CTR akan mengesahkan pembayaran anda.</div>
-        <div class="f-g"><label>Nama Penuh</label><input type="text" id="pay-nama" placeholder="Nama seperti dalam kad / bank"></div>
-        <div class="f-g"><label>No. Telefon</label><input type="tel" id="pay-tel" placeholder="01X-XXXXXXXX"></div>
+
+      <div class="pay-form-box">
+        <div class="form-title" style="font-size:1.4rem;margin-bottom:0.2rem">Payment Details</div>
+        <div class="form-sub" style="margin-bottom:1.4rem">Payment records are securely stored in Firebase. 🔒</div>
+        <div class="success-msg" id="pay-success">✅ Payment record saved! CTR will verify your payment shortly.</div>
+        <div class="field"><label>Full Name</label><input type="text" id="pay-name" placeholder="Name as on card / bank account"></div>
+        <div class="field"><label>Phone Number</label><input type="tel" id="pay-phone" placeholder="01X-XXXXXXXX"></div>
         <div id="card-fields" style="display:none">
-          <div class="f-g"><label>Nombor Kad</label><input type="text" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" oninput="fmtCard(this)"></div>
-          <div class="f-row">
-            <div class="f-g"><label>Tarikh Luput</label><input type="text" placeholder="MM/YY" maxlength="5"></div>
-            <div class="f-g"><label>CVV</label><input type="text" placeholder="XXX" maxlength="3"></div>
+          <div class="field"><label>Card Number</label><input type="text" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" oninput="fmtCard(this)"></div>
+          <div class="f2">
+            <div class="field"><label>Expiry Date</label><input type="text" placeholder="MM/YY" maxlength="5"></div>
+            <div class="field"><label>CVV</label><input type="text" placeholder="XXX" maxlength="3"></div>
           </div>
         </div>
         <div class="error-msg" id="pay-error"></div>
-        <button class="btn-blue" id="pay-btn" onclick="submitPay()">Bayar Sekarang →</button>
+        <button class="btn-primary" id="pay-btn" onclick="submitPayment()">Pay Now →</button>
       </div>
     </div>
   </div>
@@ -745,41 +835,41 @@
 <footer>
   <div class="footer-inner">
     <div class="footer-grid">
-      <div class="footer-brand">
-        <div class="f-logo">CTR</div>
-        <p>Central Tech Resources — Pusat latihan maritim bertauliah yang komited melahirkan pelaut profesional Malaysia bertaraf antarabangsa.</p>
-        <div class="f-contact">
+      <div>
+        <div class="foot-logo">CTR</div>
+        <p class="foot-desc">Central Tech Resources — A certified maritime training centre committed to developing world-class professional seafarers from Malaysia.</p>
+        <div class="foot-contact">
           <div>📞 013-8047141 / 09-5729971</div>
           <div>✉️ info@centraltech.com.my</div>
           <div>🌐 www.centraltech.com.my</div>
           <div>📍 A31, IM 5/2, Jalan Abu Bakar, Indera Mahkota, 25200 Kuantan, Pahang</div>
         </div>
       </div>
-      <div class="footer-col">
+      <div class="foot-col">
         <h4>Program</h4>
-        <a href="#fasa">Fasa 1</a>
-        <a href="#fasa">Fasa 2 — Pakej 1</a>
-        <a href="#fasa">Fasa 2 — Pakej 2</a>
-        <a href="#syarat">Syarat Kelayakan</a>
+        <a href="#program">Phase 1</a>
+        <a href="#program">Package 1 — Complete</a>
+        <a href="#program">Package 2 — Essential</a>
+        <a href="#eligibility">Eligibility</a>
       </div>
-      <div class="footer-col">
-        <h4>Pautan</h4>
-        <a href="#booking">Daftar Sekarang</a>
-        <a href="#payment">Bayaran</a>
-        <a onclick="openM('login')">Log Masuk</a>
-        <a onclick="openM('register')">Buka Akaun</a>
+      <div class="foot-col">
+        <h4>Quick Links</h4>
+        <a href="#registration">Register Now</a>
+        <a href="#payment">Payment</a>
+        <a onclick="openM('login')">Sign In</a>
+        <a onclick="openM('register')">Create Account</a>
       </div>
-      <div class="footer-col">
-        <h4>Sokongan</h4>
+      <div class="foot-col">
+        <h4>Support</h4>
         <a href="#">FAQ</a>
-        <a href="https://centraltech.com.my/contact-us/" target="_blank">Hubungi Kami</a>
-        <a href="#">Dasar Privasi</a>
-        <a href="#">Terma & Syarat</a>
+        <a href="https://centraltech.com.my/contact-us/" target="_blank">Contact Us</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms & Conditions</a>
       </div>
     </div>
-    <div class="footer-btm">
-      <span>© 2024 Central Tech Resources Sdn Bhd (1340587-K). Hak cipta terpelihara.</span>
-      <span class="uitm-tag">🎓 UiTM Student Project</span>
+    <div class="foot-bottom">
+      <span>© 2024 Central Tech Resources Sdn Bhd (1340587-K). All rights reserved.</span>
+      <span class="foot-tag">🎓 UiTM Student Project</span>
     </div>
   </div>
 </footer>
@@ -787,42 +877,50 @@
 <!-- LOGIN MODAL -->
 <div class="overlay" id="m-login">
   <div class="modal">
-    <button class="m-close" onclick="closeM('login')">✕</button>
-    <div class="m-logo-wrap"><div class="m-logo-box">CTR</div><div><div class="m-logo-text">CTR</div><div class="m-logo-sub">Program Pelaut Malaysia</div></div></div>
-    <h2>Log Masuk</h2>
-    <div class="f-g"><label>E-mel</label><input type="email" id="l-email" placeholder="nama@email.com"></div>
-    <div class="f-g"><label>Kata Laluan</label><input type="password" id="l-pass" placeholder="••••••••"></div>
-    <div style="text-align:right;margin-bottom:0.75rem"><a href="#" style="font-size:0.8rem;color:var(--blue-mid);font-weight:700">Lupa kata laluan?</a></div>
+    <button class="modal-close" onclick="closeM('login')">✕</button>
+    <div class="modal-brand">
+      <div class="modal-mark">CTR</div>
+      <div><div class="modal-brand-text">CTR</div><div class="modal-brand-sub">Malaysia Seafarer Program</div></div>
+    </div>
+    <h2>Sign In</h2>
+    <div class="field"><label>Email Address</label><input type="email" id="l-email" placeholder="name@email.com"></div>
+    <div class="field"><label>Password</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+    <div style="text-align:right;margin-bottom:1.2rem"><a href="#" style="font-size:0.78rem;color:var(--blue-mid);font-weight:600">Forgot password?</a></div>
     <div class="error-msg" id="l-error"></div>
-    <button class="btn-blue" id="l-btn" onclick="doLogin()">Log Masuk →</button>
-    <div class="m-footer">Belum ada akaun? <a onclick="switchM('login','register')">Daftar sekarang</a></div>
+    <button class="btn-primary" id="l-btn" onclick="doLogin()">Sign In →</button>
+    <div class="modal-foot">Don't have an account? <a onclick="switchM('login','register')">Register here</a></div>
   </div>
 </div>
 
 <!-- REGISTER MODAL -->
 <div class="overlay" id="m-register">
-  <div class="modal" style="max-width:500px">
-    <button class="m-close" onclick="closeM('register')">✕</button>
-    <div class="m-logo-wrap"><div class="m-logo-box">CTR</div><div><div class="m-logo-text">CTR</div><div class="m-logo-sub">Program Pelaut Malaysia</div></div></div>
-    <h2>Buka Akaun</h2>
-    <div class="f-row">
-      <div class="f-g"><label>Nama Penuh</label><input type="text" id="r-name" placeholder="Ahmad bin Ali"></div>
-      <div class="f-g"><label>No. KP</label><input type="text" id="r-kp" placeholder="XXXXXX-XX-XXXX"></div>
+  <div class="modal wide">
+    <button class="modal-close" onclick="closeM('register')">✕</button>
+    <div class="modal-brand">
+      <div class="modal-mark">CTR</div>
+      <div><div class="modal-brand-text">CTR</div><div class="modal-brand-sub">Malaysia Seafarer Program</div></div>
     </div>
-    <div class="f-g"><label>E-mel</label><input type="email" id="r-email" placeholder="nama@email.com"></div>
-    <div class="f-g"><label>No. Telefon</label><input type="tel" id="r-phone" placeholder="01X-XXXXXXXX"></div>
-    <div class="f-g"><label>Universiti / Institusi</label><input type="text" id="r-uni" placeholder="e.g. UiTM Shah Alam"></div>
-    <div class="f-row">
-      <div class="f-g"><label>Kata Laluan</label><input type="password" id="r-pass" placeholder="Min. 6 aksara"></div>
-      <div class="f-g"><label>Sahkan Kata Laluan</label><input type="password" id="r-pass2" placeholder="Ulang kata laluan"></div>
+    <h2>Create Account</h2>
+    <div class="f2">
+      <div class="field"><label>Full Name *</label><input type="text" id="r-name" placeholder="Ahmad bin Ali"></div>
+      <div class="field"><label>IC Number</label><input type="text" id="r-kp" placeholder="XXXXXX-XX-XXXX"></div>
     </div>
-    <div style="display:flex;align-items:flex-start;gap:0.7rem;margin-bottom:0.5rem">
+    <div class="field"><label>Email Address *</label><input type="email" id="r-email" placeholder="name@email.com"></div>
+    <div class="f2">
+      <div class="field"><label>Phone Number</label><input type="tel" id="r-phone" placeholder="01X-XXXXXXXX"></div>
+      <div class="field"><label>University / Institution</label><input type="text" id="r-uni" placeholder="e.g. UiTM Shah Alam"></div>
+    </div>
+    <div class="f2">
+      <div class="field"><label>Password *</label><input type="password" id="r-pass" placeholder="Min. 6 characters"></div>
+      <div class="field"><label>Confirm Password *</label><input type="password" id="r-pass2" placeholder="Repeat password"></div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:0.65rem;margin-bottom:0.4rem">
       <input type="checkbox" id="r-agree" style="width:14px;height:14px;accent-color:var(--blue);margin-top:3px;flex-shrink:0">
-      <span style="font-size:0.78rem;color:var(--text-muted)">Saya bersetuju dengan <a href="#" style="color:var(--blue-mid)">Terma & Syarat</a> dan <a href="#" style="color:var(--blue-mid)">Dasar Privasi</a> CTR.</span>
+      <span style="font-size:0.76rem;color:var(--muted)">I agree to the <a href="#" style="color:var(--blue-mid)">Terms & Conditions</a> and <a href="#" style="color:var(--blue-mid)">Privacy Policy</a> of CTR.</span>
     </div>
     <div class="error-msg" id="r-error"></div>
-    <button class="btn-blue" id="r-btn" onclick="doRegister()">Cipta Akaun →</button>
-    <div class="m-footer">Sudah ada akaun? <a onclick="switchM('register','login')">Log masuk di sini</a></div>
+    <button class="btn-primary" id="r-btn" onclick="doRegister()">Create Account →</button>
+    <div class="modal-foot">Already have an account? <a onclick="switchM('register','login')">Sign in here</a></div>
   </div>
 </div>
 
@@ -836,32 +934,32 @@
 
   function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3500); }
 
-  function switchFasa(i){
-    document.querySelectorAll('.f-tab').forEach((t,idx)=>t.classList.toggle('active',idx===i));
-    document.querySelectorAll('.f-panel').forEach((p,idx)=>p.classList.toggle('active',idx===i));
+  function switchPhase(i){
+    document.querySelectorAll('.p-tab').forEach((t,idx)=>t.classList.toggle('active',idx===i));
+    document.querySelectorAll('.phase-panel').forEach((p,idx)=>p.classList.toggle('active',idx===i));
   }
 
-  function pilihPakej(name,amt){
-    document.getElementById('pp-prog').textContent=name;
+  function selectPkg(name,amt){
+    document.getElementById('pp-pkg').textContent=name;
     document.getElementById('pp-full').textContent='RM '+amt.toLocaleString();
     const dep=Math.round(amt*0.3);
-    document.getElementById('pp-dep').textContent='RM '+dep.toLocaleString();
-    document.getElementById('pp-tot').textContent='RM '+dep.toLocaleString();
-    showToast('✓ '+name+' dipilih!');
+    document.getElementById('pp-deposit').textContent='RM '+dep.toLocaleString();
+    document.getElementById('pp-total').textContent='RM '+dep.toLocaleString();
+    showToast('✓ '+name+' selected!');
     setTimeout(()=>document.getElementById('payment').scrollIntoView({behavior:'smooth'}),700);
   }
 
   function selPay(el,method){
-    document.querySelectorAll('.pay-m').forEach(m=>m.classList.remove('active'));
+    document.querySelectorAll('.pay-opt').forEach(m=>m.classList.remove('active'));
     el.classList.add('active');
-    document.getElementById('pp-meth').textContent=method;
-    document.getElementById('card-fields').style.display=method==='Kad Kredit / Debit'?'block':'none';
+    document.getElementById('pp-method').textContent=method;
+    document.getElementById('card-fields').style.display=method==='Credit / Debit Card'?'block':'none';
   }
 
   function fmtCard(el){ let v=el.value.replace(/\D/g,'').slice(0,16); el.value=v.replace(/(.{4})/g,'$1 ').trim(); }
 
-  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target);} }),{threshold:0.1});
-  document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);} }),{threshold:0.08});
+  document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
 </script>
 </body>
 </html>
