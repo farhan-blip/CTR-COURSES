@@ -52,14 +52,18 @@
     const errEl = document.getElementById('r-error');
     errEl.textContent = '';
     if (!name || !email || !pass) { errEl.textContent = '⚠ Sila lengkapkan semua maklumat wajib.'; return; }
+    if (pass.length < 8)          { errEl.textContent = '⚠ Kata laluan sekurang-kurangnya 8 aksara.'; return; }
+    if (!/[A-Z]/.test(pass))      { errEl.textContent = '⚠ Kata laluan mesti mengandungi sekurang-kurangnya 1 huruf besar (A-Z).'; return; }
+    if (!/[a-z]/.test(pass))      { errEl.textContent = '⚠ Kata laluan mesti mengandungi sekurang-kurangnya 1 huruf kecil (a-z).'; return; }
+    if (!/[0-9]/.test(pass))      { errEl.textContent = '⚠ Kata laluan mesti mengandungi sekurang-kurangnya 1 nombor (0-9).'; return; }
+    if (!/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/.test(pass)) { errEl.textContent = '⚠ Kata laluan mesti mengandungi sekurang-kurangnya 1 aksara khas (!@#$%^&*).'; return; }
     if (pass !== pass2)           { errEl.textContent = '⚠ Kata laluan tidak sepadan.'; return; }
-    if (pass.length < 6)          { errEl.textContent = '⚠ Kata laluan sekurang-kurangnya 6 aksara.'; return; }
     if (!agree)                   { errEl.textContent = '⚠ Sila bersetuju dengan terma & syarat.'; return; }
     const btn = document.getElementById('r-btn');
     btn.textContent = 'Sedang mendaftar...'; btn.disabled = true;
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await addDoc(collection(db, 'pengguna'), { uid: cred.user.uid, name, kp, email, phone, uni, createdAt: serverTimestamp() });
+      await addDoc(collection(db, 'pengguna'), { uid: cred.user.uid, name, kp, email, phone, seamanCard: uni, createdAt: serverTimestamp() });
       closeM('register');
       showToast('✓ Akaun berjaya dicipta! Selamat datang, ' + name + '!');
     } catch (e) {
@@ -112,7 +116,7 @@
     const btn = document.getElementById('bk-btn');
     btn.textContent = 'Menghantar...'; btn.disabled = true;
     try {
-      await addDoc(collection(db, 'pendaftaran'), { nama, kp, tel, emel, uni, pakej, tarikh, nota, status: 'Baru', submittedAt: serverTimestamp(), uid: auth.currentUser ? auth.currentUser.uid : 'tetamu' });
+      await addDoc(collection(db, 'pendaftaran'), { nama, kp, tel, emel, seamanCard: uni, pakej, tarikh, nota, status: 'Baru', submittedAt: serverTimestamp(), uid: auth.currentUser ? auth.currentUser.uid : 'tetamu' });
       document.getElementById('bk-success').style.display = 'block';
       showToast('✓ Pendaftaran berjaya disimpan dalam database!');
       setTimeout(()=>document.getElementById('bayaran').scrollIntoView({behavior:'smooth'}),1200);
@@ -686,7 +690,7 @@
           <div class="medan"><label>No. Telefon *</label><input type="tel" id="b-tel" placeholder="01X-XXXXXXXX"></div>
           <div class="medan"><label>E-mel *</label><input type="email" id="b-emel" placeholder="nama@email.com"></div>
         </div>
-        <div class="medan"><label>Universiti / Institusi</label><input type="text" id="b-uni" placeholder="e.g. UiTM Shah Alam, Politeknik, dll."></div>
+        <div class="medan"><label>No. Kad Kelasi (Seaman Card)</label><input type="text" id="b-uni" placeholder="Masukkan nombor Seaman Card anda (jika ada)"></div>
         <div class="f2">
           <div class="medan">
             <label>Pilihan Pakej *</label>
@@ -845,11 +849,39 @@
     <div class="medan"><label>E-mel *</label><input type="email" id="r-email" placeholder="nama@email.com"></div>
     <div class="f2">
       <div class="medan"><label>No. Telefon</label><input type="tel" id="r-phone" placeholder="01X-XXXXXXXX"></div>
-      <div class="medan"><label>Universiti / Institusi</label><input type="text" id="r-uni" placeholder="e.g. UiTM Shah Alam"></div>
+      <div class="medan"><label>No. Kad Kelasi (Seaman Card)</label><input type="text" id="r-uni" placeholder="Masukkan nombor Seaman Card anda (jika ada)"></div>
     </div>
-    <div class="f2">
-      <div class="medan"><label>Kata Laluan *</label><input type="password" id="r-pass" placeholder="Min. 6 aksara"></div>
-      <div class="medan"><label>Sahkan Kata Laluan *</label><input type="password" id="r-pass2" placeholder="Ulang kata laluan"></div>
+    <div class="medan">
+      <label>Kata Laluan *</label>
+      <div style="position:relative">
+        <input type="password" id="r-pass" placeholder="Min. 8 aksara" oninput="semakKataLaluan(this.value)" style="padding-right:2.8rem">
+        <button type="button" onclick="togolLihat('r-pass',this)" style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;">👁</button>
+      </div>
+      <!-- Strength meter -->
+      <div style="margin-top:0.5rem">
+        <div style="display:flex;gap:4px;margin-bottom:0.35rem">
+          <div id="bar1" style="height:4px;flex:1;border-radius:2px;background:var(--border);transition:background 0.3s"></div>
+          <div id="bar2" style="height:4px;flex:1;border-radius:2px;background:var(--border);transition:background 0.3s"></div>
+          <div id="bar3" style="height:4px;flex:1;border-radius:2px;background:var(--border);transition:background 0.3s"></div>
+          <div id="bar4" style="height:4px;flex:1;border-radius:2px;background:var(--border);transition:background 0.3s"></div>
+        </div>
+        <div id="kekuatan-label" style="font-size:0.7rem;color:var(--muted)"></div>
+        <div style="margin-top:0.5rem;display:grid;grid-template-columns:1fr 1fr;gap:0.2rem 0.8rem">
+          <div id="c-len"  style="font-size:0.7rem;color:var(--muted)">○ Min. 8 aksara</div>
+          <div id="c-up"   style="font-size:0.7rem;color:var(--muted)">○ Huruf besar (A-Z)</div>
+          <div id="c-low"  style="font-size:0.7rem;color:var(--muted)">○ Huruf kecil (a-z)</div>
+          <div id="c-num"  style="font-size:0.7rem;color:var(--muted)">○ Nombor (0-9)</div>
+          <div id="c-sym"  style="font-size:0.7rem;color:var(--muted)">○ Aksara khas (!@#$)</div>
+        </div>
+      </div>
+    </div>
+    <div class="medan">
+      <label>Sahkan Kata Laluan *</label>
+      <div style="position:relative">
+        <input type="password" id="r-pass2" placeholder="Ulang kata laluan" oninput="semakPadan()" style="padding-right:2.8rem">
+        <button type="button" onclick="togolLihat('r-pass2',this)" style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;">👁</button>
+      </div>
+      <div id="padan-label" style="font-size:0.7rem;margin-top:0.3rem;min-height:1rem"></div>
     </div>
     <div style="display:flex;align-items:flex-start;gap:0.65rem;margin-bottom:0.4rem">
       <input type="checkbox" id="r-agree" style="width:14px;height:14px;accent-color:var(--blue);margin-top:3px;flex-shrink:0">
@@ -891,6 +923,60 @@
     el.classList.add('aktif');
     document.getElementById('pp-kaedah').textContent=kaedah;
     document.getElementById('kad-medan').style.display=kaedah==='Kad Kredit / Debit'?'block':'none';
+  }
+
+  function semakKataLaluan(val) {
+    const cLen = val.length >= 8;
+    const cUp  = /[A-Z]/.test(val);
+    const cLow = /[a-z]/.test(val);
+    const cNum = /[0-9]/.test(val);
+    const cSym = /[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/.test(val);
+
+    const tick = '✓ '; const cross = '○ ';
+    const ok = 'color:#0a9e6a;font-weight:600';
+    const no = 'color:var(--muted)';
+
+    document.getElementById('c-len').style.cssText = cLen ? ok : no;
+    document.getElementById('c-len').textContent  = (cLen ? tick : cross) + 'Min. 8 aksara';
+    document.getElementById('c-up').style.cssText  = cUp  ? ok : no;
+    document.getElementById('c-up').textContent   = (cUp  ? tick : cross) + 'Huruf besar (A-Z)';
+    document.getElementById('c-low').style.cssText = cLow ? ok : no;
+    document.getElementById('c-low').textContent  = (cLow ? tick : cross) + 'Huruf kecil (a-z)';
+    document.getElementById('c-num').style.cssText = cNum ? ok : no;
+    document.getElementById('c-num').textContent  = (cNum ? tick : cross) + 'Nombor (0-9)';
+    document.getElementById('c-sym').style.cssText = cSym ? ok : no;
+    document.getElementById('c-sym').textContent  = (cSym ? tick : cross) + 'Aksara khas (!@#$)';
+
+    const score = [cLen,cUp,cLow,cNum,cSym].filter(Boolean).length;
+    const colours = ['','#d93025','#e67e22','#2980b9','#0a9e6a'];
+    const labels  = ['','Sangat Lemah','Sederhana','Kuat','Sangat Kuat'];
+    const labelCol= ['','#d93025','#e67e22','#2980b9','#0a9e6a'];
+
+    for (let i=1; i<=4; i++) {
+      document.getElementById('bar'+i).style.background = i <= score ? colours[score] : 'var(--border)';
+    }
+    const lbl = document.getElementById('kekuatan-label');
+    lbl.textContent  = val.length ? 'Kekuatan: ' + (labels[score] || 'Sangat Lemah') : '';
+    lbl.style.color  = val.length ? (labelCol[score] || '#d93025') : 'var(--muted)';
+    lbl.style.fontWeight = '600';
+
+    semakPadan();
+  }
+
+  function semakPadan() {
+    const p1  = document.getElementById('r-pass').value;
+    const p2  = document.getElementById('r-pass2').value;
+    const lbl = document.getElementById('padan-label');
+    if (!p2) { lbl.textContent = ''; return; }
+    if (p1 === p2) {
+      lbl.textContent = '✓ Kata laluan sepadan';
+      lbl.style.color = '#0a9e6a';
+      lbl.style.fontWeight = '600';
+    } else {
+      lbl.textContent = '✗ Kata laluan tidak sepadan';
+      lbl.style.color = '#d93025';
+      lbl.style.fontWeight = '600';
+    }
   }
 
   function fmtKad(el){ let v=el.value.replace(/\D/g,'').slice(0,16); el.value=v.replace(/(.{4})/g,'$1 ').trim(); }
