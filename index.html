@@ -52,6 +52,7 @@
     const errEl = document.getElementById('r-error');
     errEl.textContent = '';
     if (!name || !email || !pass) { errEl.textContent = '⚠ Sila lengkapkan semua maklumat wajib.'; return; }
+    if (kp && !/^\d{6}-\d{2}-\d{4}$/.test(kp)) { errEl.textContent = '⚠ Format No. KP tidak sah. Sila gunakan format XXXXXX-XX-XXXX.'; return; }
     if (pass.length < 8)          { errEl.textContent = '⚠ Kata laluan sekurang-kurangnya 8 aksara.'; return; }
     if (!/[A-Z]/.test(pass))      { errEl.textContent = '⚠ Kata laluan mesti mengandungi sekurang-kurangnya 1 huruf besar (A-Z).'; return; }
     if (!/[a-z]/.test(pass))      { errEl.textContent = '⚠ Kata laluan mesti mengandungi sekurang-kurangnya 1 huruf kecil (a-z).'; return; }
@@ -143,6 +144,7 @@
     errEl.textContent = '';
     if (!nama)  { errEl.textContent = '⚠ Sila masukkan nama penuh.'; return; }
     if (!kp)    { errEl.textContent = '⚠ Sila masukkan No. KP / Pasport.'; return; }
+    if (!/^\d{6}-\d{2}-\d{4}$/.test(kp)) { errEl.textContent = '⚠ Format No. KP tidak sah. Sila gunakan format XXXXXX-XX-XXXX.'; return; }
     if (!tel)   { errEl.textContent = '⚠ Sila masukkan no. telefon.'; return; }
     if (!emel)  { errEl.textContent = '⚠ Sila masukkan e-mel.'; return; }
     if (!pakej) { errEl.textContent = '⚠ Sila pilih pakej program.'; return; }
@@ -947,7 +949,7 @@
         <div class="berjaya" id="bk-success">✅ Pendaftaran berjaya disimpan! Kami akan menghubungi anda dalam masa 1-2 hari bekerja.</div>
         <div class="f2">
           <div class="medan"><label>Nama Penuh *</label><input type="text" id="b-nama" placeholder="Ahmad bin Ali"></div>
-          <div class="medan"><label>No. KP / Pasport *</label><input type="text" id="b-kp" placeholder="XXXXXX-XX-XXXX"></div>
+          <div class="medan"><label>No. KP / Pasport *</label><input type="text" id="b-kp" placeholder="XXXXXX-XX-XXXX" maxlength="14" oninput="fmtKP(this,'b-kp-status')"><div id="b-kp-status" style="font-size:0.72rem;margin-top:0.3rem;min-height:1rem"></div></div>
         </div>
         <div class="f2">
           <div class="medan"><label>No. Telefon *</label><input type="tel" id="b-tel" placeholder="01X-XXXXXXXX"></div>
@@ -1159,7 +1161,7 @@
     <h2>Buka Akaun</h2>
     <div class="f2">
       <div class="medan"><label>Nama Penuh *</label><input type="text" id="r-name" placeholder="Ahmad bin Ali"></div>
-      <div class="medan"><label>No. KP</label><input type="text" id="r-kp" placeholder="XXXXXX-XX-XXXX"></div>
+      <div class="medan"><label>No. KP</label><input type="text" id="r-kp" placeholder="XXXXXX-XX-XXXX" maxlength="14" oninput="fmtKP(this,'r-kp-status')"><div id="r-kp-status" style="font-size:0.72rem;margin-top:0.3rem;min-height:1rem"></div></div>
     </div>
     <div class="medan"><label>E-mel *</label><input type="email" id="r-email" placeholder="nama@email.com"></div>
     <div class="f2">
@@ -1297,6 +1299,57 @@
       lbl.textContent = '✗ Kata laluan tidak sepadan';
       lbl.style.color = '#d93025';
       lbl.style.fontWeight = '600';
+    }
+  }
+
+  function fmtKP(el, statusId) {
+    // Remove all non-digits
+    let raw = el.value.replace(/\D/g, '').slice(0, 12);
+
+    // Auto insert dashes at positions 6 and 8
+    let fmt = '';
+    if (raw.length <= 6)       fmt = raw;
+    else if (raw.length <= 8)  fmt = raw.slice(0,6) + '-' + raw.slice(6);
+    else                       fmt = raw.slice(0,6) + '-' + raw.slice(6,8) + '-' + raw.slice(8);
+
+    el.value = fmt;
+
+    // Show validation status
+    const statusEl = document.getElementById(statusId);
+    if (!statusEl) return;
+
+    if (fmt.length === 0) {
+      statusEl.textContent = '';
+      return;
+    }
+
+    const valid = /^\d{6}-\d{2}-\d{4}$/.test(fmt);
+
+    if (valid) {
+      // Extract and validate date from IC
+      const year  = parseInt(fmt.slice(0,2));
+      const month = parseInt(fmt.slice(2,4));
+      const day   = parseInt(fmt.slice(4,6));
+      const fullYear = year <= 24 ? 2000 + year : 1900 + year;
+      const age = new Date().getFullYear() - fullYear;
+
+      if (month < 1 || month > 12 || day < 1 || day > 31) {
+        statusEl.textContent = '✗ Tarikh lahir dalam No. KP tidak sah.';
+        statusEl.style.color = '#d93025';
+        statusEl.style.fontWeight = '600';
+      } else if (age < 18) {
+        statusEl.textContent = '✗ Umur anda kurang dari 18 tahun. Tidak layak mendaftar.';
+        statusEl.style.color = '#d93025';
+        statusEl.style.fontWeight = '600';
+      } else {
+        statusEl.textContent = '✓ No. KP sah — Umur anggaran: ' + age + ' tahun';
+        statusEl.style.color = '#0a9e6a';
+        statusEl.style.fontWeight = '600';
+      }
+    } else {
+      statusEl.textContent = fmt.length > 0 ? '○ Format: XXXXXX-XX-XXXX (contoh: 991231-14-5678)' : '';
+      statusEl.style.color = '#6b88b0';
+      statusEl.style.fontWeight = '400';
     }
   }
 
