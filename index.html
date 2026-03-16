@@ -180,8 +180,35 @@
     tunjukLoader('Memproses bayaran...', 'Rekod sedang disimpan dalam Firebase');
     try {
       await addDoc(collection(db, 'bayaran'), { nama, tel, program, method, jumlah: total, status: 'Belum Disahkan', submittedAt: serverTimestamp(), uid: auth.currentUser ? auth.currentUser.uid : 'tetamu' });
-      document.getElementById('pay-success').style.display = 'block';
-      showToast('✓ Rekod bayaran disimpan! Jumlah: ' + total);
+
+      // Clear form fields
+      document.getElementById('pay-nama').value = '';
+      document.getElementById('pay-tel').value  = '';
+
+      // Reset payment summary
+      document.getElementById('pp-pakej').textContent   = '—';
+      document.getElementById('pp-kaedah').textContent  = 'FPX / Online Banking';
+      document.getElementById('pp-penuh').textContent   = '—';
+      document.getElementById('pp-deposit').textContent = '—';
+      document.getElementById('pp-total').textContent   = '—';
+
+      // Reset payment method selection
+      document.querySelectorAll('.pay-mod').forEach((m,i) => {
+        m.classList.remove('aktif');
+        if (i === 0) m.classList.add('aktif');
+      });
+
+      // Hide card fields
+      document.getElementById('kad-medan').style.display = 'none';
+
+      // Show toast
+      showToast('✓ Terima kasih ' + nama + '! Bayaran berjaya direkodkan.');
+
+      // Scroll to top after short delay
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 1500);
+
     } catch (e) {
       errEl.textContent = '⚠ Ralat: ' + e.message;
     } finally { btn.innerHTML = 'Bayar Sekarang →'; btn.disabled = false; sembunyiLoader(); }
