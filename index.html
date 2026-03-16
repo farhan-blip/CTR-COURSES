@@ -1263,4 +1263,49 @@
     }
   }
 
-  function fmtKad
+  function fmtKad(el){ let v=el.value.replace(/\D/g,'').slice(0,16); el.value=v.replace(/(.{4})/g,'$1 ').trim(); }
+
+  function togolLihat(id, btn) {
+    const inp = document.getElementById(id);
+    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+    else { inp.type = 'password'; btn.textContent = '👁'; }
+  }
+
+  function semakKataLaluan(val) {
+    const cLen = val.length >= 8;
+    const cUp  = /[A-Z]/.test(val);
+    const cLow = /[a-z]/.test(val);
+    const cNum = /[0-9]/.test(val);
+    const cSym = /[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/.test(val);
+    const tick = '✓ '; const cross = '○ ';
+    const ok = 'color:#0a9e6a;font-weight:600';
+    const no = 'color:var(--muted)';
+    document.getElementById('c-len').style.cssText = cLen ? ok : no;
+    document.getElementById('c-len').textContent = (cLen ? tick : cross) + 'Min. 8 aksara';
+    document.getElementById('c-up').style.cssText = cUp ? ok : no;
+    document.getElementById('c-up').textContent = (cUp ? tick : cross) + 'Huruf besar (A-Z)';
+    document.getElementById('c-low').style.cssText = cLow ? ok : no;
+    document.getElementById('c-low').textContent = (cLow ? tick : cross) + 'Huruf kecil (a-z)';
+    document.getElementById('c-num').style.cssText = cNum ? ok : no;
+    document.getElementById('c-num').textContent = (cNum ? tick : cross) + 'Nombor (0-9)';
+    document.getElementById('c-sym').style.cssText = cSym ? ok : no;
+    document.getElementById('c-sym').textContent = (cSym ? tick : cross) + 'Aksara khas (!@#$)';
+    const score = [cLen,cUp,cLow,cNum,cSym].filter(Boolean).length;
+    const colours = ['','#d93025','#e67e22','#2980b9','#0a9e6a'];
+    const labels  = ['','Sangat Lemah','Sederhana','Kuat','Sangat Kuat'];
+    const labelCol= ['','#d93025','#e67e22','#2980b9','#0a9e6a'];
+    for (let i=1; i<=4; i++) {
+      document.getElementById('bar'+i).style.background = i <= score ? colours[score] : 'var(--border)';
+    }
+    const lbl = document.getElementById('kekuatan-label');
+    lbl.textContent = val.length ? 'Kekuatan: ' + (labels[score] || 'Sangat Lemah') : '';
+    lbl.style.color = val.length ? (labelCol[score] || '#d93025') : 'var(--muted)';
+    lbl.style.fontWeight = '600';
+    semakPadan();
+  }
+
+  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting){e.target.classList.add('masuk');obs.unobserve(e.target);} }),{threshold:0.08});
+  document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
