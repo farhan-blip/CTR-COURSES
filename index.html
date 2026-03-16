@@ -61,7 +61,8 @@
     if (pass !== pass2)           { errEl.textContent = '⚠ Kata laluan tidak sepadan.'; return; }
     if (!agree)                   { errEl.textContent = '⚠ Sila bersetuju dengan terma & syarat.'; return; }
     const btn = document.getElementById('r-btn');
-    btn.textContent = 'Sedang mendaftar...'; btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Sedang mendaftar...'; btn.disabled = true;
+    tunjukLoader('Mencipta akaun...', 'Sila tunggu sebentar');
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await addDoc(collection(db, 'pengguna'), { uid: cred.user.uid, name, kp, email, phone, seamanCard: uni, createdAt: serverTimestamp() });
@@ -71,7 +72,7 @@
       if (e.code === 'auth/email-already-in-use') errEl.textContent = '⚠ E-mel ini sudah didaftarkan.';
       else if (e.code === 'auth/invalid-email')   errEl.textContent = '⚠ Format e-mel tidak sah.';
       else errEl.textContent = '⚠ Ralat: ' + e.message;
-    } finally { btn.textContent = 'Cipta Akaun →'; btn.disabled = false; }
+    } finally { btn.innerHTML = 'Cipta Akaun →'; btn.disabled = false; sembunyiLoader(); }
   };
 
   window.doLogin = async function() {
@@ -81,14 +82,15 @@
     errEl.textContent = '';
     if (!email || !pass) { errEl.textContent = '⚠ Sila masukkan e-mel dan kata laluan.'; return; }
     const btn = document.getElementById('l-btn');
-    btn.textContent = 'Sedang log masuk...'; btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Sedang log masuk...'; btn.disabled = true;
+    tunjukLoader('Log masuk...', 'Mengesahkan maklumat anda');
     try {
       await signInWithEmailAndPassword(auth, email, pass);
       closeM('login');
       showToast('✓ Berjaya log masuk! Selamat datang kembali.');
     } catch (e) {
       errEl.textContent = '⚠ E-mel atau kata laluan tidak betul.';
-    } finally { btn.textContent = 'Log Masuk →'; btn.disabled = false; }
+    } finally { btn.innerHTML = 'Log Masuk →'; btn.disabled = false; sembunyiLoader(); }
   };
 
   window.doLogout = async function() {
@@ -150,7 +152,8 @@
     if (!pakej) { errEl.textContent = '⚠ Sila pilih pakej program.'; return; }
     if (!agree) { errEl.textContent = '⚠ Sila bersetuju dengan terma & syarat.'; return; }
     const btn = document.getElementById('bk-btn');
-    btn.textContent = 'Menghantar...'; btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Menghantar...'; btn.disabled = true;
+    tunjukLoader('Menyimpan pendaftaran...', 'Data anda sedang disimpan dalam Firebase');
     try {
       await addDoc(collection(db, 'pendaftaran'), { nama, kp, tel, emel, seamanCard: uni, pakej, tarikh, nota, status: 'Baru', submittedAt: serverTimestamp(), uid: auth.currentUser ? auth.currentUser.uid : 'tetamu' });
       document.getElementById('bk-success').style.display = 'block';
@@ -158,7 +161,7 @@
       setTimeout(()=>document.getElementById('bayaran').scrollIntoView({behavior:'smooth'}),1200);
     } catch (e) {
       errEl.textContent = '⚠ Ralat: ' + e.message;
-    } finally { btn.textContent = 'Hantar Pendaftaran →'; btn.disabled = false; }
+    } finally { btn.innerHTML = 'Hantar Pendaftaran →'; btn.disabled = false; sembunyiLoader(); }
   };
 
   window.submitBayaran = async function() {
@@ -173,14 +176,15 @@
     if (!nama)         { errEl.textContent = '⚠ Sila masukkan nama penuh.'; return; }
     if (!tel)          { errEl.textContent = '⚠ Sila masukkan no. telefon.'; return; }
     const btn = document.getElementById('pay-btn');
-    btn.textContent = 'Memproses...'; btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Memproses...'; btn.disabled = true;
+    tunjukLoader('Memproses bayaran...', 'Rekod sedang disimpan dalam Firebase');
     try {
       await addDoc(collection(db, 'bayaran'), { nama, tel, program, method, jumlah: total, status: 'Belum Disahkan', submittedAt: serverTimestamp(), uid: auth.currentUser ? auth.currentUser.uid : 'tetamu' });
       document.getElementById('pay-success').style.display = 'block';
       showToast('✓ Rekod bayaran disimpan! Jumlah: ' + total);
     } catch (e) {
       errEl.textContent = '⚠ Ralat: ' + e.message;
-    } finally { btn.textContent = 'Bayar Sekarang →'; btn.disabled = false; }
+    } finally { btn.innerHTML = 'Bayar Sekarang →'; btn.disabled = false; sembunyiLoader(); }
   };
 </script>
 
@@ -635,9 +639,74 @@
   ::-webkit-scrollbar { width:5px; }
   ::-webkit-scrollbar-track { background:var(--pale2); }
   ::-webkit-scrollbar-thumb { background:var(--blue-mid); border-radius:3px; }
+
+  /* ── LOADING SPINNER ── */
+  .spinner {
+    display: inline-block;
+    width: 15px; height: 15px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .btn-hantar:disabled { opacity:0.75; cursor:not-allowed; }
+
+  #page-loader {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(11,45,94,0.45);
+    backdrop-filter: blur(5px);
+    z-index: 9997;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #page-loader.show { display: flex; }
+
+  .loader-box {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem 3rem;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(11,45,94,0.25);
+    min-width: 240px;
+  }
+
+  .loader-ring {
+    width: 52px; height: 52px;
+    border: 4px solid var(--pale);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1.2rem;
+  }
+
+  .loader-text {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.3rem;
+  }
+
+  .loader-sub { font-size:0.78rem; color:var(--muted); }
 </style>
 </head>
 <body>
+
+<!-- PAGE LOADER -->
+<div id="page-loader">
+  <div class="loader-box">
+    <div class="loader-ring"></div>
+    <div class="loader-text" id="loader-text">Sedang memproses...</div>
+    <div class="loader-sub" id="loader-sub">Sila tunggu sebentar</div>
+  </div>
+</div>
 
 <!-- NAV -->
 <nav>
@@ -1219,6 +1288,16 @@
   document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o){o.classList.remove('open');document.body.style.overflow='';} }));
 
   function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3500); }
+
+  function tunjukLoader(teks, sub) {
+    document.getElementById('loader-text').textContent = teks || 'Sedang memproses...';
+    document.getElementById('loader-sub').textContent  = sub  || 'Sila tunggu sebentar';
+    document.getElementById('page-loader').classList.add('show');
+  }
+
+  function sembunyiLoader() {
+    document.getElementById('page-loader').classList.remove('show');
+  }
 
   function tukarFasa(i){
     document.querySelectorAll('.f-tab').forEach((t,idx)=>t.classList.toggle('active',idx===i));
