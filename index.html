@@ -237,27 +237,191 @@
   .sek-title span { color:var(--blue); }
   .sek-sub { font-size:0.93rem; color:var(--muted); max-width:500px; line-height:1.7; }
 
-  /* SYARAT */
-  #syarat { background:var(--white); }
+  /* ── MODERN SYARAT ── */
+  .syarat-modern {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
 
-  .intro-box { background:linear-gradient(135deg,var(--pale),var(--pale2)); border:1px solid var(--border); border-radius:12px; padding:1.8rem 2rem; margin-bottom:2.5rem; display:flex; align-items:flex-start; gap:1.4rem; }
-  .intro-ico { width:48px; height:48px; background:linear-gradient(135deg,var(--navy),var(--blue-mid)); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0; }
-  .intro-box h3 { font-size:0.95rem; font-weight:700; color:var(--navy); margin-bottom:0.35rem; }
-  .intro-box p { font-size:0.88rem; color:var(--text2); line-height:1.6; }
+  .syarat-modern:hover { border-color: var(--blue-mid); box-shadow: 0 4px 20px var(--shadow); }
+  .syarat-modern.open  { border-color: var(--blue); box-shadow: 0 6px 24px var(--shadow-md); }
 
-  .syarat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(255px,1fr)); gap:1.2rem; }
+  .sm-header {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.2rem 1.5rem;
+    transition: background 0.2s;
+  }
 
-  .s-card { background:var(--white); border:1.5px solid var(--border); border-radius:12px; overflow:hidden; transition:transform 0.25s,border-color 0.25s,box-shadow 0.25s; }
-  .s-card:hover { transform:translateY(-4px); border-color:var(--blue-mid); box-shadow:0 10px 30px var(--shadow-md); }
-  .s-top { background:linear-gradient(135deg,var(--navy),var(--blue-mid)); padding:1.2rem 1.4rem; display:flex; align-items:center; gap:0.9rem; }
-  .s-ico { width:42px; height:42px; background:rgba(255,255,255,0.18); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
-  .s-top h3 { font-size:0.9rem; font-weight:700; color:white; }
-  .s-top .tag { font-size:0.62rem; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,0.55); margin-top:0.1rem; }
-  .s-body { padding:1.2rem 1.4rem; }
-  .s-item { display:flex; align-items:flex-start; gap:0.7rem; padding:0.5rem 0; border-bottom:1px solid var(--pale); font-size:0.85rem; color:var(--text2); line-height:1.5; }
-  .s-item:last-of-type { border-bottom:none; }
-  .s-item .dot { width:6px; height:6px; background:var(--blue-mid); border-radius:50%; flex-shrink:0; margin-top:6px; }
-  .s-note { margin-top:0.9rem; padding:0.65rem 0.9rem; background:var(--pale); border-left:2.5px solid var(--blue-mid); border-radius:0 5px 5px 0; font-size:0.77rem; color:var(--blue); line-height:1.5; }
+  .syarat-modern.open .sm-header { background: linear-gradient(90deg, var(--pale), var(--white)); }
+
+  .sm-left { display: flex; align-items: center; gap: 1rem; flex: 1; }
+
+  .sm-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: var(--border);
+    letter-spacing: 1px;
+    line-height: 1;
+    min-width: 36px;
+    transition: color 0.2s;
+  }
+
+  .syarat-modern.open .sm-num { color: var(--blue); }
+
+  .sm-icon {
+    width: 44px; height: 44px;
+    background: var(--pale);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+
+  .syarat-modern.open .sm-icon { background: linear-gradient(135deg, var(--navy), var(--blue-mid)); }
+
+  .sm-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .sm-tag   { font-size: 0.62rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 0.1rem; }
+
+  .sm-status {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--success);
+    background: #e6f9f2;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .sm-arrow {
+    font-size: 1.4rem;
+    color: var(--muted);
+    transition: transform 0.3s;
+    line-height: 1;
+  }
+
+  .syarat-modern.open .sm-arrow { transform: rotate(90deg); color: var(--blue); }
+
+  .sm-body {
+    display: none;
+    padding: 0 1.5rem 1.4rem;
+    border-top: 1px solid var(--pale);
+  }
+
+  .syarat-modern.open .sm-body { display: block; }
+
+  .sm-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  @media(max-width:680px){ .sm-grid{grid-template-columns:1fr} }
+
+  .sm-point {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.84rem;
+    color: var(--text2);
+    line-height: 1.5;
+    align-items: flex-start;
+  }
+
+  .sm-ck { color: var(--success); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+  .sm-note {
+    padding: 0.7rem 1rem;
+    background: var(--pale);
+    border-left: 3px solid var(--blue-mid);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.78rem;
+    color: var(--blue);
+    line-height: 1.5;
+  }
+
+  /* ── MODERN PAYMENT ── */
+  .pay-mod {
+    background: var(--white);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pay-mod:hover { border-color: var(--blue-mid); transform: translateY(-3px); box-shadow: 0 8px 24px var(--shadow-md); }
+  .pay-mod.aktif { border-color: var(--blue); background: var(--pale); box-shadow: 0 6px 20px var(--shadow-md); }
+
+  .pm-check {
+    position: absolute;
+    top: 0.75rem; right: 0.75rem;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem;
+    color: transparent;
+    transition: all 0.2s;
+  }
+
+  .pay-mod.aktif .pm-check { background: var(--blue); border-color: var(--blue); color: white; }
+
+  .pm-icon { font-size: 2rem; margin-bottom: 0.8rem; display: block; }
+  .pm-name { font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 0.35rem; }
+  .pm-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.4; }
+
+  .pm-badge {
+    display: inline-block;
+    margin-top: 0.6rem;
+    padding: 0.2rem 0.6rem;
+    background: linear-gradient(90deg, var(--navy), var(--blue-mid));
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 20px;
+  }
+
+  /* Summary rows */
+  .sum-baris {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    font-size: 0.84rem;
+    border-bottom: 1px solid var(--pale);
+  }
+
+  .sum-baris:last-child { border-bottom: none; }
+  .sum-l { color: var(--muted); }
+  .sum-v { font-weight: 700; color: var(--text); font-size: 0.84rem; text-align: right; max-width: 55%; }
+
+  @media(max-width:680px){
+    .pay-mod { padding: 1rem; }
+    .pm-icon { font-size: 1.5rem; }
+  }
+
+  @media(max-width:900px){
+    #bayaran .fade[style*="grid-template-columns:repeat(4"] { grid-template-columns: repeat(2,1fr) !important; }
+    #bayaran .fade[style*="grid-template-columns:1fr 1.5fr"] { grid-template-columns: 1fr !important; }
+    #syarat .fade[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  }
+
+
 
   /* FASA */
   #fasa { background:var(--pale2); }
@@ -491,69 +655,134 @@
       </div>
       <div class="h-info">
         <div class="h-info-lbl">📞 Hubungi Kami</div>
-        <p>013-8047141 &nbsp;|&nbsp; 09-5729971<br>info@centraltech.com.my</p>
+        <p>013-8047141 &nbsp;|&nbsp; 09-5729971<br><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f69f989099b69593988284979a8293959ed895999bd89b8f">[email&#160;protected]</a></p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- SYARAT -->
-<section id="syarat" class="sek">
+<section id="syarat" class="sek" style="background:var(--white)">
   <div class="sek-wrap">
-    <div class="sek-head fade">
-      <div class="label">Kelayakan</div>
-      <h2 class="sek-title">Syarat-Syarat <span>Pendaftaran</span></h2>
-      <p class="sek-sub">Semak kelayakan anda sebelum membuat permohonan. Semua syarat mesti dipenuhi sepenuhnya.</p>
-    </div>
-    <div class="intro-box fade">
-      <div class="intro-ico">📋</div>
+    <div class="fade" style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;margin-bottom:3.5rem">
       <div>
-        <h3>Tentang Program Ini</h3>
-        <p>Program Pelaut Malaysia adalah program latihan maritim yang terbuka kepada individu yang berminat menceburi dalam bidang perkapalan. Program ini merangkumi latihan teknikal, sijil profesional dan penempatan praktikal di atas kapal atau feri selama 6 bulan bagi pakej lengkap.</p>
+        <div class="label">Kelayakan</div>
+        <h2 class="sek-title">Syarat-Syarat <span>Pendaftaran</span></h2>
+        <p class="sek-sub">Semak kelayakan anda sebelum membuat permohonan. Semua syarat mesti dipenuhi sepenuhnya.</p>
+      </div>
+      <div style="background:linear-gradient(135deg,var(--navy),var(--blue-mid));border-radius:16px;padding:2rem;color:white">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:0.5rem">Tentang Program</div>
+        <p style="font-size:0.88rem;line-height:1.7;color:rgba(255,255,255,0.82)">Program Pelaut Malaysia adalah program latihan maritim yang terbuka kepada individu yang berminat menceburi bidang perkapalan — merangkumi latihan teknikal, sijil profesional dan penempatan praktikal di atas kapal selama 6 bulan.</p>
+        <div style="margin-top:1.2rem;display:flex;gap:1.5rem">
+          <div style="text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:white;letter-spacing:2px">4</div><div style="font-size:0.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.55)">Syarat Utama</div></div>
+          <div style="width:1px;background:rgba(255,255,255,0.15)"></div>
+          <div style="text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:white;letter-spacing:2px">100%</div><div style="font-size:0.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.55)">Mesti Dipenuhi</div></div>
+          <div style="width:1px;background:rgba(255,255,255,0.15)"></div>
+          <div style="text-align:center"><div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:white;letter-spacing:2px">SPM</div><div style="font-size:0.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.55)">Tidak Diperlukan</div></div>
+        </div>
       </div>
     </div>
-    <div class="syarat-grid fade">
-      <div class="s-card">
-        <div class="s-top"><div class="s-ico">🎂</div><div><h3>Umur 18 – 35 Tahun</h3><div class="tag">Had Umur</div></div></div>
-        <div class="s-body">
-          <div class="s-item"><div class="dot"></div>Calon mestilah berumur sekurang-kurangnya <strong>18 tahun</strong> pada tarikh pendaftaran.</div>
-          <div class="s-item"><div class="dot"></div>Had umur maksimum adalah <strong>35 tahun</strong> semasa memohon program.</div>
-          <div class="s-item"><div class="dot"></div>Umur dikira berdasarkan tarikh lahir dalam MyKad atau Pasport.</div>
-          <div class="s-item"><div class="dot"></div>Calon yang hampir mencapai 35 tahun digalakkan mendaftar segera.</div>
-          <div class="s-note">💡 Dokumen diperlukan: Salinan MyKad atau Pasport yang masih sah.</div>
+
+    <!-- Modern accordion-style cards -->
+    <div class="fade" style="display:flex;flex-direction:column;gap:1rem">
+
+      <div class="syarat-modern" onclick="togolSyarat(this)">
+        <div class="sm-header">
+          <div class="sm-left">
+            <div class="sm-num">01</div>
+            <div class="sm-icon">🎂</div>
+            <div>
+              <div class="sm-title">Umur 18 – 35 Tahun</div>
+              <div class="sm-tag">Had Umur</div>
+            </div>
+          </div>
+          <div class="sm-status">✓ Wajib</div>
+          <div class="sm-arrow">›</div>
+        </div>
+        <div class="sm-body">
+          <div class="sm-grid">
+            <div class="sm-point"><span class="sm-ck">✓</span>Calon mestilah berumur sekurang-kurangnya <strong>18 tahun</strong> pada tarikh pendaftaran.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Had umur maksimum adalah <strong>35 tahun</strong> semasa memohon program.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Umur dikira berdasarkan tarikh lahir dalam MyKad atau Pasport.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Calon yang hampir mencapai 35 tahun digalakkan mendaftar segera.</div>
+          </div>
+          <div class="sm-note">💡 Dokumen diperlukan: Salinan MyKad atau Pasport yang masih sah.</div>
         </div>
       </div>
-      <div class="s-card">
-        <div class="s-top"><div class="s-ico">👁️</div><div><h3>Tidak Rabun Warna</h3><div class="tag">Ujian Penglihatan</div></div></div>
-        <div class="s-body">
-          <div class="s-item"><div class="dot"></div>Calon mesti lulus ujian <strong>Ishihara Colour Vision Test</strong> — ujian standard maritim.</div>
-          <div class="s-item"><div class="dot"></div>Keperluan wajib mengikut standard <strong>STCW</strong> antarabangsa.</div>
-          <div class="s-item"><div class="dot"></div>Rabun warna boleh menjejaskan keselamatan dalam mengenali lampu isyarat maritim.</div>
-          <div class="s-item"><div class="dot"></div>Ujian dijalankan oleh doktor bertauliah semasa Medical Check Up Fasa 1.</div>
-          <div class="s-note">💡 Ujian penglihatan dilakukan secara automatik semasa pemeriksaan perubatan Fasa 1.</div>
+
+      <div class="syarat-modern" onclick="togolSyarat(this)">
+        <div class="sm-header">
+          <div class="sm-left">
+            <div class="sm-num">02</div>
+            <div class="sm-icon">👁️</div>
+            <div>
+              <div class="sm-title">Tidak Rabun Warna</div>
+              <div class="sm-tag">Ujian Penglihatan</div>
+            </div>
+          </div>
+          <div class="sm-status">✓ Wajib</div>
+          <div class="sm-arrow">›</div>
+        </div>
+        <div class="sm-body">
+          <div class="sm-grid">
+            <div class="sm-point"><span class="sm-ck">✓</span>Calon mesti lulus ujian <strong>Ishihara Colour Vision Test</strong> — ujian standard maritim.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Keperluan wajib mengikut standard <strong>STCW</strong> antarabangsa.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Rabun warna boleh menjejaskan keselamatan dalam mengenali lampu isyarat maritim.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Ujian dijalankan oleh doktor bertauliah semasa Medical Check Up Fasa 1.</div>
+          </div>
+          <div class="sm-note">💡 Ujian penglihatan dilakukan secara automatik semasa pemeriksaan perubatan Fasa 1.</div>
         </div>
       </div>
-      <div class="s-card">
-        <div class="s-top"><div class="s-ico">📖</div><div><h3>Boleh Membaca, Menulis & Mengira</h3><div class="tag">Kemahiran Asas</div></div></div>
-        <div class="s-body">
-          <div class="s-item"><div class="dot"></div>Berkebolehan membaca dan memahami teks dalam <strong>Bahasa Malaysia</strong> dan/atau Bahasa Inggeris.</div>
-          <div class="s-item"><div class="dot"></div>Boleh menulis dengan jelas untuk tujuan laporan dan rekod pelayaran.</div>
-          <div class="s-item"><div class="dot"></div>Berkebolehan mengira asas untuk keperluan navigasi dan rekod kerja harian.</div>
-          <div class="s-item"><div class="dot"></div>Kemahiran Bahasa Inggeris adalah kelebihan untuk dokumentasi maritim antarabangsa.</div>
-          <div class="s-note">💡 Tiada keperluan kelulusan akademik minimum — kemahiran asas sudah mencukupi.</div>
+
+      <div class="syarat-modern" onclick="togolSyarat(this)">
+        <div class="sm-header">
+          <div class="sm-left">
+            <div class="sm-num">03</div>
+            <div class="sm-icon">📖</div>
+            <div>
+              <div class="sm-title">Boleh Membaca, Menulis & Mengira</div>
+              <div class="sm-tag">Kemahiran Asas</div>
+            </div>
+          </div>
+          <div class="sm-status">✓ Wajib</div>
+          <div class="sm-arrow">›</div>
+        </div>
+        <div class="sm-body">
+          <div class="sm-grid">
+            <div class="sm-point"><span class="sm-ck">✓</span>Berkebolehan membaca dan memahami teks dalam <strong>Bahasa Malaysia</strong> dan/atau Bahasa Inggeris.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Boleh menulis dengan jelas untuk tujuan laporan dan rekod pelayaran.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Berkebolehan mengira asas untuk keperluan navigasi dan rekod kerja harian.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Kemahiran Bahasa Inggeris adalah kelebihan untuk dokumentasi maritim antarabangsa.</div>
+          </div>
+          <div class="sm-note">💡 Tiada keperluan kelulusan akademik minimum — kemahiran asas sudah mencukupi.</div>
         </div>
       </div>
-      <div class="s-card">
-        <div class="s-top"><div class="s-ico">💪</div><div><h3>Sihat Tubuh Badan</h3><div class="tag">Kesihatan Fizikal & Mental</div></div></div>
-        <div class="s-body">
-          <div class="s-item"><div class="dot"></div>Bebas daripada penyakit kronik yang boleh menjejaskan prestasi kerja di atas kapal.</div>
-          <div class="s-item"><div class="dot"></div>Tidak mengalami masalah kesihatan mental yang serius.</div>
-          <div class="s-item"><div class="dot"></div>Berupaya melakukan kerja fizikal dalam pelbagai keadaan cuaca.</div>
-          <div class="s-item"><div class="dot"></div>Bebas daripada pergantungan dadah dan alkohol.</div>
-          <div class="s-item"><div class="dot"></div>Sijil <strong>Medical Fitness Certificate</strong> dikeluarkan oleh doktor bertauliah KKM.</div>
-          <div class="s-note">💡 Pemeriksaan kesihatan penuh dijalankan dalam Fasa 1 sebelum kursus bermula.</div>
+
+      <div class="syarat-modern" onclick="togolSyarat(this)">
+        <div class="sm-header">
+          <div class="sm-left">
+            <div class="sm-num">04</div>
+            <div class="sm-icon">💪</div>
+            <div>
+              <div class="sm-title">Sihat Tubuh Badan</div>
+              <div class="sm-tag">Kesihatan Fizikal & Mental</div>
+            </div>
+          </div>
+          <div class="sm-status">✓ Wajib</div>
+          <div class="sm-arrow">›</div>
+        </div>
+        <div class="sm-body">
+          <div class="sm-grid">
+            <div class="sm-point"><span class="sm-ck">✓</span>Bebas daripada penyakit kronik yang boleh menjejaskan prestasi kerja di atas kapal.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Tidak mengalami masalah kesihatan mental yang serius.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Berupaya melakukan kerja fizikal dalam pelbagai keadaan cuaca.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Bebas daripada pergantungan dadah dan alkohol. Ujian saringan dadah akan dijalankan.</div>
+            <div class="sm-point"><span class="sm-ck">✓</span>Sijil <strong>Medical Fitness Certificate</strong> dikeluarkan oleh doktor bertauliah KKM.</div>
+          </div>
+          <div class="sm-note">💡 Pemeriksaan kesihatan penuh dijalankan dalam Fasa 1 sebelum kursus bermula.</div>
         </div>
       </div>
+
     </div>
   </div>
 </section>
@@ -720,47 +949,89 @@
 <div class="pemisah"></div>
 
 <!-- BAYARAN -->
-<section id="bayaran" class="sek">
+<section id="bayaran" class="sek" style="background:var(--pale2)">
   <div class="sek-wrap">
     <div class="sek-head fade">
       <div class="label">Bayaran</div>
       <h2 class="sek-title">Pilihan <span>Pembayaran</span></h2>
-      <p class="sek-sub">Pilih kaedah pembayaran yang sesuai. Rekod disimpan selamat dalam Firebase.</p>
+      <p class="sek-sub">Pilih kaedah pembayaran yang sesuai. Semua rekod disimpan selamat dalam Firebase.</p>
     </div>
 
-    <div class="kaedah-grid fade">
-      <div class="kaedah-kad aktif" onclick="pilihKaedah(this,'FPX / Online Banking')">
-        <div class="k-ico">🏦</div><div><h4>FPX / Online Banking</h4><p>Maybank2u, CIMB Clicks, RHB dan lain-lain.</p></div>
-        <div class="k-dot">✓</div>
+    <!-- Payment method cards - modern style -->
+    <div class="fade" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:3rem">
+
+      <div class="pay-mod aktif" onclick="pilihKaedah(this,'FPX / Online Banking')">
+        <div class="pm-check" id="check-0">✓</div>
+        <div class="pm-icon">🏦</div>
+        <div class="pm-name">FPX / Online Banking</div>
+        <div class="pm-desc">Maybank2u, CIMB Clicks, RHB, Hong Leong</div>
+        <div class="pm-badge">Disyorkan</div>
       </div>
-      <div class="kaedah-kad" onclick="pilihKaedah(this,'Kad Kredit / Debit')">
-        <div class="k-ico">💳</div><div><h4>Kad Kredit / Debit</h4><p>Visa, Mastercard & Amex diterima.</p></div>
-        <div class="k-dot">✓</div>
+
+      <div class="pay-mod" onclick="pilihKaedah(this,'Kad Kredit / Debit')">
+        <div class="pm-check" id="check-1"></div>
+        <div class="pm-icon">💳</div>
+        <div class="pm-name">Kad Kredit / Debit</div>
+        <div class="pm-desc">Visa, Mastercard & Amex diterima</div>
       </div>
-      <div class="kaedah-kad" onclick="pilihKaedah(this,'DuitNow / QR')">
-        <div class="k-ico">📱</div><div><h4>DuitNow / QR</h4><p>Imbas QR melalui aplikasi bank anda.</p></div>
-        <div class="k-dot">✓</div>
+
+      <div class="pay-mod" onclick="pilihKaedah(this,'DuitNow / QR')">
+        <div class="pm-check" id="check-2"></div>
+        <div class="pm-icon">📱</div>
+        <div class="pm-name">DuitNow / QR</div>
+        <div class="pm-desc">Imbas QR melalui aplikasi bank anda</div>
       </div>
-      <div class="kaedah-kad" onclick="pilihKaedah(this,'PTPK / MARA / Biasiswa')">
-        <div class="k-ico">🎓</div><div><h4>PTPK / MARA / Biasiswa</h4><p>Diiktiraf untuk pinjaman & biasiswa kerajaan.</p></div>
-        <div class="k-dot">✓</div>
+
+      <div class="pay-mod" onclick="pilihKaedah(this,'PTPK / MARA / Biasiswa')">
+        <div class="pm-check" id="check-3"></div>
+        <div class="pm-icon">🎓</div>
+        <div class="pm-name">PTPK / MARA / Biasiswa</div>
+        <div class="pm-desc">Diiktiraf untuk pinjaman & biasiswa</div>
       </div>
+
     </div>
 
-    <div class="bayar-bawah fade">
-      <div class="ringkasan">
-        <div class="ringkasan-kepala"><h3>Ringkasan Bayaran</h3></div>
-        <div class="ringkasan-badan">
-          <div class="baris"><span class="l">Pakej Dipilih</span><span class="v" id="pp-pakej">—</span></div>
-          <div class="baris"><span class="l">Kaedah Bayaran</span><span class="v" id="pp-kaedah">FPX / Online Banking</span></div>
-          <div class="baris"><span class="l">Harga Penuh</span><span class="v" id="pp-penuh">—</span></div>
-          <div class="baris"><span class="l">Deposit (30%)</span><span class="v" id="pp-deposit">—</span></div>
-          <div class="baris jumlah"><span class="l">Bayar Hari Ini</span><span class="v" id="pp-total">—</span></div>
+    <!-- Summary + Form -->
+    <div class="fade" style="display:grid;grid-template-columns:1fr 1.5fr;gap:2rem;align-items:start">
+
+      <!-- Summary card -->
+      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 3px 16px var(--shadow)">
+        <div style="background:linear-gradient(135deg,var(--navy),var(--blue-mid));padding:1.4rem 1.6rem">
+          <div style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:0.3rem">Ringkasan</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:2px;color:white">Bayaran Anda</div>
+        </div>
+        <div style="padding:1.5rem">
+          <div class="sum-baris">
+            <span class="sum-l">📦 Pakej Dipilih</span>
+            <span class="sum-v" id="pp-pakej">—</span>
+          </div>
+          <div class="sum-baris">
+            <span class="sum-l">💳 Kaedah Bayaran</span>
+            <span class="sum-v" id="pp-kaedah">FPX / Online Banking</span>
+          </div>
+          <div class="sum-baris">
+            <span class="sum-l">🏷️ Harga Penuh</span>
+            <span class="sum-v" id="pp-penuh">—</span>
+          </div>
+          <div class="sum-baris">
+            <span class="sum-l">📊 Deposit (30%)</span>
+            <span class="sum-v" id="pp-deposit">—</span>
+          </div>
+          <div style="margin-top:1rem;padding:1rem;background:var(--pale);border-radius:8px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.82rem;color:var(--text2);font-weight:600">Bayar Hari Ini</span>
+            <span id="pp-total" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--navy);letter-spacing:1px">—</span>
+          </div>
+          <div style="margin-top:1rem;padding:0.8rem;background:#e6f9f2;border-radius:8px;font-size:0.75rem;color:var(--success);font-weight:600;text-align:center">
+            🔒 Bayaran selamat dan disulitkan
+          </div>
         </div>
       </div>
-      <div class="bayar-kotak">
+
+      <!-- Payment form -->
+      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:2rem;box-shadow:0 3px 16px var(--shadow);position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--blue-lt))"></div>
         <div class="form-tajuk" style="font-size:1.4rem;margin-bottom:0.2rem">Maklumat Bayaran</div>
-        <div class="form-sub" style="margin-bottom:1.4rem">Rekod bayaran disimpan selamat dalam Firebase 🔒</div>
+        <div class="form-sub" style="margin-bottom:1.4rem">Isi maklumat di bawah untuk meneruskan pembayaran 🔒</div>
         <div class="berjaya" id="pay-success">✅ Rekod bayaran berjaya disimpan! Pihak CTR akan mengesahkan pembayaran anda.</div>
         <div class="medan"><label>Nama Penuh</label><input type="text" id="pay-nama" placeholder="Nama seperti dalam kad / bank"></div>
         <div class="medan"><label>No. Telefon</label><input type="tel" id="pay-tel" placeholder="01X-XXXXXXXX"></div>
@@ -771,9 +1042,16 @@
             <div class="medan"><label>CVV</label><input type="text" placeholder="XXX" maxlength="3"></div>
           </div>
         </div>
+        <!-- Trust badges -->
+        <div style="display:flex;gap:0.6rem;margin-bottom:1.2rem;flex-wrap:wrap">
+          <div style="padding:0.3rem 0.7rem;background:var(--pale);border:1px solid var(--border);border-radius:4px;font-size:0.68rem;color:var(--blue);font-weight:600">🔐 SSL Selamat</div>
+          <div style="padding:0.3rem 0.7rem;background:var(--pale);border:1px solid var(--border);border-radius:4px;font-size:0.68rem;color:var(--blue);font-weight:600">🏦 FPX Malaysia</div>
+          <div style="padding:0.3rem 0.7rem;background:var(--pale);border:1px solid var(--border);border-radius:4px;font-size:0.68rem;color:var(--blue);font-weight:600">✅ Firebase Protected</div>
+        </div>
         <div class="ralat" id="pay-error"></div>
         <button class="btn-hantar" id="pay-btn" onclick="submitBayaran()">Bayar Sekarang →</button>
       </div>
+
     </div>
   </div>
 </section>
@@ -787,7 +1065,7 @@
         <p class="f-desc">Central Tech Resources — Pusat latihan maritim bertauliah yang komited melahirkan pelaut profesional Malaysia bertaraf antarabangsa.</p>
         <div class="f-kontak">
           <div>📞 013-8047141 / 09-5729971</div>
-          <div>✉️ info@centraltech.com.my</div>
+          <div>✉️ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cca5a2aaa38cafa9a2b8beada0b8a9afa4e2afa3a1e2a1b5">[email&#160;protected]</a></div>
           <div>🌐 www.centraltech.com.my</div>
           <div>📍 A31, IM 5/2, Jalan Abu Bakar, Indera Mahkota, 25200 Kuantan, Pahang</div>
         </div>
@@ -895,7 +1173,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   function openM(t){ document.getElementById('m-'+t).classList.add('open'); document.body.style.overflow='hidden'; }
   function closeM(t){ document.getElementById('m-'+t).classList.remove('open'); document.body.style.overflow=''; }
   function switchM(a,b){ closeM(a); setTimeout(()=>openM(b),200); }
@@ -918,11 +1196,17 @@
     setTimeout(()=>document.getElementById('bayaran').scrollIntoView({behavior:'smooth'}),700);
   }
 
-  function pilihKaedah(el,kaedah){
-    document.querySelectorAll('.kaedah-kad').forEach(m=>m.classList.remove('aktif'));
+  function togolSyarat(el) {
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.syarat-modern').forEach(s => s.classList.remove('open'));
+    if (!isOpen) el.classList.add('open');
+  }
+
+  function pilihKaedah(el, kaedah) {
+    document.querySelectorAll('.pay-mod').forEach(m => m.classList.remove('aktif'));
     el.classList.add('aktif');
-    document.getElementById('pp-kaedah').textContent=kaedah;
-    document.getElementById('kad-medan').style.display=kaedah==='Kad Kredit / Debit'?'block':'none';
+    document.getElementById('pp-kaedah').textContent = kaedah;
+    document.getElementById('kad-medan').style.display = kaedah === 'Kad Kredit / Debit' ? 'block' : 'none';
   }
 
   function semakKataLaluan(val) {
@@ -979,10 +1263,4 @@
     }
   }
 
-  function fmtKad(el){ let v=el.value.replace(/\D/g,'').slice(0,16); el.value=v.replace(/(.{4})/g,'$1 ').trim(); }
-
-  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting){e.target.classList.add('masuk');obs.unobserve(e.target);} }),{threshold:0.08});
-  document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
-</script>
-</body>
-</html>
+  function fmtKad
