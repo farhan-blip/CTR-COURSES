@@ -8,7 +8,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, collection, addDoc, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -93,6 +93,40 @@
   window.doLogout = async function() {
     await signOut(auth);
     showToast('✓ Berjaya log keluar.');
+  };
+
+  window.lupaKataLaluan = async function() {
+    const email = document.getElementById('l-email').value.trim();
+    const errEl = document.getElementById('l-error');
+    const okEl  = document.getElementById('l-success');
+    errEl.textContent = '';
+    okEl.style.display = 'none';
+
+    if (!email) {
+      errEl.textContent = '⚠ Sila masukkan e-mel anda dahulu.';
+      document.getElementById('l-email').focus();
+      return;
+    }
+
+    const btn = document.getElementById('lupa-btn');
+    btn.textContent = 'Menghantar...';
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.6';
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      okEl.style.display = 'block';
+      okEl.textContent = '✅ E-mel tetapan semula kata laluan telah dihantar ke ' + email + '. Sila semak inbox atau folder spam anda.';
+      errEl.textContent = '';
+    } catch (e) {
+      if (e.code === 'auth/user-not-found')  errEl.textContent = '⚠ E-mel ini tidak didaftarkan dalam sistem.';
+      else if (e.code === 'auth/invalid-email') errEl.textContent = '⚠ Format e-mel tidak sah.';
+      else errEl.textContent = '⚠ Ralat: ' + e.message;
+    } finally {
+      btn.textContent = 'Hantar E-mel Reset';
+      btn.style.pointerEvents = 'auto';
+      btn.style.opacity = '1';
+    }
   };
 
   window.submitPendaftaran = async function() {
@@ -647,7 +681,7 @@
     <div class="hero-cards">
       <div class="h-stat-row">
         <div class="h-stat"><div class="val">18–35</div><div class="lbl">Lingkungan Umur</div></div>
-        <div class="h-stat"><div class="val">6 BULAN</div><div class="lbl">Praktikal Di Kapal</div></div>
+        <div class="h-stat"><div class="val">6 BLN</div><div class="lbl">Praktikal Di Kapal</div></div>
       </div>
       <div class="h-info">
         <div class="h-info-lbl">📍 Lokasi Pusat Latihan</div>
@@ -655,7 +689,7 @@
       </div>
       <div class="h-info">
         <div class="h-info-lbl">📞 Hubungi Kami</div>
-        <p>013-603 9641 <br><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f69f989099b69593988284979a8293959ed895999bd89b8f">[email&#160;protected]</a></p>
+        <p>013-8047141 &nbsp;|&nbsp; 09-5729971<br><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f69f989099b69593988284979a8293959ed895999bd89b8f">[email&#160;protected]</a></p>
       </div>
     </div>
   </div>
@@ -1064,7 +1098,7 @@
         <div class="f-logo">CTR</div>
         <p class="f-desc">Central Tech Resources — Pusat latihan maritim bertauliah yang komited melahirkan pelaut profesional Malaysia bertaraf antarabangsa.</p>
         <div class="f-kontak">
-          <div>📞 013-6039641 </div>
+          <div>📞 013-8047141 / 09-5729971</div>
           <div>✉️ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cca5a2aaa38cafa9a2b8beada0b8a9afa4e2afa3a1e2a1b5">[email&#160;protected]</a></div>
           <div>🌐 www.centraltech.com.my</div>
           <div>📍 A31, IM 5/2, Jalan Abu Bakar, Indera Mahkota, 25200 Kuantan, Pahang</div>
@@ -1107,7 +1141,10 @@
     <h2>Log Masuk</h2>
     <div class="medan"><label>E-mel</label><input type="email" id="l-email" placeholder="nama@email.com"></div>
     <div class="medan"><label>Kata Laluan</label><input type="password" id="l-pass" placeholder="••••••••"></div>
-    <div style="text-align:right;margin-bottom:1.2rem"><a href="#" style="font-size:0.78rem;color:var(--blue-mid);font-weight:600">Lupa kata laluan?</a></div>
+    <div style="text-align:right;margin-bottom:1rem">
+      <a id="lupa-btn" onclick="lupaKataLaluan()" style="font-size:0.78rem;color:var(--blue-mid);font-weight:600;cursor:pointer;text-decoration:none">Lupa kata laluan?</a>
+    </div>
+    <div id="l-success" style="display:none;padding:0.9rem 1rem;background:#e6f9f2;border:1.5px solid #a0dfc4;border-radius:8px;margin-bottom:1rem;font-size:0.82rem;color:var(--success);font-weight:600;line-height:1.5"></div>
     <div class="ralat" id="l-error"></div>
     <button class="btn-hantar" id="l-btn" onclick="doLogin()">Log Masuk →</button>
     <div class="modal-kaki">Belum ada akaun? <a onclick="switchM('login','register')">Daftar sekarang</a></div>
