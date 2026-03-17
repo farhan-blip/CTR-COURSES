@@ -10,7 +10,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query, serverTimestamp }
+  import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -26,30 +26,21 @@
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  const ADMIN = 'alltsup6565@gmail.com';
-
-  // ── AUTH STATE ──
+  // ── PACKAGES ──
   onAuthStateChanged(auth, (user) => {
-    const navAuth   = document.getElementById('nav-auth');
-    const navUser   = document.getElementById('nav-user');
+    const navAuth = document.getElementById('nav-auth');
+    const navUser = document.getElementById('nav-user');
     const userEmail = document.getElementById('user-email');
-    const adminWrap = document.getElementById('admin-tambah-wrap');
-    const adminBtn  = document.getElementById('admin-nav-btn');
 
     if (user) {
       navAuth.style.display = 'none';
       navUser.style.display = 'flex';
       userEmail.textContent = user.email;
-      if (user.email === ADMIN) {
-        if (adminWrap) adminWrap.style.display = 'block';
-        if (adminBtn)  adminBtn.style.display  = 'inline-block';
-      }
     } else {
       navAuth.style.display = 'flex';
       navUser.style.display = 'none';
-      if (adminWrap) adminWrap.style.display = 'none';
-      if (adminBtn)  adminBtn.style.display  = 'none';
     }
+    // Reload packages so button state updates
     muatPakej();
   });
 
@@ -207,19 +198,18 @@
     container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)"><span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span> Memuatkan pakej...</div>';
     try {
       const snap = await getDocs(query(collection(db, 'pakej'), orderBy('harga', 'asc')));
-      const isAdmin = auth.currentUser && auth.currentUser.email === ADMIN;
       if (snap.empty) {
-        await muatPakejDefault(isAdmin, container);
+        await muatPakejDefault(container);
         return;
       }
       container.innerHTML = '';
-      snap.forEach(d => { container.innerHTML += buatKadPakej(d.id, d.data(), isAdmin); });
+      snap.forEach(d => { container.innerHTML += buatKadPakej(d.id, d.data()); });
     } catch (e) {
       container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--error)">⚠ Ralat memuatkan pakej.</div>';
     }
   };
 
-  async function muatPakejDefault(isAdmin, container) {
+  async function muatPakejDefault(container) {
     const defaults = [
       { nama:'Pakej Lengkap', harga:3500, popular:'tidak', nota:'🎓 Semua 5 sijil STCW + pengalaman praktikal penuh',
         kursusYa:['Basic Training (BT)|Latihan asas keselamatan dan survival di laut','Designated Security Duties (DSD)|Latihan tugas keselamatan kapal ISPS Code','BTOCT (Tanker)|Latihan asas kapal tangki minyak / kimia','Ship Security Awareness (SSA)|Sijil kesedaran keselamatan kapal','Crowd Management|Pengurusan penumpang dalam situasi kecemasan','Penempatan Praktikal 6 Bulan|Di atas kapal @ feri — pengalaman sebenar industri'],
@@ -231,116 +221,21 @@
     container.innerHTML = '';
     for (const p of defaults) {
       const ref = await addDoc(collection(db, 'pakej'), { ...p, createdAt: serverTimestamp() });
-      container.innerHTML += buatKadPakej(ref.id, p, isAdmin);
+      container.innerHTML += buatKadPakej(ref.id, p);
     }
   }
 
-  window.buatKadPakej = function(id, d, isAdmin) {
-    const pop    = d.popular === 'ya';
-    const badge  = pop ? '<div class="p-badge">⭐ Popular</div>' : '';
-    const headBg = pop ? 'background:linear-gradient(135deg,var(--blue),var(--blue-lt))' : 'background:linear-gradient(135deg,var(--navy),var(--blue-mid))';
-    const ya     = (d.kursusYa||[]).map(k=>{ const[n,s]=k.split('|'); return `<div class="p-item"><span class="yes">✓</span><div><div>${n}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`; }).join('');
-    const tidak  = (d.kursustidak||[]).map(k=>{ const[n,s]=k.split('|'); return `<div class="p-item dim"><span class="no">✗</span><div><div>${n}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`; }).join('');
-    const adminBtn = isAdmin ? `<div style="padding:0 1.4rem 1rem"><button onclick="hapusPakej('${id}')" style="width:100%;padding:0.6rem;background:#fff0f0;border:1.5px solid #fcc;border-radius:7px;color:#c0392b;font-family:'DM Sans',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer">🗑️ Buang Pakej Ini</button></div>` : '';
-    return `<div class="p-card${pop?' popular':''}" id="pakej-${id}"><div class="p-head" style="${headBg};position:relative;padding:1.6rem">${badge}<div class="p-tag">${d.nama}</div><h3>${d.nama}</h3><div class="p-price">Mulai dari <strong>RM ${parseInt(d.harga).toLocaleString()}</strong></div></div><div class="p-body">${ya}${tidak}${d.nota?`<div class="p-note">${d.nota}</div>`:''}</div><div class="p-foot"><button class="btn-hantar" onclick="pilihPakej('${d.nama}',${d.harga})">Pilih Pakej Ini →</button></div>${adminBtn}</div>`;
-  };
-
-  window.simpanPakej = async function() {
-    const nama  = document.getElementById('pk-nama').value.trim();
-    const harga = document.getElementById('pk-harga').value.trim();
-    const pop   = document.getElementById('pk-popular').value;
-    const nota  = document.getElementById('pk-nota').value.trim();
-    const ya    = document.getElementById('pk-kursus-ya').value.trim();
-    const tidak = document.getElementById('pk-kursus-tidak').value.trim();
-    const errEl = document.getElementById('pk-error');
-    errEl.textContent = '';
-    if (!nama)  { errEl.textContent = '⚠ Sila masukkan nama pakej.'; return; }
-    if (!harga) { errEl.textContent = '⚠ Sila masukkan harga pakej.'; return; }
-    if (!ya)    { errEl.textContent = '⚠ Sila masukkan sekurang-kurangnya satu kursus.'; return; }
-    const btn = document.getElementById('pk-btn');
-    btn.innerHTML = '<span class="spinner"></span>Menyimpan...'; btn.disabled = true;
-    try {
-      await addDoc(collection(db, 'pakej'), { nama, harga: parseInt(harga), popular: pop, nota, kursusYa: ya.split('\n').map(s=>s.trim()).filter(Boolean), kursustidak: tidak ? tidak.split('\n').map(s=>s.trim()).filter(Boolean) : [], createdAt: serverTimestamp() });
-      closeM('tambah-pakej');
-      showToast('✅ Pakej "' + nama + '" berjaya ditambah!');
-      ['pk-nama','pk-harga','pk-nota','pk-kursus-ya','pk-kursus-tidak'].forEach(i => document.getElementById(i).value = '');
-      await muatPakej();
-    } catch (e) {
-      errEl.textContent = '⚠ Ralat: ' + e.message;
-    } finally { btn.innerHTML = '💾 Simpan Pakej →'; btn.disabled = false; }
-  };
-
-  window.hapusPakej = async function(id) {
-    if (!confirm('Pasti mahu membuang pakej ini?')) return;
-    try {
-      await deleteDoc(doc(db, 'pakej', id));
-      const card = document.getElementById('pakej-' + id);
-      if (card) { card.style.transition='all 0.3s'; card.style.opacity='0'; card.style.transform='scale(0.95)'; setTimeout(()=>card.remove(),300); }
-      showToast('✅ Pakej berjaya dibuang!');
-    } catch (e) { showToast('⚠ Ralat: ' + e.message); }
-  };
-
-  // ── ADMIN DASHBOARD ──
-  window.bukaAdmin = function() {
-    document.getElementById('admin-panel').style.display = 'block';
-    document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
-    muatAdmin(0); muatStats();
-  };
-
-  window.tutupAdmin = function() {
-    document.getElementById('admin-panel').style.display = 'none';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  window.tukarAdmin = function(i) {
-    window._adminTab = i;
-    document.querySelectorAll('.admin-tab').forEach((t, idx) => {
-      t.style.background = idx === i ? 'linear-gradient(135deg,var(--navy),var(--blue-mid))' : 'transparent';
-      t.style.color      = idx === i ? 'white' : 'var(--text2)';
-    });
-    muatAdmin(i);
-  };
-
-  window.muatSemula = function() { muatAdmin(window._adminTab || 0); muatStats(); };
-
-  window.muatStats = async function() {
-    try {
-      const [p, b, u] = await Promise.all([getDocs(collection(db,'pendaftaran')), getDocs(collection(db,'bayaran')), getDocs(collection(db,'pengguna'))]);
-      document.getElementById('stat-pendaftaran').textContent = p.size;
-      document.getElementById('stat-bayaran').textContent     = b.size;
-      document.getElementById('stat-pengguna').textContent    = u.size;
-    } catch(e) {}
-  };
-
-  window.muatAdmin = async function(tab) {
-    const cols    = ['pendaftaran','bayaran','pengguna'];
-    const headers = [['Nama','No. KP','Telefon','E-mel','Pakej','Tarikh','Status'],['Nama','Telefon','Program','Kaedah','Jumlah','Status'],['Nama','E-mel','Telefon','No. Kad Kelasi']];
-    const fields  = [['nama','kp','tel','emel','pakej','tarikh','status'],['nama','tel','program','method','jumlah','status'],['name','email','phone','seamanCard']];
-    const labels  = ['Senarai pendaftaran terbaru','Senarai rekod bayaran','Senarai pengguna berdaftar'];
-    document.getElementById('admin-table-label').textContent = labels[tab];
-    const thead = document.getElementById('admin-thead');
-    const tbody = document.getElementById('admin-tbody');
-    thead.innerHTML = '<tr>' + headers[tab].map(h=>`<th style="padding:0.7rem 1rem;text-align:left;font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);border-bottom:1.5px solid var(--border);white-space:nowrap;background:var(--pale2)">${h}</th>`).join('') + '<th style="padding:0.7rem 1rem;background:var(--pale2);border-bottom:1.5px solid var(--border)"></th></tr>';
-    tbody.innerHTML = `<tr><td colspan="${headers[tab].length+1}" style="text-align:center;padding:2.5rem;color:var(--muted)"><span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span> Memuatkan...</td></tr>`;
-    try {
-      const snap = await getDocs(collection(db, cols[tab]));
-      if (snap.empty) { tbody.innerHTML = `<tr><td colspan="${headers[tab].length+1}" style="text-align:center;padding:2.5rem;color:var(--muted)">Tiada rekod.</td></tr>`; return; }
-      tbody.innerHTML = '';
-      let row = 0;
-      snap.forEach(d => {
-        const data = d.data();
-        const bg   = row % 2 === 0 ? 'white' : 'var(--pale2)';
-        const ts   = data.submittedAt?.toDate?.()?.toLocaleDateString('ms-MY') || '—';
-        const sc   = data.status === 'Baru' || data.status === 'Belum Disahkan' ? '#e67e22' : '#0a9e6a';
-        const cells = fields[tab].map(f => {
-          let v = data[f] || '—';
-          if (f === 'status') v = `<span style="padding:0.2rem 0.6rem;background:${sc}22;color:${sc};border-radius:20px;font-size:0.68rem;font-weight:700">${v}</span>`;
-          return `<td style="padding:0.7rem 1rem;border-bottom:1px solid var(--border);background:${bg};color:var(--text2);white-space:nowrap">${v}</td>`;
-        }).join('');
-        tbody.innerHTML += `<tr>${cells}<td style="padding:0.7rem 1rem;border-bottom:1px solid var(--border);background:${bg};font-size:0.68rem;color:var(--muted)">${ts}</td></tr>`;
-        row++;
-      });
-    } catch(e) { tbody.innerHTML = `<tr><td colspan="${headers[tab].length+1}" style="text-align:center;padding:2rem;color:var(--error)">⚠ ${e.message}</td></tr>`; }
+  window.buatKadPakej = function(id, d) {
+    const pop     = d.popular === 'ya';
+    const badge   = pop ? '<div class="p-badge">⭐ Popular</div>' : '';
+    const headBg  = pop ? 'background:linear-gradient(135deg,var(--blue),var(--blue-lt))' : 'background:linear-gradient(135deg,var(--navy),var(--blue-mid))';
+    const ya      = (d.kursusYa||[]).map(k=>{ const[n,s]=k.split('|'); return `<div class="p-item"><span class="yes">✓</span><div><div>${n}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`; }).join('');
+    const tidak   = (d.kursustidak||[]).map(k=>{ const[n,s]=k.split('|'); return `<div class="p-item dim"><span class="no">✗</span><div><div>${n}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`; }).join('');
+    const navUser = document.getElementById('nav-user');
+    const loggedIn = navUser && navUser.style.display !== 'none' && navUser.style.display !== '';
+    const btnLabel = loggedIn ? 'Pilih Pakej Ini →' : '🔒 Log Masuk untuk Pilih';
+    const btnStyle = loggedIn ? '' : 'background:linear-gradient(90deg,var(--muted),#8a9bb5);box-shadow:none;';
+    return `<div class="p-card${pop?' popular':''}" id="pakej-${id}"><div class="p-head" style="${headBg};position:relative;padding:1.6rem">${badge}<div class="p-tag">${d.nama}</div><h3>${d.nama}</h3><div class="p-price">Mulai dari <strong>RM ${parseInt(d.harga).toLocaleString()}</strong></div></div><div class="p-body">${ya}${tidak}${d.nota?`<div class="p-note">${d.nota}</div>`:''}</div><div class="p-foot"><button class="btn-hantar" style="${btnStyle}" onclick="pilihPakej('${d.nama}',${d.harga})">${btnLabel}</button></div></div>`;
   };
 </script>
 
@@ -552,13 +447,6 @@
   .trust-badges { display:flex; gap:0.6rem; margin-bottom:1.2rem; flex-wrap:wrap; }
   .trust-badge { padding:0.3rem 0.7rem; background:var(--pale); border:1px solid var(--border); border-radius:4px; font-size:0.68rem; color:var(--blue); font-weight:600; }
 
-  /* ADMIN DASHBOARD */
-  #admin-panel { background:var(--pale2); padding:5rem 5%; }
-  .admin-stat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; margin-bottom:2rem; }
-  .admin-stat-card { background:var(--white); border:1.5px solid var(--border); border-radius:12px; padding:1.5rem; text-align:center; }
-  .admin-stat-num { font-family:'Bebas Neue',sans-serif; font-size:2.5rem; letter-spacing:2px; line-height:1; }
-  .admin-stat-lbl { font-size:0.7rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:0.3rem; }
-
   /* FOOTER */
   footer { background:var(--navy); color:white; padding:4rem 5% 2rem; }
   .footer-inner { max-width:1160px; margin:0 auto; }
@@ -732,7 +620,6 @@
   </div>
   <div id="nav-user">
     <div class="u-info">Hai, <strong id="user-email"></strong></div>
-    <button id="admin-nav-btn" class="btn-fill green" onclick="bukaAdmin()" style="display:none;font-size:0.75rem">📊 Admin</button>
     <button class="btn-line red" onclick="doLogout()">Log Keluar</button>
   </div>
 </nav>
@@ -755,7 +642,7 @@
         <div class="h-stat"><div class="val">6 BLN</div><div class="lbl">Praktikal Di Kapal</div></div>
       </div>
       <div class="h-info"><div class="h-info-lbl">📍 Lokasi Pusat Latihan</div><p>A31, Tingkat 1, IM 5/2, Jalan Persiaran Sultan Abu Bakar, Indera Mahkota, 25200 Kuantan, Pahang</p></div>
-      <div class="h-info"><div class="h-info-lbl">📞 Hubungi Kami</div><p>013-6039641<br>info@centraltech.com.my</p></div>
+      <div class="h-info"><div class="h-info-lbl">📞 Hubungi Kami</div><p>013-6039641<br><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b8d1d6ded7f8dbddd6cccad9d4ccdddbd096dbd7d596d5c1">[email&#160;protected]</a></p></div>
     </div>
   </div>
 </section>
@@ -827,9 +714,6 @@
     </div>
 
     <div class="f-panel" id="panel-1">
-      <div id="admin-tambah-wrap" style="display:none;margin-bottom:1.5rem">
-        <button onclick="openM('tambah-pakej')" class="btn-hantar" style="width:auto;padding:0.75rem 1.8rem;display:inline-flex;align-items:center;gap:0.5rem">➕ Tambah Pakej Baru</button>
-      </div>
       <div class="pakej-grid" id="pakej-container">
         <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)"><span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span> Memuatkan pakej...</div>
       </div>
@@ -926,35 +810,6 @@
   </div>
 </section>
 
-<!-- ADMIN DASHBOARD -->
-<div id="admin-panel" style="display:none">
-  <div class="sek" style="background:var(--pale2)">
-    <div class="sek-wrap">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem">
-        <div><div class="label">Panel Admin</div><h2 class="sek-title">Dashboard <span>Admin CTR</span></h2></div>
-        <button onclick="tutupAdmin()" class="btn-line red">✕ Tutup Dashboard</button>
-      </div>
-      <div class="admin-stat-grid">
-        <div class="admin-stat-card"><div class="admin-stat-num" style="color:var(--blue)" id="stat-pendaftaran">—</div><div class="admin-stat-lbl">Jumlah Pendaftaran</div></div>
-        <div class="admin-stat-card"><div class="admin-stat-num" style="color:var(--success)" id="stat-bayaran">—</div><div class="admin-stat-lbl">Jumlah Bayaran</div></div>
-        <div class="admin-stat-card"><div class="admin-stat-num" style="color:var(--navy)" id="stat-pengguna">—</div><div class="admin-stat-lbl">Jumlah Pengguna</div></div>
-      </div>
-      <div style="display:flex;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);margin-bottom:1.5rem;background:var(--white)">
-        <button class="admin-tab" onclick="tukarAdmin(0)" style="flex:1;padding:0.9rem;border:none;background:linear-gradient(135deg,var(--navy),var(--blue-mid));color:white;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;border-right:1.5px solid var(--border)">📋 Pendaftaran</button>
-        <button class="admin-tab" onclick="tukarAdmin(1)" style="flex:1;padding:0.9rem;border:none;background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;border-right:1.5px solid var(--border)">💳 Bayaran</button>
-        <button class="admin-tab" onclick="tukarAdmin(2)" style="flex:1;padding:0.9rem;border:none;background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer">👤 Pengguna</button>
-      </div>
-      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;overflow:hidden">
-        <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-          <div style="font-size:0.82rem;color:var(--muted)" id="admin-table-label">Senarai pendaftaran terbaru</div>
-          <button onclick="muatSemula()" style="padding:0.4rem 1rem;background:var(--pale);border:1.5px solid var(--border);border-radius:6px;font-size:0.75rem;font-weight:700;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif">🔄 Muat Semula</button>
-        </div>
-        <div style="overflow-x:auto"><table id="admin-table" style="width:100%;border-collapse:collapse;font-size:0.82rem"><thead id="admin-thead"></thead><tbody id="admin-tbody"><tr><td style="text-align:center;padding:3rem;color:var(--muted)">Klik tab untuk muat data...</td></tr></tbody></table></div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- FOOTER -->
 <footer>
   <div class="footer-inner">
@@ -964,7 +819,7 @@
         <p class="f-desc">Central Tech Resources — Pusat latihan maritim bertauliah yang komited melahirkan pelaut profesional Malaysia bertaraf antarabangsa.</p>
         <div class="f-kontak">
           <div>📞 013-6039641</div>
-          <div>✉️ info@centraltech.com.my</div>
+          <div>✉️ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4b22252d240b282e253f392a273f2e282365282426652632">[email&#160;protected]</a></div>
           <div>🌐 www.centraltech.com.my</div>
           <div>📍 A31, IM 5/2, Jalan Abu Bakar, Indera Mahkota, 25200 Kuantan, Pahang</div>
         </div>
@@ -1017,22 +872,6 @@
   </div>
 </div>
 
-<!-- TAMBAH PAKEJ MODAL (Admin only) -->
-<div class="overlay" id="m-tambah-pakej">
-  <div class="modal lebar scroll">
-    <button class="modal-tutup" onclick="closeM('tambah-pakej')">✕</button>
-    <div class="modal-jenama"><div class="modal-mark">CTR</div><div><div class="modal-nama">Admin</div><div class="modal-sub">Urus Pakej Program</div></div></div>
-    <h2>Tambah Pakej Baru</h2>
-    <div class="medan"><label>Nama Pakej *</label><input type="text" id="pk-nama" placeholder="cth: Pakej Premium"></div>
-    <div class="f2"><div class="medan"><label>Harga (RM) *</label><input type="number" id="pk-harga" placeholder="cth: 3500"></div><div class="medan"><label>Popular?</label><select id="pk-popular"><option value="tidak">Tidak</option><option value="ya">Ya — Tunjuk Badge ⭐</option></select></div></div>
-    <div class="medan"><label>Nota Ringkas</label><input type="text" id="pk-nota" placeholder="cth: 🎓 Semua sijil STCW + praktikal penuh"></div>
-    <div class="medan"><label>Kursus Yang Disertakan (satu baris satu kursus) *</label><textarea id="pk-kursus-ya" rows="5" placeholder="Basic Training (BT)|Latihan asas keselamatan di laut&#10;Designated Security Duties (DSD)|Latihan keselamatan ISPS Code"></textarea><div style="font-size:0.72rem;color:var(--muted);margin-top:0.3rem">Format: <strong>Nama Kursus|Penerangan</strong></div></div>
-    <div class="medan"><label>Kursus Yang Tidak Disertakan (kosongkan jika tiada)</label><textarea id="pk-kursus-tidak" rows="3" placeholder="Crowd Management|Tidak termasuk dalam pakej ini"></textarea></div>
-    <div class="ralat" id="pk-error"></div>
-    <button class="btn-hantar" id="pk-btn" onclick="simpanPakej()">💾 Simpan Pakej →</button>
-  </div>
-</div>
-
 <!-- FAQ MODAL -->
 <div class="overlay" id="m-faq">
   <div class="modal scroll" style="max-width:560px">
@@ -1045,7 +884,7 @@
     <div class="faq-item"><div class="faq-soal" onclick="togolFaq(this)">Berapa kos program ini? <span class="faq-anak">›</span></div><div class="faq-jawab">Pakej Lengkap bermula dari RM 3,500 dan Pakej Asas bermula dari RM 2,800. Deposit 30% diperlukan untuk mengesahkan tempat anda.</div></div>
     <div class="faq-item"><div class="faq-soal" onclick="togolFaq(this)">Bolehkah saya memohon pinjaman PTPK atau MARA? <span class="faq-anak">›</span></div><div class="faq-jawab">Ya! Program ini diiktiraf untuk permohonan pinjaman PTPK, MARA dan biasiswa kerajaan yang lain.</div></div>
     <div class="faq-item"><div class="faq-soal" onclick="togolFaq(this)">Di mana lokasi pusat latihan? <span class="faq-anak">›</span></div><div class="faq-jawab">Pusat latihan CTR terletak di A31, Tingkat 1, IM 5/2, Jalan Persiaran Sultan Abu Bakar, Indera Mahkota, 25200 Kuantan, Pahang.</div></div>
-    <div class="faq-item"><div class="faq-soal" onclick="togolFaq(this)">Bagaimana cara menghubungi CTR? <span class="faq-anak">›</span></div><div class="faq-jawab">Hubungi kami melalui WhatsApp atau telefon di 013-6039641, e-mel di info@centraltech.com.my atau layari www.centraltech.com.my.</div></div>
+    <div class="faq-item"><div class="faq-soal" onclick="togolFaq(this)">Bagaimana cara menghubungi CTR? <span class="faq-anak">›</span></div><div class="faq-jawab">Hubungi kami melalui WhatsApp atau telefon di 013-6039641, e-mel di <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="84edeae2ebc4e7e1eaf0f6e5e8f0e1e7ecaae7ebe9aae9fd">[email&#160;protected]</a> atau layari www.centraltech.com.my.</div></div>
   </div>
 </div>
 
@@ -1060,7 +899,7 @@
       <p><strong style="color:var(--navy)">2. Penggunaan Maklumat</strong><br>Maklumat yang dikumpul digunakan untuk memproses pendaftaran kursus, menghubungi pemohon berkaitan program, dan tujuan pentadbiran dalaman CTR.</p>
       <p><strong style="color:var(--navy)">3. Keselamatan Data</strong><br>Semua data disimpan dengan selamat menggunakan Firebase Google Cloud yang mematuhi piawaian keselamatan antarabangsa. Data anda dilindungi dengan penyulitan SSL.</p>
       <p><strong style="color:var(--navy)">4. Perkongsian Maklumat</strong><br>CTR tidak akan berkongsi maklumat peribadi anda dengan pihak ketiga tanpa kebenaran anda kecuali dikehendaki oleh undang-undang.</p>
-      <p><strong style="color:var(--navy)">5. Hak Anda</strong><br>Anda berhak untuk meminta akses, pembetulan atau penghapusan maklumat peribadi anda pada bila-bila masa dengan menghubungi kami di info@centraltech.com.my.</p>
+      <p><strong style="color:var(--navy)">5. Hak Anda</strong><br>Anda berhak untuk meminta akses, pembetulan atau penghapusan maklumat peribadi anda pada bila-bila masa dengan menghubungi kami di <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="9df4f3fbf2ddfef8f3e9effcf1e9f8fef5b3fef2f0b3f0e4">[email&#160;protected]</a>.</p>
     </div>
   </div>
 </div>
@@ -1098,7 +937,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // ── MODAL HELPERS ──
   function openM(t)  { document.getElementById('m-'+t).classList.add('open'); document.body.style.overflow='hidden'; }
   function closeM(t) { document.getElementById('m-'+t).classList.remove('open'); document.body.style.overflow=''; }
@@ -1116,7 +955,18 @@
   function tukarFasa(i) { document.querySelectorAll('.f-tab').forEach((t,idx)=>t.classList.toggle('active',idx===i)); document.querySelectorAll('.f-panel').forEach((p,idx)=>p.classList.toggle('active',idx===i)); }
 
   // ── PILIH PAKEJ ──
-  function pilihPakej(nama,amt) {
+  function pilihPakej(nama, amt) {
+    // Check if user is logged in
+    const navUser = document.getElementById('nav-user');
+    const isLoggedIn = navUser && navUser.style.display !== 'none' && navUser.style.display !== '';
+
+    if (!isLoggedIn) {
+      // Show login prompt
+      showToast('⚠ Sila log masuk atau daftar dahulu untuk memilih pakej!');
+      setTimeout(() => openM('login'), 800);
+      return;
+    }
+
     document.getElementById('pp-pakej').textContent   = nama;
     document.getElementById('pp-penuh').textContent   = 'RM '+parseInt(amt).toLocaleString();
     const dep = Math.round(amt*0.3);
@@ -1191,16 +1041,4 @@
   function togolFaq(el) { const jawab=el.nextElementSibling; const isOpen=el.classList.contains('open'); document.querySelectorAll('.faq-soal').forEach(s=>{s.classList.remove('open');s.nextElementSibling.classList.remove('open');}); if(!isOpen){el.classList.add('open');jawab.classList.add('open');} }
 
   // ── WHATSAPP ──
-  function togolWA() { const t=document.getElementById('wa-tooltip'); const n=document.getElementById('wa-notif'); t.classList.toggle('open'); n.style.display='none'; }
-  function tutupWA() { document.getElementById('wa-tooltip').classList.remove('open'); }
-  setTimeout(()=>{document.getElementById('wa-tooltip').classList.add('open');},3000);
-
-  // ── SCROLL FADE ──
-  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('masuk');obs.unobserve(e.target);}}),{threshold:0.08});
-  document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
-
-  // ── LOAD PACKAGES ON PAGE LOAD ──
-  window.addEventListener('load',()=>{ if(typeof muatPakej==='function') muatPakej(); });
-</script>
-</body>
-</html>
+  function togolWA() { const t=document.getElementById('wa-tooltip'); const n=document.getElementById('wa-notif'); t.classList.toggle('open'); n.style.display='n</body></html>
