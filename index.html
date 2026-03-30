@@ -10,7 +10,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp }
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -198,12 +198,42 @@
     container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)"><span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span> Memuatkan pakej...</div>';
     try {
       const snap = await getDocs(query(collection(db, 'pakej'), orderBy('harga', 'asc')));
-      if (snap.empty) {
+      const allDocs = [];
+      snap.forEach(d => allDocs.push({ id: d.id, data: d.data() }));
+
+      // If more than 2 packages — delete all duplicates, keep only unique names
+      if (allDocs.length > 2) {
+        const seen = {};
+        const toDelete = [];
+        const toKeep   = [];
+        for (const d of allDocs) {
+          const nama = d.data.nama;
+          if (!seen[nama]) {
+            seen[nama] = true;
+            toKeep.push(d);
+          } else {
+            toDelete.push(d.id);
+          }
+        }
+        // Delete duplicates silently
+        for (const id of toDelete) {
+          await deleteDoc(doc(db, 'pakej', id));
+        }
+        container.innerHTML = '';
+        toKeep.forEach(d => { container.innerHTML += buatKadPakej(d.id, d.data); });
+        return;
+      }
+
+      // If empty — add defaults
+      if (allDocs.length === 0) {
         await muatPakejDefault(container);
         return;
       }
+
+      // Normal — show packages
       container.innerHTML = '';
-      snap.forEach(d => { container.innerHTML += buatKadPakej(d.id, d.data()); });
+      allDocs.forEach(d => { container.innerHTML += buatKadPakej(d.id, d.data); });
+
     } catch (e) {
       container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--error)">⚠ Ralat memuatkan pakej.</div>';
     }
@@ -211,14 +241,6 @@
 
   // Only runs ONCE when collection is empty
   async function muatPakejDefault(container) {
-    // Double check it is really empty before adding
-    const check = await getDocs(collection(db, 'pakej'));
-    if (!check.empty) {
-      container.innerHTML = '';
-      check.forEach(d => { container.innerHTML += buatKadPakej(d.id, d.data()); });
-      return;
-    }
-
     const defaults = [
       { nama:'Pakej Lengkap', harga:3500, popular:'tidak', nota:'🎓 Semua 5 sijil STCW + pengalaman praktikal penuh',
         kursusYa:['Basic Training (BT)|Latihan asas keselamatan dan survival di laut','Designated Security Duties (DSD)|Latihan tugas keselamatan kapal ISPS Code','BTOCT (Tanker)|Latihan asas kapal tangki minyak / kimia','Ship Security Awareness (SSA)|Sijil kesedaran keselamatan kapal','Crowd Management|Pengurusan penumpang dalam situasi kecemasan','Penempatan Praktikal 6 Bulan|Di atas kapal @ feri — pengalaman sebenar industri'],
@@ -822,7 +844,7 @@
         <p class="f-desc">Pusat latihan maritim bertauliah yang komited melahirkan pelaut profesional Malaysia bertaraf antarabangsa.</p>
         <div class="f-kontak">
           <div>📞 013-6039641</div>
-          <div>✉️ info@centraltech.com.my</div>
+          <div>✉️ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="026b6c646d4261676c7670636e7667616a2c616d6f2c6f7b">[email&#160;protected]</a></div>
           <div>✉️ <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4b22252d240b282e253f392a273f2e282365282426652632">[email&#160;protected]</a></div>
           
         </div>
@@ -940,7 +962,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // ── MODAL HELPERS ──
   function openM(t)  { document.getElementById('m-'+t).classList.add('open'); document.body.style.overflow='hidden'; }
   function closeM(t) { document.getElementById('m-'+t).classList.remove('open'); document.body.style.overflow=''; }
@@ -1052,7 +1074,7 @@
   const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('masuk');obs.unobserve(e.target);}}),{threshold:0.08});
   document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
 
-  // ── LOAD PACKAGES ON PAGE LOAD ──
+  // Load packages on page load
   window.addEventListener('load',()=>{ if(typeof muatPakej==='function') muatPakej(); });
 </script>
 </body>
