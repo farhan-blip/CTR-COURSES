@@ -182,7 +182,7 @@
       document.getElementById('pp-penuh').textContent   = '—';
       document.getElementById('pp-deposit').textContent = '—';
       document.getElementById('pp-total').textContent   = '—';
-      document.querySelectorAll('.pay-mod').forEach((m, i) => { m.classList.remove('aktif'); if (i === 0) m.classList.add('aktif'); });
+      document.querySelectorAll('.pay-pro').forEach((m, i) => { m.classList.remove('aktif'); if (i === 0) m.classList.add('aktif'); });
       document.getElementById('kad-medan').style.display = 'none';
       showToast('✓ Terima kasih ' + nama + '! Bayaran berjaya direkodkan.');
       setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 1500);
@@ -447,38 +447,24 @@
   .berjaya { display:none; padding:1.1rem 1.3rem; background:#e6f9f2; border:1.5px solid #a0dfc4; border-radius:8px; margin-bottom:1.3rem; font-size:0.86rem; color:var(--success); font-weight:600; }
   .ralat { font-size:0.8rem; color:var(--error); margin-top:0.4rem; min-height:1.1rem; }
 
-  /* BAYARAN - Modern */
-  #bayaran { background:var(--pale2); }
-  .pay-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2.5rem; }
-  .pay-mod { background:var(--white); border:2px solid var(--border); border-radius:14px; padding:1.5rem 1.2rem; cursor:pointer; transition:all 0.25s; text-align:center; position:relative; overflow:hidden; }
-  .pay-mod:hover { border-color:var(--blue-mid); transform:translateY(-3px); box-shadow:0 8px 24px var(--shadow-md); }
-  .pay-mod.aktif { border-color:var(--blue); background:var(--pale); box-shadow:0 6px 20px var(--shadow-md); }
-  .pm-check { position:absolute; top:0.75rem; right:0.75rem; width:22px; height:22px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:transparent; transition:all 0.2s; }
-  .pay-mod.aktif .pm-check { background:var(--blue); border-color:var(--blue); color:white; }
-  .pm-icon { font-size:2rem; margin-bottom:0.8rem; display:block; }
-  .pm-name { font-size:0.85rem; font-weight:700; color:var(--text); margin-bottom:0.35rem; }
-  .pm-desc { font-size:0.72rem; color:var(--muted); line-height:1.4; }
-  .pm-badge { display:inline-block; margin-top:0.6rem; padding:0.2rem 0.6rem; background:linear-gradient(90deg,var(--navy),var(--blue-mid)); color:white; font-size:0.6rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; border-radius:20px; }
-  .bayar-bawah { display:grid; grid-template-columns:1fr 1.5fr; gap:1.8rem; align-items:start; }
-  .ringkasan { background:var(--white); border:1.5px solid var(--border); border-radius:12px; overflow:hidden; box-shadow:0 3px 16px var(--shadow); }
-  .ring-kepala { background:linear-gradient(135deg,var(--navy),var(--blue-mid)); padding:1.4rem 1.6rem; }
-  .ring-kepala .sub { font-size:0.65rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.55); margin-bottom:0.3rem; }
-  .ring-kepala .tajuk { font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:2px; color:white; }
-  .ring-badan { padding:1.5rem; }
-  .sum-baris { display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0; font-size:0.84rem; border-bottom:1px solid var(--pale); }
-  .sum-baris:last-child { border-bottom:none; }
-  .sum-l { color:var(--muted); }
-  .sum-v { font-weight:700; color:var(--text); text-align:right; max-width:55%; }
-  .jumlah-box { margin-top:1rem; padding:1rem; background:var(--pale); border-radius:8px; display:flex; justify-content:space-between; align-items:center; }
-  .jumlah-box .j-lbl { font-size:0.82rem; color:var(--text2); font-weight:600; }
-  .jumlah-box .j-val { font-family:'Bebas Neue',sans-serif; font-size:2rem; color:var(--navy); letter-spacing:1px; }
-  .secure-box { margin-top:1rem; padding:0.8rem; background:#e6f9f2; border-radius:8px; font-size:0.75rem; color:var(--success); font-weight:600; text-align:center; }
-  .bayar-kotak { background:var(--white); border:1.5px solid var(--border); border-radius:12px; padding:1.8rem; box-shadow:0 3px 16px var(--shadow); position:relative; overflow:hidden; }
-  .bayar-kotak::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--navy),var(--blue-lt)); }
-  .trust-badges { display:flex; gap:0.6rem; margin-bottom:1.2rem; flex-wrap:wrap; }
-  .trust-badge { padding:0.3rem 0.7rem; background:var(--pale); border:1px solid var(--border); border-radius:4px; font-size:0.68rem; color:var(--blue); font-weight:600; }
+  /* ── BAYARAN PROFESSIONAL ── */
+  #bayaran { background:var(--white); }
+  .pay-pro { background:var(--white); border:1.5px solid var(--border); border-radius:10px; padding:1rem 1.2rem; cursor:pointer; transition:all 0.2s; position:relative; overflow:hidden; }
+  .pay-pro:hover { border-color:var(--blue-mid); box-shadow:0 4px 16px var(--shadow); transform:translateY(-2px); }
+  .pay-pro.aktif { border-color:var(--blue); background:var(--pale); box-shadow:0 4px 16px var(--shadow-md); }
+  .pay-pro-inner { display:flex; align-items:center; gap:0.8rem; }
+  .pay-pro-icon { font-size:1.5rem; flex-shrink:0; }
+  .pay-pro-name { font-size:0.85rem; font-weight:700; color:var(--text); }
+  .pay-pro-desc { font-size:0.7rem; color:var(--muted); margin-top:0.1rem; }
+  .pay-pro-check { margin-left:auto; width:20px; height:20px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:transparent; flex-shrink:0; transition:all 0.2s; }
+  .pay-pro.aktif .pay-pro-check { background:var(--blue); border-color:var(--blue); color:white; }
+  .pay-pro-tag { display:inline-block; margin-top:0.5rem; padding:0.15rem 0.6rem; background:linear-gradient(90deg,var(--navy),var(--blue-mid)); color:white; font-size:0.58rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; border-radius:20px; }
 
-  /* FOOTER */
+  @media(max-width:900px) {
+    #bayaran [style*="grid-template-columns:1.2fr"] { grid-template-columns:1fr !important; }
+  }
+
+
   footer { background:var(--navy); color:white; padding:4rem 5% 2rem; }
   .footer-inner { max-width:1160px; margin:0 auto; }
   .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem; margin-bottom:3rem; }
@@ -792,45 +778,170 @@
 <div class="pemisah"></div>
 
 <!-- BAYARAN -->
-<section id="bayaran" class="sek" style="background:var(--pale2)">
+<section id="bayaran" class="sek" style="background:var(--white)">
   <div class="sek-wrap">
+
     <div class="sek-head fade">
-      <div class="label">Bayaran</div>
-      <h2 class="sek-title">Pilihan <span>Pembayaran</span></h2>
-      <p class="sek-sub">Pilih kaedah pembayaran yang sesuai. Semua rekod disimpan selamat dalam Firebase.</p>
+      <div class="label">Pembayaran</div>
+      <h2 class="sek-title">Kaedah <span>Pembayaran</span></h2>
+      <p class="sek-sub">Pilih kaedah pembayaran yang sesuai untuk anda. Semua transaksi adalah selamat dan disulitkan.</p>
     </div>
-    <div class="pay-grid fade">
-      <div class="pay-mod aktif" onclick="pilihKaedah(this,'FPX / Online Banking')"><div class="pm-check">✓</div><span class="pm-icon">🏦</span><div class="pm-name">FPX / Online Banking</div><div class="pm-desc">Maybank2u, CIMB Clicks, RHB, Hong Leong</div><div class="pm-badge">Disyorkan</div></div>
-      <div class="pay-mod" onclick="pilihKaedah(this,'Kad Kredit / Debit')"><div class="pm-check">✓</div><span class="pm-icon">💳</span><div class="pm-name">Kad Kredit / Debit</div><div class="pm-desc">Visa, Mastercard & Amex diterima</div></div>
-      <div class="pay-mod" onclick="pilihKaedah(this,'DuitNow / QR')"><div class="pm-check">✓</div><span class="pm-icon">📱</span><div class="pm-name">DuitNow / QR</div><div class="pm-desc">Imbas QR melalui aplikasi bank anda</div></div>
-      <div class="pay-mod" onclick="pilihKaedah(this,'PTPK / MARA / Biasiswa')"><div class="pm-check">✓</div><span class="pm-icon">🎓</span><div class="pm-name">PTPK / MARA / Biasiswa</div><div class="pm-desc">Diiktiraf untuk pinjaman & biasiswa</div></div>
-    </div>
-    <div class="bayar-bawah fade">
-      <div class="ringkasan">
-        <div class="ring-kepala"><div class="sub">Ringkasan</div><div class="tajuk">Bayaran Anda</div></div>
-        <div class="ring-badan">
-          <div class="sum-baris"><span class="sum-l">📦 Pakej Dipilih</span><span class="sum-v" id="pp-pakej">—</span></div>
-          <div class="sum-baris"><span class="sum-l">💳 Kaedah Bayaran</span><span class="sum-v" id="pp-kaedah">FPX / Online Banking</span></div>
-          <div class="sum-baris"><span class="sum-l">🏷️ Harga Penuh</span><span class="sum-v" id="pp-penuh">—</span></div>
-          <div class="sum-baris"><span class="sum-l">📊 Deposit (30%)</span><span class="sum-v" id="pp-deposit">—</span></div>
-          <div class="jumlah-box"><span class="j-lbl">Bayar Hari Ini</span><span class="j-val" id="pp-total">—</span></div>
-          <div class="secure-box">🔒 Bayaran selamat dan disulitkan</div>
+
+    <div class="fade" style="display:grid;grid-template-columns:1.2fr 0.8fr;gap:2.5rem;align-items:start">
+
+      <!-- LEFT — Payment method + Form -->
+      <div>
+        <!-- Step indicator -->
+        <div style="display:flex;align-items:center;gap:0;margin-bottom:2rem">
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <div style="width:28px;height:28px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:700">1</div>
+            <span style="font-size:0.8rem;font-weight:700;color:var(--blue)">Kaedah Bayaran</span>
+          </div>
+          <div style="flex:1;height:2px;background:var(--border);margin:0 0.75rem"></div>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <div style="width:28px;height:28px;background:var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.75rem;font-weight:700">2</div>
+            <span style="font-size:0.8rem;font-weight:600;color:var(--muted)">Maklumat</span>
+          </div>
+          <div style="flex:1;height:2px;background:var(--border);margin:0 0.75rem"></div>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <div style="width:28px;height:28px;background:var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.75rem;font-weight:700">3</div>
+            <span style="font-size:0.8rem;font-weight:600;color:var(--muted)">Sahkan</span>
+          </div>
+        </div>
+
+        <!-- Payment methods -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1.5rem">
+          <div class="pay-pro aktif" onclick="pilihKaedah(this,'FPX / Online Banking')">
+            <div class="pay-pro-inner">
+              <div class="pay-pro-icon">🏦</div>
+              <div>
+                <div class="pay-pro-name">FPX / Online Banking</div>
+                <div class="pay-pro-desc">Maybank2u, CIMB, RHB</div>
+              </div>
+              <div class="pay-pro-check" id="chk-0">✓</div>
+            </div>
+            <div class="pay-pro-tag">Disyorkan</div>
+          </div>
+          <div class="pay-pro" onclick="pilihKaedah(this,'Kad Kredit / Debit')">
+            <div class="pay-pro-inner">
+              <div class="pay-pro-icon">💳</div>
+              <div>
+                <div class="pay-pro-name">Kad Kredit / Debit</div>
+                <div class="pay-pro-desc">Visa, Mastercard, Amex</div>
+              </div>
+              <div class="pay-pro-check">✓</div>
+            </div>
+          </div>
+          <div class="pay-pro" onclick="pilihKaedah(this,'DuitNow / QR')">
+            <div class="pay-pro-inner">
+              <div class="pay-pro-icon">📱</div>
+              <div>
+                <div class="pay-pro-name">DuitNow / QR</div>
+                <div class="pay-pro-desc">Imbas & bayar serta-merta</div>
+              </div>
+              <div class="pay-pro-check">✓</div>
+            </div>
+          </div>
+          <div class="pay-pro" onclick="pilihKaedah(this,'PTPK / MARA / Biasiswa')">
+            <div class="pay-pro-inner">
+              <div class="pay-pro-icon">🎓</div>
+              <div>
+                <div class="pay-pro-name">PTPK / MARA</div>
+                <div class="pay-pro-desc">Pinjaman & biasiswa</div>
+              </div>
+              <div class="pay-pro-check">✓</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment form -->
+        <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:1.8rem;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--blue-lt))"></div>
+          <div style="font-size:0.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem">Maklumat Pembayar</div>
+          <div class="berjaya" id="pay-success">✅ Rekod bayaran berjaya disimpan! Pihak kami akan mengesahkan pembayaran anda.</div>
+          <div class="f2">
+            <div class="medan"><label>Nama Penuh *</label><input type="text" id="pay-nama" placeholder="Nama seperti dalam kad / bank"></div>
+            <div class="medan"><label>No. Telefon *</label><input type="tel" id="pay-tel" placeholder="01X-XXXXXXXX"></div>
+          </div>
+          <div id="kad-medan" style="display:none">
+            <div style="font-size:0.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:0.8rem 0 1rem">Maklumat Kad</div>
+            <div class="medan"><label>Nombor Kad</label><input type="text" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" oninput="fmtKad(this)"></div>
+            <div class="f2">
+              <div class="medan"><label>Tarikh Luput</label><input type="text" placeholder="MM / YY" maxlength="5"></div>
+              <div class="medan"><label>CVV</label><input type="text" placeholder="• • •" maxlength="3"></div>
+            </div>
+          </div>
+
+          <!-- Security badges -->
+          <div style="display:flex;align-items:center;gap:1rem;padding:0.9rem 1rem;background:var(--pale2);border-radius:8px;margin-bottom:1.2rem">
+            <div style="font-size:1.2rem">🔒</div>
+            <div>
+              <div style="font-size:0.78rem;font-weight:700;color:var(--text)">Pembayaran Selamat & Disulitkan</div>
+              <div style="font-size:0.7rem;color:var(--muted);margin-top:0.1rem">SSL 256-bit · FPX Malaysia · Data dilindungi</div>
+            </div>
+          </div>
+
+          <div class="ralat" id="pay-error"></div>
+          <button class="btn-hantar" id="pay-btn" onclick="submitBayaran()" style="font-size:0.9rem;letter-spacing:0.5px">
+            Teruskan Pembayaran →
+          </button>
         </div>
       </div>
-      <div class="bayar-kotak">
-        <div class="form-tajuk" style="font-size:1.4rem;margin-bottom:0.2rem">Maklumat Bayaran</div>
-        <div class="form-sub" style="margin-bottom:1.4rem">Isi maklumat di bawah untuk meneruskan bayaran 🔒</div>
-        <div class="berjaya" id="pay-success">✅ Rekod bayaran berjaya disimpan! Pihak kami akan mengesahkan pembayaran anda.</div>
-        <div class="medan"><label>Nama Penuh</label><input type="text" id="pay-nama" placeholder="Nama seperti dalam kad / bank"></div>
-        <div class="medan"><label>No. Telefon</label><input type="tel" id="pay-tel" placeholder="01X-XXXXXXXX"></div>
-        <div id="kad-medan" style="display:none">
-          <div class="medan"><label>Nombor Kad</label><input type="text" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" oninput="fmtKad(this)"></div>
-          <div class="f2"><div class="medan"><label>Tarikh Luput</label><input type="text" placeholder="MM/YY" maxlength="5"></div><div class="medan"><label>CVV</label><input type="text" placeholder="XXX" maxlength="3"></div></div>
+
+      <!-- RIGHT — Order summary -->
+      <div style="position:sticky;top:80px">
+        <div style="background:var(--navy);border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(11,45,94,0.2)">
+
+          <!-- Header -->
+          <div style="padding:1.5rem 1.8rem;border-bottom:1px solid rgba(255,255,255,0.1)">
+            <div style="font-size:0.65rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:0.3rem">Ringkasan Pesanan</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:white">Bayaran Anda</div>
+          </div>
+
+          <!-- Package info -->
+          <div style="padding:1.5rem 1.8rem;border-bottom:1px solid rgba(255,255,255,0.08)">
+            <div style="font-size:0.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:0.8rem">Program</div>
+            <div id="pp-pakej" style="font-size:0.95rem;font-weight:700;color:white">— Pilih pakej dahulu</div>
+          </div>
+
+          <!-- Breakdown -->
+          <div style="padding:1.5rem 1.8rem;border-bottom:1px solid rgba(255,255,255,0.08)">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;font-size:0.83rem">
+              <span style="color:rgba(255,255,255,0.55)">Harga Penuh</span>
+              <span id="pp-penuh" style="color:rgba(255,255,255,0.8);font-weight:600">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;font-size:0.83rem">
+              <span style="color:rgba(255,255,255,0.55)">Kaedah Bayaran</span>
+              <span id="pp-kaedah" style="color:rgba(255,255,255,0.8);font-weight:600;font-size:0.78rem;text-align:right;max-width:55%">FPX / Online Banking</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;font-size:0.83rem">
+              <span style="color:rgba(255,255,255,0.55)">Deposit (30%)</span>
+              <span id="pp-deposit" style="color:rgba(255,255,255,0.8);font-weight:600">—</span>
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div style="padding:1.5rem 1.8rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
+              <span style="font-size:0.85rem;font-weight:600;color:rgba(255,255,255,0.7)">Jumlah Bayar Hari Ini</span>
+              <span id="pp-total" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:white;letter-spacing:1px">—</span>
+            </div>
+            <div style="padding:0.8rem;background:rgba(255,255,255,0.07);border-radius:8px;font-size:0.75rem;color:rgba(255,255,255,0.5);line-height:1.5;text-align:center">
+              Baki yuran akan dibayar sebelum kursus bermula
+            </div>
+          </div>
         </div>
-        <div class="trust-badges"><span class="trust-badge">🔐 SSL Selamat</span><span class="trust-badge">🏦 FPX Malaysia</span><span class="trust-badge">✅ Firebase Protected</span></div>
-        <div class="ralat" id="pay-error"></div>
-        <button class="btn-hantar" id="pay-btn" onclick="submitBayaran()">Bayar Sekarang →</button>
+
+        <!-- Help box -->
+        <div style="margin-top:1rem;padding:1rem 1.2rem;background:var(--pale);border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:flex-start;gap:0.75rem">
+          <div style="font-size:1.2rem;flex-shrink:0">💬</div>
+          <div>
+            <div style="font-size:0.8rem;font-weight:700;color:var(--text);margin-bottom:0.2rem">Perlukan bantuan?</div>
+            <div style="font-size:0.75rem;color:var(--muted);line-height:1.5">Hubungi kami di <strong style="color:var(--blue)">013-6039641</strong> untuk pertanyaan berkaitan pembayaran.</div>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
 </section>
@@ -1003,7 +1114,7 @@
 
   // ── PILIH KAEDAH ──
   function pilihKaedah(el,kaedah) {
-    document.querySelectorAll('.pay-mod').forEach(m=>m.classList.remove('aktif'));
+    document.querySelectorAll('.pay-pro').forEach(m=>m.classList.remove('aktif'));
     el.classList.add('aktif');
     document.getElementById('pp-kaedah').textContent = kaedah;
     document.getElementById('kad-medan').style.display = kaedah==='Kad Kredit / Debit'?'block':'none';
