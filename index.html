@@ -28,19 +28,21 @@
 
   // ── PACKAGES ──
   onAuthStateChanged(auth, (user) => {
-    const navAuth = document.getElementById('nav-auth');
-    const navUser = document.getElementById('nav-user');
+    const navAuth   = document.getElementById('nav-auth');
+    const navUser   = document.getElementById('nav-user');
     const userEmail = document.getElementById('user-email');
+    const adminBtn  = document.getElementById('admin-nav-btn');
 
     if (user) {
       navAuth.style.display = 'none';
       navUser.style.display = 'flex';
       userEmail.textContent = user.email;
+      if (adminBtn) adminBtn.style.display = user.email === 'alltsup6565@gmail.com' ? 'inline-block' : 'none';
     } else {
       navAuth.style.display = 'flex';
       navUser.style.display = 'none';
+      if (adminBtn) adminBtn.style.display = 'none';
     }
-    // Reload packages so button state updates
     muatPakej();
   });
 
@@ -465,6 +467,15 @@
   }
 
 
+  /* ── ADMIN ── */
+  .adm-tab { flex:1; padding:0.9rem; border:none; background:transparent; color:var(--text2); font-family:'DM Sans',sans-serif; font-size:0.82rem; font-weight:700; cursor:pointer; transition:all 0.2s; }
+  .adm-tab.aktif-tab { background:linear-gradient(135deg,var(--navy),var(--blue-mid)); color:white; }
+  .adm-tab:hover:not(.aktif-tab) { background:var(--pale); }
+  .adm-th { padding:0.75rem 1rem; text-align:left; font-size:0.65rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); border-bottom:1.5px solid var(--border); background:var(--pale2); white-space:nowrap; }
+  .adm-td { padding:0.75rem 1rem; border-bottom:1px solid var(--border); color:var(--text2); font-size:0.82rem; white-space:nowrap; }
+  .adm-badge-new  { padding:0.2rem 0.65rem; background:#fff3e0; color:#e67e22; border-radius:20px; font-size:0.68rem; font-weight:700; }
+  .adm-badge-done { padding:0.2rem 0.65rem; background:#e6f9f2; color:#0a9e6a; border-radius:20px; font-size:0.68rem; font-weight:700; }
+
   footer { background:var(--navy); color:white; padding:4rem 5% 2rem; }
   .footer-inner { max-width:1160px; margin:0 auto; }
   .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem; margin-bottom:3rem; }
@@ -633,6 +644,7 @@
   </div>
   <div id="nav-user">
     <div class="u-info">Hai, <strong id="user-email"></strong></div>
+    <button id="admin-nav-btn" class="btn-fill" onclick="bukaAdmin()" style="display:none;background:var(--success);font-size:0.75rem">📊 Dashboard</button>
     <button class="btn-line red" onclick="doLogout()">Log Keluar</button>
   </div>
 </nav>
@@ -946,6 +958,60 @@
   </div>
 </section>
 
+<!-- ADMIN DASHBOARD -->
+<div id="admin-panel" style="display:none;background:var(--pale2);padding:5rem 5%">
+  <div style="max-width:1160px;margin:0 auto">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem">
+      <div>
+        <div class="label">Pentadbir</div>
+        <h2 class="sek-title">Dashboard <span>Admin</span></h2>
+        <p class="sek-sub">Semak semua rekod pendaftaran, bayaran dan pengguna.</p>
+      </div>
+      <button onclick="tutupAdmin()" style="padding:0.6rem 1.4rem;background:#fff0f0;border:1.5px solid #fcc;border-radius:8px;color:#c0392b;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer">✕ Tutup Dashboard</button>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2.5rem">
+      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:1.6rem;text-align:center;box-shadow:0 2px 12px var(--shadow)">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--blue);letter-spacing:2px;line-height:1" id="stat-daftar">—</div>
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:0.4rem">Pendaftaran</div>
+      </div>
+      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:1.6rem;text-align:center;box-shadow:0 2px 12px var(--shadow)">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--success);letter-spacing:2px;line-height:1" id="stat-bayar">—</div>
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:0.4rem">Bayaran</div>
+      </div>
+      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:1.6rem;text-align:center;box-shadow:0 2px 12px var(--shadow)">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--navy);letter-spacing:2px;line-height:1" id="stat-user">—</div>
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:0.4rem">Pengguna</div>
+      </div>
+    </div>
+
+    <!-- Tab bar -->
+    <div style="display:flex;background:var(--white);border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.5rem">
+      <button class="adm-tab aktif-tab" onclick="tukarAdminTab(0,this)">📋 Pendaftaran</button>
+      <button class="adm-tab" onclick="tukarAdminTab(1,this)" style="border-left:1.5px solid var(--border);border-right:1.5px solid var(--border)">💳 Bayaran</button>
+      <button class="adm-tab" onclick="tukarAdminTab(2,this)">👤 Pengguna</button>
+    </div>
+
+    <!-- Table -->
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 12px var(--shadow)">
+      <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div id="adm-label" style="font-size:0.82rem;font-weight:600;color:var(--text2)">Senarai Pendaftaran</div>
+        <button onclick="refreshAdmin()" style="padding:0.4rem 1rem;background:var(--pale);border:1.5px solid var(--border);border-radius:6px;font-size:0.75rem;font-weight:700;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s">🔄 Muat Semula</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:0.82rem">
+          <thead id="adm-thead"></thead>
+          <tbody id="adm-tbody"><tr><td style="text-align:center;padding:3rem;color:var(--muted)">Memuatkan data...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-inner">
@@ -1180,6 +1246,100 @@
   function togolWA() { const t=document.getElementById('wa-tooltip'); const n=document.getElementById('wa-notif'); t.classList.toggle('open'); n.style.display='none'; }
   function tutupWA() { document.getElementById('wa-tooltip').classList.remove('open'); }
   setTimeout(()=>{document.getElementById('wa-tooltip').classList.add('open');},3000);
+
+  // ── ADMIN DASHBOARD ──
+  let _adminTab = 0;
+
+  window.bukaAdmin = function() {
+    document.getElementById('admin-panel').style.display = 'block';
+    setTimeout(() => document.getElementById('admin-panel').scrollIntoView({ behavior:'smooth' }), 100);
+    muatAdminData(0);
+    muatAdminStats();
+  };
+
+  window.tutupAdmin = function() {
+    document.getElementById('admin-panel').style.display = 'none';
+    window.scrollTo({ top:0, behavior:'smooth' });
+  };
+
+  window.tukarAdminTab = function(i, el) {
+    _adminTab = i;
+    document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('aktif-tab'));
+    el.classList.add('aktif-tab');
+    const labels = ['Senarai Pendaftaran','Senarai Bayaran','Senarai Pengguna'];
+    document.getElementById('adm-label').textContent = labels[i];
+    muatAdminData(i);
+  };
+
+  window.refreshAdmin = function() {
+    muatAdminData(_adminTab);
+    muatAdminStats();
+  };
+
+  async function muatAdminStats() {
+    try {
+      const [p, b, u] = await Promise.all([
+        getDocs(collection(db,'pendaftaran')),
+        getDocs(collection(db,'bayaran')),
+        getDocs(collection(db,'pengguna'))
+      ]);
+      document.getElementById('stat-daftar').textContent = p.size;
+      document.getElementById('stat-bayar').textContent  = b.size;
+      document.getElementById('stat-user').textContent   = u.size;
+    } catch(e) {}
+  }
+
+  async function muatAdminData(tab) {
+    const cols    = ['pendaftaran','bayaran','pengguna'];
+    const headers = [
+      ['Nama','No. KP','Telefon','E-mel','Pakej','Tarikh','Status','Masa'],
+      ['Nama','Telefon','Program','Kaedah','Jumlah','Status','Masa'],
+      ['Nama','E-mel','Telefon','Kad Kelasi','Masa']
+    ];
+    const fields = [
+      ['nama','kp','tel','emel','pakej','tarikh','status'],
+      ['nama','tel','program','method','jumlah','status'],
+      ['name','email','phone','seamanCard']
+    ];
+
+    const thead = document.getElementById('adm-thead');
+    const tbody = document.getElementById('adm-tbody');
+
+    thead.innerHTML = '<tr>' + headers[tab].map(h => `<th class="adm-th">${h}</th>`).join('') + '</tr>';
+    tbody.innerHTML = `<tr><td colspan="${headers[tab].length}" style="text-align:center;padding:2.5rem;color:var(--muted)"><span class="spinner" style="border-color:rgba(11,45,94,0.15);border-top-color:var(--blue)"></span> Memuatkan...</td></tr>`;
+
+    try {
+      const snap = await getDocs(collection(db, cols[tab]));
+
+      if (snap.empty) {
+        tbody.innerHTML = `<tr><td colspan="${headers[tab].length}" style="text-align:center;padding:3rem;color:var(--muted)">Tiada rekod dijumpai.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      let row = 0;
+      snap.forEach(d => {
+        const data = d.data();
+        const bg   = row % 2 === 0 ? 'white' : 'var(--pale2)';
+        const ts   = data.submittedAt?.toDate?.()?.toLocaleString('ms-MY') || '—';
+        const isNew = data.status === 'Baru' || data.status === 'Belum Disahkan';
+
+        const cells = fields[tab].map(f => {
+          let v = data[f] || '—';
+          if (f === 'status') {
+            v = `<span class="${isNew ? 'adm-badge-new' : 'adm-badge-done'}">${v}</span>`;
+          }
+          return `<td class="adm-td" style="background:${bg}">${v}</td>`;
+        }).join('');
+
+        tbody.innerHTML += `<tr>${cells}<td class="adm-td" style="background:${bg};color:var(--muted);font-size:0.72rem">${ts}</td></tr>`;
+        row++;
+      });
+
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="${headers[tab].length}" style="text-align:center;padding:2rem;color:var(--error)">⚠ Ralat: ${e.message}</td></tr>`;
+    }
+  }
 
   // ── SCROLL FADE ──
   const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('masuk');obs.unobserve(e.target);}}),{threshold:0.08});
