@@ -488,6 +488,13 @@
   .f-tag { padding:0.25rem 0.8rem; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:20px; font-size:0.67rem; color:rgba(255,255,255,0.55); font-weight:600; }
 
   /* MODALS */
+  .modal-input-group { margin-bottom:1rem; }
+  .modal-input-group label { display:block; font-size:0.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:0.45rem; }
+  .modal-input-wrap { position:relative; }
+  .modal-input-icon { position:absolute; left:1rem; top:50%; transform:translateY(-50%); font-size:0.85rem; color:var(--muted); pointer-events:none; }
+  .modal-input-wrap input { width:100%; padding:0.82rem 1rem 0.82rem 2.8rem; background:#f5f9ff; border:1.5px solid var(--border); border-radius:9px; font-family:'DM Sans',sans-serif; font-size:0.88rem; color:var(--text); outline:none; transition:all 0.2s; }
+  .modal-input-wrap input:focus { border-color:var(--blue-mid); background:white; box-shadow:0 0 0 3px rgba(26,111,212,0.08); }
+  .modal-input-wrap input::placeholder { color:#b0c0d8; }
   .overlay { display:none; position:fixed; inset:0; background:rgba(11,45,94,0.45); backdrop-filter:blur(8px); z-index:999; align-items:center; justify-content:center; padding:1rem; }
   .overlay.open { display:flex; }
   .modal { background:white; border-radius:16px; padding:2.2rem; width:100%; max-width:420px; position:relative; box-shadow:0 24px 60px rgba(11,45,94,0.22); animation:pop 0.28s ease; overflow:hidden; }
@@ -980,17 +987,54 @@
 
 <!-- LOGIN MODAL -->
 <div class="overlay" id="m-login">
-  <div class="modal">
-    <button class="modal-tutup" onclick="closeM('login')">✕</button>
-    <div class="modal-jenama"><div class="modal-mark">⚓</div><div><div class="modal-nama">Program Pelaut</div><div class="modal-sub">Malaysia</div></div></div>
-    <h2>Log Masuk</h2>
-    <div class="medan"><label>E-mel</label><input type="email" id="l-email" placeholder="nama@email.com"></div>
-    <div class="medan"><label>Kata Laluan</label><div style="position:relative"><input type="password" id="l-pass" placeholder="••••••••" style="padding-right:2.8rem"><button type="button" onclick="togolLihat('l-pass',this)" style="position:absolute;right:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem">👁</button></div></div>
-    <div style="text-align:right;margin-bottom:0.75rem"><a id="lupa-btn" onclick="lupaKataLaluan()" style="font-size:0.78rem;color:var(--blue-mid);font-weight:600;cursor:pointer">Lupa kata laluan?</a></div>
-    <div id="l-success" style="display:none;padding:0.9rem 1rem;background:#e6f9f2;border:1.5px solid #a0dfc4;border-radius:8px;margin-bottom:1rem;font-size:0.82rem;color:var(--success);font-weight:600;line-height:1.5"></div>
-    <div class="ralat" id="l-error"></div>
-    <button class="btn-hantar" id="l-btn" onclick="doLogin()">Log Masuk →</button>
-    <div class="modal-kaki">Belum ada akaun? <a onclick="switchM('login','register')">Daftar sekarang</a></div>
+  <div class="modal" style="max-width:440px;padding:0;overflow:hidden;border-radius:18px">
+    <button class="modal-tutup" onclick="closeM('login')" style="z-index:10;top:1rem;right:1rem">✕</button>
+
+    <!-- Modal header -->
+    <div style="background:linear-gradient(135deg,var(--navy),var(--blue-mid));padding:2rem 2.2rem;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.05)"></div>
+      <div style="position:absolute;bottom:-40px;left:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.04)"></div>
+      <div style="position:relative;z-index:2">
+        <div style="width:42px;height:42px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:1rem;backdrop-filter:blur(8px)">⚓</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:2px;color:white;line-height:1">Log Masuk</div>
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.6);margin-top:0.3rem">Program Pelaut Malaysia</div>
+      </div>
+    </div>
+
+    <!-- Modal body -->
+    <div style="padding:1.8rem 2.2rem">
+      <div id="l-success" style="display:none;padding:0.85rem 1rem;background:#e6f9f2;border:1.5px solid #a0dfc4;border-radius:8px;margin-bottom:1.2rem;font-size:0.82rem;color:var(--success);font-weight:600;line-height:1.5"></div>
+
+      <div class="modal-input-group">
+        <label>E-mel</label>
+        <div class="modal-input-wrap">
+          <span class="modal-input-icon">✉</span>
+          <input type="email" id="l-email" placeholder="nama@email.com">
+        </div>
+      </div>
+
+      <div class="modal-input-group">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">
+          <label style="margin-bottom:0">Kata Laluan</label>
+          <a id="lupa-btn" onclick="lupaKataLaluan()" style="font-size:0.72rem;color:var(--blue-mid);font-weight:600;cursor:pointer">Lupa kata laluan?</a>
+        </div>
+        <div class="modal-input-wrap">
+          <span class="modal-input-icon">🔑</span>
+          <input type="password" id="l-pass" placeholder="••••••••" style="padding-right:3rem">
+          <button type="button" onclick="togolLihat('l-pass',this)" style="position:absolute;right:0.8rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem">👁</button>
+        </div>
+      </div>
+
+      <div class="ralat" id="l-error"></div>
+
+      <button class="btn-hantar" id="l-btn" onclick="doLogin()" style="margin-top:0.5rem;border-radius:10px;font-size:0.92rem;letter-spacing:0.3px">
+        Log Masuk →
+      </button>
+
+      <div style="text-align:center;margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--border);font-size:0.8rem;color:var(--muted)">
+        Belum ada akaun? <a onclick="switchM('login','register')" style="color:var(--blue-mid);font-weight:700;cursor:pointer">Daftar sekarang</a>
+      </div>
+    </div>
   </div>
 </div>
 
