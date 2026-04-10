@@ -31,17 +31,14 @@
     const navAuth   = document.getElementById('nav-auth');
     const navUser   = document.getElementById('nav-user');
     const userEmail = document.getElementById('user-email');
-    const adminBtn  = document.getElementById('admin-nav-btn');
 
     if (user) {
       navAuth.style.display = 'none';
       navUser.style.display = 'flex';
       userEmail.textContent = user.email;
-      if (adminBtn) adminBtn.style.display = user.email === 'alltsup6565@gmail.com' ? 'inline-block' : 'none';
-    } else {
+      } else {
       navAuth.style.display = 'flex';
       navUser.style.display = 'none';
-      if (adminBtn) adminBtn.style.display = 'none';
     }
     muatPakej();
   });
@@ -258,6 +255,7 @@
     }
   }
 
+  
   window.buatKadPakej = function(id, d) {
     const pop     = d.popular === 'ya';
     const badge   = pop ? '<div class="p-badge">⭐ Popular</div>' : '';
@@ -268,225 +266,9 @@
     const loggedIn = navUser && navUser.style.display !== 'none' && navUser.style.display !== '';
     const btnLabel = loggedIn ? 'Pilih Pakej Ini →' : '🔒 Log Masuk untuk Pilih';
     const btnStyle = loggedIn ? '' : 'background:linear-gradient(90deg,var(--muted),#8a9bb5);box-shadow:none;';
-
-    // Admin edit/delete buttons
-    const isAdmin = auth.currentUser && auth.currentUser.email === 'alltsup6565@gmail.com';
-    const kYa  = JSON.stringify(d.kursusYa||[]).replace(/'/g,"\\'");
-    const kTdk = JSON.stringify(d.kursustidak||[]).replace(/'/g,"\\'");
-    const adminBtns = isAdmin ? `
-      <div style="display:flex;gap:0.5rem;padding:0 1.4rem 1rem">
-        <button onclick="bukaModalPakej('edit','${id}','${d.nama}',${d.harga},'${d.popular||'tidak'}','${(d.nota||'').replace(/'/g,"\\'")}',${JSON.stringify(d.kursusYa||[])},${JSON.stringify(d.kursustidak||[])})" style="flex:1;padding:0.55rem;background:var(--pale);border:1.5px solid var(--border);border-radius:7px;color:var(--blue);font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer">✏️ Edit</button>
-        <button onclick="hapusPakej('${id}','${d.nama}')" style="flex:1;padding:0.55rem;background:#fff0f0;border:1.5px solid #fcc;border-radius:7px;color:#c0392b;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer">🗑️ Buang</button>
-      </div>` : '';
-
-    return `<div class="p-card${pop?' popular':''}" id="pakej-${id}"><div class="p-head" style="${headBg};position:relative;padding:1.6rem">${badge}<div class="p-tag">${d.nama}</div><h3>${d.nama}</h3><div class="p-price">Mulai dari <strong>RM ${parseInt(d.harga).toLocaleString()}</strong></div></div><div class="p-body">${ya}${tidak}${d.nota?`<div class="p-note">${d.nota}</div>`:''}</div><div class="p-foot"><button class="btn-hantar" style="${btnStyle}" onclick="pilihPakej('${d.nama}',${d.harga})">${btnLabel}</button></div>${adminBtns}</div>`;
+    return `<div class="p-card${pop?' popular':''}" id="pakej-${id}"><div class="p-head" style="${headBg};position:relative;padding:1.6rem">${badge}<div class="p-tag">${d.nama}</div><h3>${d.nama}</h3><div class="p-price">Mulai dari <strong>RM ${parseInt(d.harga).toLocaleString()}</strong></div></div><div class="p-body">${ya}${tidak}${d.nota?`<div class="p-note">${d.nota}</div>`:''}</div><div class="p-foot"><button class="btn-hantar" style="${btnStyle}" onclick="pilihPakej('${d.nama}',${d.harga})">${btnLabel}</button></div></div>`;
   };
 
-  // ── ADMIN DASHBOARD ── (inside module to access db, getDocs, collection)
-  let _adminTab = 0;
-
-  window.bukaAdmin = function() {
-    document.getElementById('admin-panel').style.display = 'block';
-    setTimeout(() => document.getElementById('admin-panel').scrollIntoView({ behavior:'smooth' }), 100);
-    muatAdminData(0);
-    muatAdminStats();
-  };
-
-  window.tutupAdmin = function() {
-    document.getElementById('admin-panel').style.display = 'none';
-    window.scrollTo({ top:0, behavior:'smooth' });
-  };
-
-  window.tukarAdminTab = function(i, el) {
-    _adminTab = i;
-    document.querySelectorAll('.adm-tab').forEach(t => t.classList.remove('aktif-tab'));
-    el.classList.add('aktif-tab');
-    const labels = ['Senarai Pendaftaran','Senarai Bayaran','Senarai Pengguna'];
-    document.getElementById('adm-label').textContent = labels[i];
-    muatAdminData(i);
-  };
-
-  window.refreshAdmin = function() { muatAdminData(_adminTab); muatAdminStats(); };
-
-  async function muatAdminStats() {
-    try {
-      const [p, b, u] = await Promise.all([
-        getDocs(collection(db,'pendaftaran')),
-        getDocs(collection(db,'bayaran')),
-        getDocs(collection(db,'pengguna'))
-      ]);
-      document.getElementById('stat-daftar').textContent = p.size;
-      document.getElementById('stat-bayar').textContent  = b.size;
-      document.getElementById('stat-user').textContent   = u.size;
-    } catch(e) { console.log('Stats error:', e); }
-  }
-
-  async function muatAdminData(tab) {
-    const cols    = ['pendaftaran','bayaran','pengguna'];
-    const headers = [
-      ['Nama','No. KP','Telefon','E-mel','Pakej','Status','Tindakan'],
-      ['Nama','Telefon','Program','Kaedah','Jumlah','Status','Tindakan'],
-      ['Nama','E-mel','Telefon','Kad Kelasi','Masa']
-    ];
-    const fields = [
-      ['nama','kp','tel','emel','pakej','status'],
-      ['nama','tel','program','method','jumlah','status'],
-      ['name','email','phone','seamanCard']
-    ];
-
-    const thead = document.getElementById('adm-thead');
-    const tbody = document.getElementById('adm-tbody');
-    thead.innerHTML = '<tr>' + headers[tab].map(h => `<th class="adm-th">${h}</th>`).join('') + '</tr>';
-    tbody.innerHTML = `<tr><td colspan="${headers[tab].length}" style="text-align:center;padding:2.5rem;color:var(--muted)"><span class="spinner" style="border-color:rgba(11,45,94,0.15);border-top-color:var(--blue)"></span> Memuatkan...</td></tr>`;
-
-    try {
-      const snap = await getDocs(collection(db, cols[tab]));
-      if (snap.empty) {
-        tbody.innerHTML = `<tr><td colspan="${headers[tab].length}" style="text-align:center;padding:3rem;color:var(--muted)">Tiada rekod dijumpai.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = '';
-      let row = 0;
-      snap.forEach(d => {
-        const data = d.data();
-        const id   = d.id;
-        const bg   = row % 2 === 0 ? 'white' : 'var(--pale2)';
-        const ts   = data.submittedAt?.toDate?.()?.toLocaleString('ms-MY') || '—';
-        const isNew = data.status === 'Baru' || data.status === 'Belum Disahkan';
-
-        // Build data cells
-        const cells = fields[tab].map(f => {
-          let v = data[f] || '—';
-          if (f === 'status') {
-            v = `<span class="${isNew ? 'adm-badge-new':'adm-badge-done'}">${v}</span>`;
-          }
-          if (f === 'seamanCard') v = `<span style="font-size:0.72rem">${v}</span><br><span style="font-size:0.68rem;color:var(--muted)">${ts}</span>`;
-          return `<td class="adm-td" style="background:${bg}">${v}</td>`;
-        }).join('');
-
-        // Action buttons for pendaftaran (tab 0) and bayaran (tab 1)
-        let actionCell = '';
-        if (tab === 0) {
-          actionCell = `<td class="adm-td" style="background:${bg}">
-            <select onchange="tukarStatus('pendaftaran','${id}',this.value,this)" style="padding:0.3rem 0.5rem;border:1.5px solid var(--border);border-radius:6px;font-size:0.72rem;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--text);background:white;cursor:pointer">
-              <option value="Baru" ${data.status==='Baru'?'selected':''}>Baru</option>
-              <option value="Disahkan" ${data.status==='Disahkan'?'selected':''}>Disahkan</option>
-              <option value="Ditolak" ${data.status==='Ditolak'?'selected':''}>Ditolak</option>
-            </select>
-          </td>`;
-        } else if (tab === 1) {
-          actionCell = `<td class="adm-td" style="background:${bg}">
-            <select onchange="tukarStatus('bayaran','${id}',this.value,this)" style="padding:0.3rem 0.5rem;border:1.5px solid var(--border);border-radius:6px;font-size:0.72rem;font-weight:600;font-family:'DM Sans',sans-serif;color:var(--text);background:white;cursor:pointer">
-              <option value="Belum Disahkan" ${data.status==='Belum Disahkan'?'selected':''}>Belum Disahkan</option>
-              <option value="Disahkan" ${data.status==='Disahkan'?'selected':''}>Disahkan</option>
-            </select>
-          </td>`;
-        }
-
-        tbody.innerHTML += `<tr>${cells}${actionCell}</tr>`;
-        row++;
-      });
-
-      // If tab is pakej — show edit buttons
-      if (tab === 2) {
-        // For pengguna tab, no action needed
-      }
-
-    } catch(e) {
-      tbody.innerHTML = `<tr><td colspan="${headers[tab].length}" style="text-align:center;padding:2rem;color:var(--error)">⚠ Ralat: ${e.message}</td></tr>`;
-    }
-  }
-
-  // ── TUKAR STATUS ──
-  window.tukarStatus = async function(koleksi, id, statusBaru, selectEl) {
-    const asal = selectEl.value;
-    try {
-      await updateDoc(doc(db, koleksi, id), { status: statusBaru });
-      showToast('✅ Status dikemaskini kepada "' + statusBaru + '"');
-      // Update badge color in same row
-      const row = selectEl.closest('tr');
-      if (row) {
-        const badge = row.querySelector('.adm-badge-new, .adm-badge-done');
-        if (badge) {
-          const isNew = statusBaru === 'Baru' || statusBaru === 'Belum Disahkan';
-          badge.className = isNew ? 'adm-badge-new' : 'adm-badge-done';
-          badge.textContent = statusBaru;
-        }
-      }
-    } catch(e) {
-      showToast('⚠ Ralat: ' + e.message);
-      selectEl.value = asal;
-    }
-  };
-
-  // ── PAKEJ MANAGEMENT ──
-  window.bukaModalPakej = function(mod, id, nama, harga, popular, nota, kursusYa, kursustidak) {
-    document.getElementById('pk-mod').value     = mod;
-    document.getElementById('pk-id').value      = id || '';
-    document.getElementById('pk-nama').value    = nama || '';
-    document.getElementById('pk-harga').value   = harga || '';
-    document.getElementById('pk-popular').value = popular || 'tidak';
-    document.getElementById('pk-nota').value    = nota || '';
-    document.getElementById('pk-kursus-ya').value    = (kursusYa||[]).join('\n');
-    document.getElementById('pk-kursus-tidak').value = (kursustidak||[]).join('\n');
-    document.getElementById('pk-modal-title').textContent = mod === 'tambah' ? 'Tambah Pakej Baru' : 'Edit Pakej';
-    document.getElementById('pk-error').textContent = '';
-    openM('pakej-form');
-  };
-
-  window.simpanPakej = async function() {
-    const mod    = document.getElementById('pk-mod').value;
-    const id     = document.getElementById('pk-id').value;
-    const nama   = document.getElementById('pk-nama').value.trim();
-    const harga  = document.getElementById('pk-harga').value.trim();
-    const pop    = document.getElementById('pk-popular').value;
-    const nota   = document.getElementById('pk-nota').value.trim();
-    const ya     = document.getElementById('pk-kursus-ya').value.trim();
-    const tidak  = document.getElementById('pk-kursus-tidak').value.trim();
-    const errEl  = document.getElementById('pk-error');
-    errEl.textContent = '';
-
-    if (!nama)  { errEl.textContent = '⚠ Sila masukkan nama pakej.'; return; }
-    if (!harga) { errEl.textContent = '⚠ Sila masukkan harga pakej.'; return; }
-    if (!ya)    { errEl.textContent = '⚠ Sila masukkan sekurang-kurangnya satu kursus.'; return; }
-
-    const btn = document.getElementById('pk-btn');
-    btn.innerHTML = '<span class="spinner"></span>Menyimpan...'; btn.disabled = true;
-
-    const data = {
-      nama, harga: parseInt(harga), popular: pop, nota,
-      kursusYa:    ya.split('\n').map(s => s.trim()).filter(Boolean),
-      kursustidak: tidak ? tidak.split('\n').map(s => s.trim()).filter(Boolean) : []
-    };
-
-    try {
-      if (mod === 'tambah') {
-        await addDoc(collection(db, 'pakej'), { ...data, createdAt: serverTimestamp() });
-        showToast('✅ Pakej "' + nama + '" berjaya ditambah!');
-      } else {
-        await updateDoc(doc(db, 'pakej', id), data);
-        showToast('✅ Pakej "' + nama + '" berjaya dikemaskini!');
-      }
-      closeM('pakej-form');
-      ['pk-nama','pk-harga','pk-nota','pk-kursus-ya','pk-kursus-tidak'].forEach(i => document.getElementById(i).value = '');
-      await muatPakej();
-    } catch(e) {
-      errEl.textContent = '⚠ Ralat: ' + e.message;
-    } finally {
-      btn.innerHTML = '💾 Simpan Pakej →'; btn.disabled = false;
-    }
-  };
-
-  window.hapusPakej = async function(id, nama) {
-    if (!confirm('Pasti mahu membuang pakej "' + nama + '"?')) return;
-    try {
-      await deleteDoc(doc(db, 'pakej', id));
-      const card = document.getElementById('pakej-' + id);
-      if (card) { card.style.transition = 'all 0.3s'; card.style.opacity = '0'; card.style.transform = 'scale(0.95)'; setTimeout(() => card.remove(), 300); }
-      showToast('✅ Pakej berjaya dibuang!');
-    } catch(e) { showToast('⚠ Ralat: ' + e.message); }
-  };
 </script>
 
 <style>
@@ -861,7 +643,6 @@
   </div>
   <div id="nav-user">
     <div class="u-info">Hai, <strong id="user-email"></strong></div>
-    <button id="admin-nav-btn" class="btn-fill" onclick="bukaAdmin()" style="display:none;background:var(--success);font-size:0.75rem">📊 Dashboard</button>
     <button class="btn-line red" onclick="doLogout()">Log Keluar</button>
   </div>
 </nav>
@@ -1175,63 +956,6 @@
   </div>
 </section>
 
-<!-- ADMIN DASHBOARD -->
-<div id="admin-panel" style="display:none;background:var(--pale2);padding:5rem 5%">
-  <div style="max-width:1160px;margin:0 auto">
-
-    <!-- Header -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem">
-      <div>
-        <div class="label">Pentadbir</div>
-        <h2 class="sek-title">Dashboard <span>Admin</span></h2>
-        <p class="sek-sub">Semak semua rekod pendaftaran, bayaran dan pengguna.</p>
-      </div>
-      <button onclick="tutupAdmin()" style="padding:0.6rem 1.4rem;background:#fff0f0;border:1.5px solid #fcc;border-radius:8px;color:#c0392b;font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer">✕ Tutup Dashboard</button>
-    </div>
-    <div style="margin-bottom:1.5rem">
-      <button onclick="bukaModalPakej('tambah')" class="btn-hantar" style="width:auto;padding:0.7rem 1.8rem;display:inline-flex;align-items:center;gap:0.5rem;font-size:0.85rem">➕ Tambah Pakej Baru</button>
-    </div>
-
-    <!-- Stats -->
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2.5rem">
-      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:1.6rem;text-align:center;box-shadow:0 2px 12px var(--shadow)">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--blue);letter-spacing:2px;line-height:1" id="stat-daftar">—</div>
-        <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:0.4rem">Pendaftaran</div>
-      </div>
-      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:1.6rem;text-align:center;box-shadow:0 2px 12px var(--shadow)">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--success);letter-spacing:2px;line-height:1" id="stat-bayar">—</div>
-        <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:0.4rem">Bayaran</div>
-      </div>
-      <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:1.6rem;text-align:center;box-shadow:0 2px 12px var(--shadow)">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--navy);letter-spacing:2px;line-height:1" id="stat-user">—</div>
-        <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:0.4rem">Pengguna</div>
-      </div>
-    </div>
-
-    <!-- Tab bar -->
-    <div style="display:flex;background:var(--white);border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.5rem">
-      <button class="adm-tab aktif-tab" onclick="tukarAdminTab(0,this)">📋 Pendaftaran</button>
-      <button class="adm-tab" onclick="tukarAdminTab(1,this)" style="border-left:1.5px solid var(--border);border-right:1.5px solid var(--border)">💳 Bayaran</button>
-      <button class="adm-tab" onclick="tukarAdminTab(2,this)">👤 Pengguna</button>
-    </div>
-
-    <!-- Table -->
-    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 2px 12px var(--shadow)">
-      <div style="padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-        <div id="adm-label" style="font-size:0.82rem;font-weight:600;color:var(--text2)">Senarai Pendaftaran</div>
-        <button onclick="refreshAdmin()" style="padding:0.4rem 1rem;background:var(--pale);border:1.5px solid var(--border);border-radius:6px;font-size:0.75rem;font-weight:700;color:var(--blue);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s">🔄 Muat Semula</button>
-      </div>
-      <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:0.82rem">
-          <thead id="adm-thead"></thead>
-          <tbody id="adm-tbody"><tr><td style="text-align:center;padding:3rem;color:var(--muted)">Memuatkan data...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-  </div>
-</div>
-
 <!-- FOOTER -->
 <footer>
   <div class="footer-inner">
@@ -1291,34 +1015,6 @@
     <div class="ralat" id="r-error"></div>
     <button class="btn-hantar" id="r-btn" onclick="doRegister()">Cipta Akaun →</button>
     <div class="modal-kaki">Sudah ada akaun? <a onclick="switchM('register','login')">Log masuk di sini</a></div>
-  </div>
-</div>
-
-<!-- PAKEJ FORM MODAL -->
-<div class="overlay" id="m-pakej-form">
-  <div class="modal lebar scroll">
-    <button class="modal-tutup" onclick="closeM('pakej-form')">✕</button>
-    <div class="modal-jenama"><div class="modal-mark">⚓</div><div><div class="modal-nama">Admin</div><div class="modal-sub">Urus Pakej</div></div></div>
-    <h2 id="pk-modal-title">Tambah Pakej Baru</h2>
-    <input type="hidden" id="pk-mod" value="tambah">
-    <input type="hidden" id="pk-id" value="">
-    <div class="medan"><label>Nama Pakej *</label><input type="text" id="pk-nama" placeholder="cth: Pakej Premium"></div>
-    <div class="f2">
-      <div class="medan"><label>Harga (RM) *</label><input type="number" id="pk-harga" placeholder="cth: 3500"></div>
-      <div class="medan"><label>Popular?</label><select id="pk-popular"><option value="tidak">Tidak</option><option value="ya">Ya ⭐</option></select></div>
-    </div>
-    <div class="medan"><label>Nota Ringkas</label><input type="text" id="pk-nota" placeholder="cth: 🎓 Semua sijil STCW + praktikal penuh"></div>
-    <div class="medan">
-      <label>Kursus Yang Disertakan *</label>
-      <textarea id="pk-kursus-ya" rows="5" placeholder="Basic Training (BT)|Latihan asas keselamatan&#10;DSD|Latihan keselamatan ISPS Code"></textarea>
-      <div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem">Format: <strong>Nama Kursus|Penerangan</strong> — satu baris satu kursus</div>
-    </div>
-    <div class="medan">
-      <label>Kursus Yang Tidak Disertakan</label>
-      <textarea id="pk-kursus-tidak" rows="3" placeholder="Crowd Management|Tidak termasuk&#10;Penempatan Praktikal|Boleh ditambah kemudian"></textarea>
-    </div>
-    <div class="ralat" id="pk-error"></div>
-    <button class="btn-hantar" id="pk-btn" onclick="simpanPakej()">💾 Simpan Pakej →</button>
   </div>
 </div>
 
