@@ -280,7 +280,7 @@
           <h1 class="page-title">Pengguna</h1>
           <p class="page-sub">${data.length} pengguna berdaftar</p>
         </div>
-        <div style="display:flex;gap:0.7rem">
+        <div style="display:flex;gap:0.7rem;flex-wrap:wrap">
           <input id="search-box" type="text" placeholder="🔍 Cari nama, e-mel..." value="${carian}" oninput="renderTabSemula()" class="search-input">
           <button onclick="exportCSV('pengguna')" class="btn-export">⬇ Export CSV</button>
         </div>
@@ -290,24 +290,132 @@
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th>Nama</th><th>E-mel</th><th>Telefon</th><th>No. KP</th><th>Kad Kelasi</th><th>Tindakan</th>
+              <th>#</th><th>Nama</th><th>E-mel</th><th>Telefon</th><th>No. KP</th><th>Kad Kelasi</th><th>Tindakan</th>
             </tr></thead>
             <tbody>
-              ${data.length === 0 ? `<tr><td colspan="6" class="empty-row">Tiada pengguna dijumpai.</td></tr>` :
+              ${data.length === 0 ? `<tr><td colspan="7" class="empty-row">Tiada pengguna dijumpai.</td></tr>` :
                 data.map((d,i) => `
                 <tr class="${i%2===0?'':'row-alt'}">
-                  <td><strong>${d.name||d.nama||'—'}</strong></td>
+                  <td style="color:var(--muted);font-size:0.75rem">${i+1}</td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:0.6rem">
+                      <div style="width:32px;height:32px;background:linear-gradient(135deg,var(--navy),var(--blue-mid));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:700;flex-shrink:0">${(d.name||d.nama||'?')[0].toUpperCase()}</div>
+                      <strong>${d.name||d.nama||'—'}</strong>
+                    </div>
+                  </td>
                   <td style="font-size:0.78rem">${d.email||d.emel||'—'}</td>
                   <td>${d.phone||d.tel||'—'}</td>
-                  <td>${d.kp||'—'}</td>
+                  <td style="font-size:0.78rem">${d.kp||'—'}</td>
                   <td>${d.seamanCard||'—'}</td>
-                  <td><button onclick="padamRekod('pengguna','${d.id}')" class="btn-del" title="Padam">🗑</button></td>
+                  <td>
+                    <div style="display:flex;gap:0.4rem">
+                      <button onclick="lihatPengguna('${d.id}')" class="btn-view" title="Lihat">👁 Lihat</button>
+                      <button onclick="editPengguna('${d.id}')" class="btn-edit-u" title="Edit">✏️</button>
+                      <button onclick="padamRekod('pengguna','${d.id}')" class="btn-del" title="Padam">🗑</button>
+                    </div>
+                  </td>
                 </tr>`).join('')}
             </tbody>
           </table>
         </div>
       </div>`;
   }
+
+  // ── VIEW USER ──
+  window.lihatPengguna = function(id) {
+    const d = _allData.pengguna.find(u => u.id === id);
+    if (!d) return;
+
+    document.getElementById('uv-avatar').textContent = (d.name||d.nama||'?')[0].toUpperCase();
+    document.getElementById('uv-nama').textContent   = d.name||d.nama||'—';
+    document.getElementById('uv-email').textContent  = d.email||d.emel||'—';
+    document.getElementById('uv-tel').textContent    = d.phone||d.tel||'—';
+    document.getElementById('uv-kp').textContent     = d.kp||'—';
+    document.getElementById('uv-seaman').textContent = d.seamanCard||'Tiada';
+    document.getElementById('uv-uid').textContent    = d.uid||'—';
+
+    // Find their registrations
+    const daftars = _allData.pendaftaran.filter(p => p.uid === d.uid || p.emel === (d.email||d.emel));
+    const bayarans = _allData.bayaran.filter(b => b.uid === d.uid);
+
+    document.getElementById('uv-daftar-list').innerHTML = daftars.length === 0
+      ? '<div style="color:var(--muted);font-size:0.82rem;padding:0.5rem 0">Tiada rekod pendaftaran.</div>'
+      : daftars.map(p => `
+          <div style="padding:0.7rem;background:var(--bg);border-radius:8px;margin-bottom:0.5rem;font-size:0.82rem">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong>${p.pakej||'—'}</strong>
+              <span class="badge ${p.status==='Disahkan'?'badge-ok':p.status==='Ditolak'?'badge-no':'badge-new'}">${p.status||'Baru'}</span>
+            </div>
+            <div style="color:var(--muted);font-size:0.75rem;margin-top:0.3rem">${p.tarikh||'—'}</div>
+          </div>`).join('');
+
+    document.getElementById('uv-bayar-list').innerHTML = bayarans.length === 0
+      ? '<div style="color:var(--muted);font-size:0.82rem;padding:0.5rem 0">Tiada rekod bayaran.</div>'
+      : bayarans.map(b => `
+          <div style="padding:0.7rem;background:var(--bg);border-radius:8px;margin-bottom:0.5rem;font-size:0.82rem">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong style="color:var(--green)">${b.jumlah||'—'}</strong>
+              <span class="badge ${b.status==='Disahkan'?'badge-ok':'badge-new'}">${b.status||'—'}</span>
+            </div>
+            <div style="color:var(--muted);font-size:0.75rem;margin-top:0.3rem">${b.method||'—'}</div>
+          </div>`).join('');
+
+    document.getElementById('uv-edit-btn').onclick = () => { tutupModalUser('view'); editPengguna(id); };
+    document.getElementById('user-view-modal').style.display = 'flex';
+  };
+
+  window.tutupModalUser = function(mod) {
+    document.getElementById(mod === 'view' ? 'user-view-modal' : 'user-edit-modal').style.display = 'none';
+  };
+
+  // ── EDIT USER ──
+  window.editPengguna = function(id) {
+    const d = _allData.pengguna.find(u => u.id === id);
+    if (!d) return;
+
+    document.getElementById('ue-id').value    = id;
+    document.getElementById('ue-nama').value  = d.name||d.nama||'';
+    document.getElementById('ue-email').value = d.email||d.emel||'';
+    document.getElementById('ue-tel').value   = d.phone||d.tel||'';
+    document.getElementById('ue-kp').value    = d.kp||'';
+    document.getElementById('ue-seaman').value= d.seamanCard||'';
+    document.getElementById('ue-error').textContent = '';
+    document.getElementById('user-edit-modal').style.display = 'flex';
+  };
+
+  window.simpanEditPengguna = async function() {
+    const id     = document.getElementById('ue-id').value;
+    const nama   = document.getElementById('ue-nama').value.trim();
+    const tel    = document.getElementById('ue-tel').value.trim();
+    const kp     = document.getElementById('ue-kp').value.trim();
+    const seaman = document.getElementById('ue-seaman').value.trim();
+    const errEl  = document.getElementById('ue-error');
+    errEl.textContent = '';
+
+    if (!nama) { errEl.textContent = '⚠ Sila masukkan nama.'; return; }
+
+    const btn = document.getElementById('ue-btn');
+    btn.innerHTML = '<span class="spin"></span>Menyimpan...'; btn.disabled = true;
+
+    try {
+      await updateDoc(doc(db, 'pengguna', id), { name: nama, phone: tel, kp, seamanCard: seaman });
+
+      // Update local data
+      const idx = _allData.pengguna.findIndex(u => u.id === id);
+      if (idx !== -1) {
+        _allData.pengguna[idx] = { ..._allData.pengguna[idx], name: nama, phone: tel, kp, seamanCard: seaman };
+      }
+
+      tutupModalUser('edit');
+      renderTab('pengguna');
+      showToast('✅ Maklumat pengguna berjaya dikemaskini!');
+    } catch(e) {
+      errEl.textContent = '⚠ Ralat: ' + e.message;
+    } finally {
+      btn.innerHTML = '💾 Simpan Perubahan'; btn.disabled = false;
+    }
+  };
+
 
   // ── RENDER PAKEJ ──
   function renderPakej(container) {
@@ -1062,6 +1170,78 @@
     <button class="pf-btn" id="pf-btn" onclick="simpanPakej()">💾 Simpan</button>
   </div>
 </div>
+
+<!-- USER VIEW MODAL -->
+<div class="modal-overlay" id="user-view-modal" style="display:none">
+  <div class="modal-box" style="max-width:560px">
+    <button class="modal-close" onclick="tutupModalUser('view')">✕</button>
+
+    <!-- Header with avatar -->
+    <div style="display:flex;align-items:center;gap:1.2rem;margin-bottom:1.8rem;padding-bottom:1.5rem;border-bottom:1.5px solid var(--border)">
+      <div id="uv-avatar" style="width:56px;height:56px;background:linear-gradient(135deg,var(--navy),var(--blue-mid));border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;flex-shrink:0">?</div>
+      <div>
+        <div id="uv-nama" style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:2px;color:var(--navy)">—</div>
+        <div id="uv-email" style="font-size:0.82rem;color:var(--muted);margin-top:0.2rem">—</div>
+      </div>
+      <button id="uv-edit-btn" class="btn-primary" style="margin-left:auto;padding:0.5rem 1.2rem;font-size:0.8rem">✏️ Edit</button>
+    </div>
+
+    <!-- Info grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+      <div class="uv-field"><div class="uv-lbl">📞 Telefon</div><div class="uv-val" id="uv-tel">—</div></div>
+      <div class="uv-field"><div class="uv-lbl">🪪 No. KP</div><div class="uv-val" id="uv-kp">—</div></div>
+      <div class="uv-field"><div class="uv-lbl">🚢 Kad Kelasi</div><div class="uv-val" id="uv-seaman">—</div></div>
+      <div class="uv-field"><div class="uv-lbl">🔑 UID Firebase</div><div class="uv-val" id="uv-uid" style="font-size:0.68rem;word-break:break-all">—</div></div>
+    </div>
+
+    <!-- Registrations -->
+    <div style="margin-bottom:1.2rem">
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem">📋 Rekod Pendaftaran</div>
+      <div id="uv-daftar-list"></div>
+    </div>
+
+    <!-- Payments -->
+    <div>
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem">💳 Rekod Bayaran</div>
+      <div id="uv-bayar-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- USER EDIT MODAL -->
+<div class="modal-overlay" id="user-edit-modal" style="display:none">
+  <div class="modal-box" style="max-width:460px">
+    <button class="modal-close" onclick="tutupModalUser('edit')">✕</button>
+    <div class="modal-title">✏️ Edit Maklumat Pengguna</div>
+    <input type="hidden" id="ue-id">
+
+    <div style="background:var(--bg);border-radius:8px;padding:0.8rem 1rem;margin-bottom:1.2rem;font-size:0.78rem;color:var(--muted)">
+      ⚠️ E-mel tidak boleh ditukar kerana ia digunakan untuk log masuk Firebase.
+    </div>
+
+    <div class="mf"><label>Nama Penuh *</label><input type="text" id="ue-nama" placeholder="Nama penuh pengguna"></div>
+    <div class="mf"><label>E-mel (Tidak boleh ditukar)</label><input type="email" id="ue-email" disabled style="opacity:0.5;cursor:not-allowed"></div>
+    <div class="mf-row">
+      <div class="mf"><label>No. Telefon</label><input type="tel" id="ue-tel" placeholder="01X-XXXXXXXX"></div>
+      <div class="mf"><label>No. KP</label><input type="text" id="ue-kp" placeholder="XXXXXX-XX-XXXX" maxlength="14"></div>
+    </div>
+    <div class="mf"><label>No. Kad Kelasi (Seaman Card)</label><input type="text" id="ue-seaman" placeholder="Nombor kad kelasi"></div>
+
+    <div class="pf-error" id="ue-error"></div>
+    <button class="pf-btn" id="ue-btn" onclick="simpanEditPengguna()">💾 Simpan Perubahan</button>
+  </div>
+</div>
+
+<style>
+  /* User view/edit extras */
+  .uv-field { background:var(--bg); border-radius:8px; padding:0.8rem 1rem; }
+  .uv-lbl   { font-size:0.65rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:0.3rem; }
+  .uv-val   { font-size:0.88rem; font-weight:600; color:var(--text); }
+  .btn-view { padding:0.3rem 0.7rem; background:#edf4ff; border:1.5px solid var(--border); border-radius:6px; color:var(--blue); font-family:'DM Sans',sans-serif; font-size:0.72rem; font-weight:700; cursor:pointer; white-space:nowrap; transition:all 0.2s; }
+  .btn-view:hover { background:var(--blue-lt); color:white; border-color:var(--blue-lt); }
+  .btn-edit-u { padding:0.3rem 0.55rem; background:#fff8e1; border:1.5px solid #ffe082; border-radius:6px; color:#e67e22; font-size:0.75rem; cursor:pointer; transition:all 0.2s; }
+  .btn-edit-u:hover { background:#e67e22; color:white; border-color:#e67e22; }
+</style>
 
 <div class="toast" id="toast"></div>
 
