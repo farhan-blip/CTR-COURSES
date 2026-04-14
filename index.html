@@ -130,25 +130,31 @@
     const kp     = document.getElementById('b-kp').value.trim();
     const tel    = document.getElementById('b-tel').value.trim();
     const emel   = document.getElementById('b-emel').value.trim();
-    const seaman = document.getElementById('b-uni').value.trim();
+    const seaman = document.getElementById('b-uni')?.value.trim() || '';
     const pakej  = document.getElementById('b-pakej').value;
     const tarikh = document.getElementById('b-tarikh').value;
     const nota   = document.getElementById('b-nota').value.trim();
     const agree  = document.getElementById('b-agree').checked;
     const errEl  = document.getElementById('bk-error');
+
+    // Get Fasa 1 status
+    const statusMedical = document.querySelector('input[name="status-medical"]:checked')?.value || '—';
+    const statusSeaman  = document.querySelector('input[name="status-seaman"]:checked')?.value || '—';
+
     errEl.textContent = '';
-    if (!nama)  { errEl.textContent = '⚠ Sila masukkan nama penuh.'; return; }
-    if (!kp)    { errEl.textContent = '⚠ Sila masukkan No. KP / Pasport.'; return; }
-    if (!/^\d{6}-\d{2}-\d{4}$/.test(kp)) { errEl.textContent = '⚠ Format No. KP tidak sah. Gunakan XXXXXX-XX-XXXX.'; return; }
-    if (!tel)   { errEl.textContent = '⚠ Sila masukkan no. telefon.'; return; }
-    if (!emel)  { errEl.textContent = '⚠ Sila masukkan e-mel.'; return; }
     if (!pakej) { errEl.textContent = '⚠ Sila pilih pakej program.'; return; }
     if (!agree) { errEl.textContent = '⚠ Sila bersetuju dengan terma & syarat.'; return; }
+
     const btn = document.getElementById('bk-btn');
     btn.innerHTML = '<span class="spinner"></span>Menghantar...'; btn.disabled = true;
     tunjukLoader('Menyimpan pendaftaran...', 'Data anda sedang disimpan dalam Firebase');
     try {
-      await addDoc(collection(db, 'pendaftaran'), { nama, kp, tel, emel, seamanCard: seaman, pakej, tarikh, nota, status: 'Baru', submittedAt: serverTimestamp(), uid: auth.currentUser ? auth.currentUser.uid : 'tetamu' });
+      await addDoc(collection(db, 'pendaftaran'), {
+        nama, kp, tel, emel, seamanCard: seaman, pakej, tarikh, nota,
+        statusMedical, statusSeaman,
+        status: 'Baru', submittedAt: serverTimestamp(),
+        uid: auth.currentUser ? auth.currentUser.uid : 'tetamu'
+      });
       document.getElementById('bk-success').style.display = 'block';
       showToast('✓ Pendaftaran berjaya disimpan!');
       setTimeout(() => document.getElementById('bayaran').scrollIntoView({ behavior: 'smooth' }), 1200);
@@ -487,6 +493,24 @@
   .f-bawah { border-top:1px solid rgba(255,255,255,0.08); padding-top:1.4rem; display:flex; justify-content:space-between; align-items:center; font-size:0.74rem; color:rgba(255,255,255,0.3); flex-wrap:wrap; gap:0.5rem; }
   .f-tag { padding:0.25rem 0.8rem; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:20px; font-size:0.67rem; color:rgba(255,255,255,0.55); font-weight:600; }
 
+  /* ── REGISTRATION STEPS ── */
+  .reg-steps { display:flex; align-items:center; margin-bottom:1.8rem; }
+  .reg-step { display:flex; flex-direction:column; align-items:center; gap:0.3rem; }
+  .rs-num { width:30px; height:30px; border-radius:50%; background:var(--border); color:var(--muted); font-size:0.78rem; font-weight:700; display:flex; align-items:center; justify-content:center; transition:all 0.3s; }
+  .rs-lbl { font-size:0.62rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); text-align:center; transition:all 0.3s; white-space:nowrap; }
+  .rs-line { flex:1; height:2px; background:var(--border); margin:0 0.5rem; margin-bottom:1rem; transition:background 0.3s; }
+  .aktif-step .rs-num { background:var(--blue); color:white; }
+  .aktif-step .rs-lbl { color:var(--blue); }
+  .done-step .rs-num { background:var(--success); color:white; }
+  .done-step .rs-lbl { color:var(--success); }
+  .fasa1-item { display:flex; gap:1rem; padding:1.1rem; background:var(--pale2); border:1.5px solid var(--border); border-radius:10px; align-items:flex-start; transition:border-color 0.2s; }
+  .fasa1-icon { font-size:1.5rem; flex-shrink:0; margin-top:0.2rem; }
+  .fasa1-title { font-size:0.88rem; font-weight:700; color:var(--text); margin-bottom:0.2rem; }
+  .fasa1-sub   { font-size:0.75rem; color:var(--muted); margin-bottom:0.7rem; }
+  .fasa1-radio-group { display:flex; flex-direction:column; gap:0.4rem; }
+  .fasa1-radio { display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; color:var(--text2); cursor:pointer; }
+  .fasa1-radio input { accent-color:var(--blue); width:14px; height:14px; cursor:pointer; }
+
   /* MODALS */
   .modal-input-group { margin-bottom:1rem; }
   .modal-input-group label { display:block; font-size:0.68rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:0.45rem; }
@@ -768,25 +792,134 @@
       </div>
       <div class="form-kotak fade">
         <div class="form-tajuk">Borang Pendaftaran</div>
-        <div class="form-sub">Data anda disimpan selamat dalam Firebase 🔒</div>
+        <div class="form-sub">Lengkapkan semua maklumat dengan tepat 🔒</div>
+
+        <!-- STEP INDICATOR -->
+        <div class="reg-steps">
+          <div class="reg-step aktif-step" id="step-ind-1">
+            <div class="rs-num">1</div>
+            <div class="rs-lbl">Maklumat Peribadi</div>
+          </div>
+          <div class="rs-line"></div>
+          <div class="reg-step" id="step-ind-2">
+            <div class="rs-num">2</div>
+            <div class="rs-lbl">Persediaan Fasa 1</div>
+          </div>
+          <div class="rs-line"></div>
+          <div class="reg-step" id="step-ind-3">
+            <div class="rs-num">3</div>
+            <div class="rs-lbl">Pilih Pakej</div>
+          </div>
+        </div>
+
         <div class="berjaya" id="bk-success">✅ Pendaftaran berjaya disimpan! Kami akan menghubungi anda dalam masa 1-2 hari bekerja.</div>
-        <div class="f2">
-          <div class="medan"><label>Nama Penuh *</label><input type="text" id="b-nama" placeholder="Ahmad bin Ali"></div>
-          <div class="medan"><label>No. KP / Pasport *</label><input type="text" id="b-kp" placeholder="XXXXXX-XX-XXXX" maxlength="14" oninput="fmtKP(this,'b-kp-status')"><div id="b-kp-status" style="font-size:0.72rem;margin-top:0.3rem;min-height:1rem"></div></div>
+
+        <!-- STEP 1 — Maklumat Peribadi -->
+        <div id="reg-step-1">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1.5px solid var(--pale)">Langkah 1 — Maklumat Peribadi</div>
+          <div class="f2">
+            <div class="medan"><label>Nama Penuh *</label><input type="text" id="b-nama" placeholder="Ahmad bin Ali"></div>
+            <div class="medan">
+              <label>No. KP / Pasport *</label>
+              <input type="text" id="b-kp" placeholder="XXXXXX-XX-XXXX" maxlength="14" oninput="fmtKP(this,'b-kp-status')">
+              <div id="b-kp-status" style="font-size:0.72rem;margin-top:0.3rem;min-height:1rem"></div>
+            </div>
+          </div>
+          <div class="f2">
+            <div class="medan"><label>No. Telefon *</label><input type="tel" id="b-tel" placeholder="01X-XXXXXXXX"></div>
+            <div class="medan"><label>E-mel *</label><input type="email" id="b-emel" placeholder="nama@email.com"></div>
+          </div>
+          <div class="ralat" id="bk-error-1"></div>
+          <button class="btn-hantar" onclick="regStep1Next()" style="border-radius:8px">Seterusnya → Persediaan Fasa 1</button>
         </div>
-        <div class="f2">
-          <div class="medan"><label>No. Telefon *</label><input type="tel" id="b-tel" placeholder="01X-XXXXXXXX"></div>
-          <div class="medan"><label>E-mel *</label><input type="email" id="b-emel" placeholder="nama@email.com"></div>
+
+        <!-- STEP 2 — Persediaan Fasa 1 -->
+        <div id="reg-step-2" style="display:none">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1.5px solid var(--pale)">Langkah 2 — Persediaan Asas (Fasa 1)</div>
+
+          <!-- Info box -->
+          <div style="background:#fff8f0;border:1.5px solid #ffe0b2;border-radius:10px;padding:1.1rem 1.2rem;margin-bottom:1.2rem">
+            <div style="font-size:0.78rem;font-weight:700;color:#e67e22;margin-bottom:0.6rem">⚠️ Wajib Diselesaikan Sebelum Kursus</div>
+            <p style="font-size:0.8rem;color:#7d5a3c;line-height:1.6">Sebelum mengikuti kursus Fasa 2, anda <strong>mesti</strong> menyiapkan kedua-dua dokumen berikut. Sila maklumkan status semasa anda:</p>
+          </div>
+
+          <!-- Medical Check Up status -->
+          <div class="fasa1-item" id="fasa1-medical">
+            <div class="fasa1-icon">🏥</div>
+            <div style="flex:1">
+              <div class="fasa1-title">Marine Medical Check Up</div>
+              <div class="fasa1-sub">Pemeriksaan perubatan maritim oleh doktor bertauliah KKM</div>
+              <div class="fasa1-radio-group">
+                <label class="fasa1-radio"><input type="radio" name="status-medical" value="sudah"> ✅ Sudah ada sijil</label>
+                <label class="fasa1-radio"><input type="radio" name="status-medical" value="proses"> 🔄 Sedang dalam proses</label>
+                <label class="fasa1-radio"><input type="radio" name="status-medical" value="belum"> ❌ Belum lagi</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seaman Card status -->
+          <div class="fasa1-item" id="fasa1-seaman" style="margin-top:0.8rem">
+            <div class="fasa1-icon">🪪</div>
+            <div style="flex:1">
+              <div class="fasa1-title">Seaman Card (Kad Kelasi)</div>
+              <div class="fasa1-sub">Dikeluarkan oleh Jabatan Laut Malaysia (JLM)</div>
+              <div class="fasa1-radio-group">
+                <label class="fasa1-radio"><input type="radio" name="status-seaman" value="sudah"> ✅ Sudah ada kad</label>
+                <label class="fasa1-radio"><input type="radio" name="status-seaman" value="proses"> 🔄 Sedang dalam proses</label>
+                <label class="fasa1-radio"><input type="radio" name="status-seaman" value="belum"> ❌ Belum lagi</label>
+              </div>
+              <!-- Show seaman card number if they have it -->
+              <div id="seaman-no-wrap" style="display:none;margin-top:0.6rem">
+                <input type="text" id="b-uni" placeholder="Masukkan No. Kad Kelasi anda" style="width:100%;padding:0.65rem 0.9rem;background:var(--pale2);border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
+              </div>
+            </div>
+          </div>
+
+          <!-- Bantuan note -->
+          <div style="margin-top:1rem;padding:0.8rem 1rem;background:var(--pale);border-left:3px solid var(--blue-mid);border-radius:0 8px 8px 0;font-size:0.78rem;color:var(--blue);line-height:1.6">
+            💡 Pihak kami boleh membantu proses permohonan Seaman Card. Hubungi kami di <strong>013-6039641</strong> untuk maklumat lanjut.
+          </div>
+
+          <div class="ralat" id="bk-error-2" style="margin-top:0.8rem"></div>
+          <div style="display:flex;gap:0.7rem;margin-top:1rem">
+            <button onclick="regStepBack(1)" class="btn-line" style="flex:0.4">← Kembali</button>
+            <button onclick="regStep2Next()" class="btn-hantar" style="flex:1;border-radius:8px">Seterusnya → Pilih Pakej</button>
+          </div>
         </div>
-        <div class="medan"><label>No. Kad Kelasi (Seaman Card)</label><input type="text" id="b-uni" placeholder="Masukkan nombor Seaman Card anda (jika ada)"></div>
-        <div class="f2">
-          <div class="medan"><label>Pilihan Pakej *</label><select id="b-pakej"><option value="">-- Pilih Pakej --</option><option>Fasa 1 Sahaja</option><option>Fasa 2 — Pakej Lengkap (RM 3,500)</option><option>Fasa 2 — Pakej Asas (RM 2,800)</option><option>Fasa 1 + Pakej Lengkap</option><option>Fasa 1 + Pakej Asas</option></select></div>
-          <div class="medan"><label>Tarikh Mula Pilihan</label><input type="date" id="b-tarikh"></div>
+
+        <!-- STEP 3 — Pilih Pakej -->
+        <div id="reg-step-3" style="display:none">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1.5px solid var(--pale)">Langkah 3 — Pilih Pakej Program</div>
+
+          <!-- Summary of step 1 & 2 -->
+          <div id="reg-summary" style="background:var(--pale);border-radius:8px;padding:0.9rem 1.1rem;margin-bottom:1.2rem;font-size:0.82rem;color:var(--text2)"></div>
+
+          <div class="f2">
+            <div class="medan">
+              <label>Pilihan Pakej *</label>
+              <select id="b-pakej">
+                <option value="">-- Pilih Pakej --</option>
+                <option value="Fasa 1 Sahaja">Fasa 1 Sahaja (Medical + Seaman Card)</option>
+                <option value="Fasa 2 — Pakej Lengkap (RM 3,500)">Fasa 2 — Pakej Lengkap (RM 3,500)</option>
+                <option value="Fasa 2 — Pakej Asas (RM 2,800)">Fasa 2 — Pakej Asas (RM 2,800)</option>
+                <option value="Fasa 1 + Pakej Lengkap">Fasa 1 + Pakej Lengkap</option>
+                <option value="Fasa 1 + Pakej Asas">Fasa 1 + Pakej Asas</option>
+              </select>
+            </div>
+            <div class="medan"><label>Tarikh Mula Pilihan</label><input type="date" id="b-tarikh"></div>
+          </div>
+          <div class="medan"><label>Maklumat Tambahan</label><textarea rows="3" id="b-nota" placeholder="Soalan, keperluan khas, atau maklumat lain..."></textarea></div>
+          <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.8rem">
+            <input type="checkbox" id="b-agree" style="width:15px;height:15px;accent-color:var(--blue);flex-shrink:0">
+            <label for="b-agree" style="font-size:0.78rem;color:var(--muted);cursor:pointer">Saya bersetuju dengan <a onclick="openM('terma')" style="color:var(--blue-mid);cursor:pointer">terma &amp; syarat</a> program ini.</label>
+          </div>
+          <div class="ralat" id="bk-error"></div>
+          <div style="display:flex;gap:0.7rem">
+            <button onclick="regStepBack(2)" class="btn-line" style="flex:0.4">← Kembali</button>
+            <button class="btn-hantar" id="bk-btn" onclick="submitPendaftaran()" style="flex:1;border-radius:8px">Hantar Pendaftaran →</button>
+          </div>
         </div>
-        <div class="medan"><label>Maklumat Tambahan</label><textarea rows="3" id="b-nota" placeholder="Soalan, keperluan khas, atau maklumat lain..."></textarea></div>
-        <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.4rem"><input type="checkbox" id="b-agree" style="width:15px;height:15px;accent-color:var(--blue);flex-shrink:0"><label for="b-agree" style="font-size:0.78rem;color:var(--muted);cursor:pointer">Saya bersetuju dengan <a onclick="openM('terma')" style="color:var(--blue-mid);cursor:pointer">terma &amp; syarat</a> program CTR.</label></div>
-        <div class="ralat" id="bk-error"></div>
-        <button class="btn-hantar" id="bk-btn" onclick="submitPendaftaran()">Hantar Pendaftaran →</button>
+
       </div>
     </div>
   </div>
@@ -1234,6 +1367,78 @@
   function togolWA() { const t=document.getElementById('wa-tooltip'); const n=document.getElementById('wa-notif'); t.classList.toggle('open'); n.style.display='none'; }
   function tutupWA() { document.getElementById('wa-tooltip').classList.remove('open'); }
   setTimeout(()=>{document.getElementById('wa-tooltip').classList.add('open');},3000);
+
+  // ── REGISTRATION STEP NAVIGATION ──
+  function updateStepIndicator(step) {
+    for (let i = 1; i <= 3; i++) {
+      const el = document.getElementById('step-ind-' + i);
+      if (!el) continue;
+      el.classList.remove('aktif-step', 'done-step');
+      if (i < step) el.classList.add('done-step');
+      else if (i === step) el.classList.add('aktif-step');
+    }
+  }
+
+  window.regStep1Next = function() {
+    const nama  = document.getElementById('b-nama').value.trim();
+    const kp    = document.getElementById('b-kp').value.trim();
+    const tel   = document.getElementById('b-tel').value.trim();
+    const emel  = document.getElementById('b-emel').value.trim();
+    const errEl = document.getElementById('bk-error-1');
+    errEl.textContent = '';
+    if (!nama)  { errEl.textContent = '⚠ Sila masukkan nama penuh.'; return; }
+    if (!kp)    { errEl.textContent = '⚠ Sila masukkan No. KP.'; return; }
+    if (!/^\d{6}-\d{2}-\d{4}$/.test(kp)) { errEl.textContent = '⚠ Format No. KP tidak sah. Gunakan XXXXXX-XX-XXXX.'; return; }
+    if (!tel)   { errEl.textContent = '⚠ Sila masukkan no. telefon.'; return; }
+    if (!emel)  { errEl.textContent = '⚠ Sila masukkan e-mel.'; return; }
+    document.getElementById('reg-step-1').style.display = 'none';
+    document.getElementById('reg-step-2').style.display = 'block';
+    updateStepIndicator(2);
+  };
+
+  window.regStep2Next = function() {
+    const medical = document.querySelector('input[name="status-medical"]:checked');
+    const seaman  = document.querySelector('input[name="status-seaman"]:checked');
+    const errEl   = document.getElementById('bk-error-2');
+    errEl.textContent = '';
+    if (!medical) { errEl.textContent = '⚠ Sila pilih status Medical Check Up anda.'; return; }
+    if (!seaman)  { errEl.textContent = '⚠ Sila pilih status Seaman Card anda.'; return; }
+
+    // Show seaman card number field if they have it
+    const seamanWrap = document.getElementById('seaman-no-wrap');
+    if (seaman.value === 'sudah') seamanWrap.style.display = 'block';
+
+    // Build summary
+    const medLabel  = { sudah:'✅ Sudah ada sijil', proses:'🔄 Sedang dalam proses', belum:'❌ Belum lagi' };
+    const seamLabel = { sudah:'✅ Sudah ada kad', proses:'🔄 Sedang dalam proses', belum:'❌ Belum lagi' };
+    document.getElementById('reg-summary').innerHTML = `
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:0.7rem">📋 Ringkasan Maklumat Anda</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;font-size:0.82rem">
+        <div>👤 <strong>${document.getElementById('b-nama').value}</strong></div>
+        <div>📞 ${document.getElementById('b-tel').value}</div>
+        <div>🏥 Medical: <strong>${medLabel[medical.value]}</strong></div>
+        <div>🪪 Seaman: <strong>${seamLabel[seaman.value]}</strong></div>
+      </div>`;
+
+    document.getElementById('reg-step-2').style.display = 'none';
+    document.getElementById('reg-step-3').style.display = 'block';
+    updateStepIndicator(3);
+  };
+
+  window.regStepBack = function(toStep) {
+    document.getElementById('reg-step-1').style.display = toStep === 1 ? 'block' : 'none';
+    document.getElementById('reg-step-2').style.display = toStep === 2 ? 'block' : 'none';
+    document.getElementById('reg-step-3').style.display = 'none';
+    updateStepIndicator(toStep);
+  };
+
+  // Show seaman card field when radio changes
+  document.addEventListener('change', function(e) {
+    if (e.target.name === 'status-seaman') {
+      const wrap = document.getElementById('seaman-no-wrap');
+      if (wrap) wrap.style.display = e.target.value === 'sudah' ? 'block' : 'none';
+    }
+  });
 
   // ── SCROLL FADE ──
   const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('masuk');obs.unobserve(e.target);}}),{threshold:0.08});
