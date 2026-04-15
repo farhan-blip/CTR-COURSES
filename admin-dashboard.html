@@ -86,15 +86,62 @@
       const snap = await getDocs(collection(db, nama));
       _allData[nama] = [];
       snap.forEach(d => _allData[nama].push({ id: d.id, ...d.data() }));
-    } catch(e) { console.log('Error loading ' + nama, e); }
+      console.log(`✅ ${nama}: ${_allData[nama].length} rekod`);
+    } catch(e) {
+      console.error(`❌ Ralat memuatkan ${nama}:`, e.code, e.message);
+      _allData[nama] = [];
+    }
   }
 
   async function muatPakejList() {
     try {
+      // Try with orderBy first
       const snap = await getDocs(query(collection(db,'pakej'), orderBy('harga','asc')));
       _allData.pakej = [];
       snap.forEach(d => _allData.pakej.push({ id: d.id, ...d.data() }));
-    } catch(e) { console.log('Error loading pakej', e); }
+      console.log(`✅ pakej: ${_allData.pakej.length} rekod`);
+
+      // If empty, create defaults
+      if (_allData.pakej.length === 0) {
+        console.log('Pakej kosong — cipta pakej default...');
+        await ciptaPakejDefault();
+      }
+    } catch(e) {
+      console.error('❌ Ralat pakej:', e.code, e.message);
+      // Try without orderBy if index error
+      try {
+        const snap2 = await getDocs(collection(db,'pakej'));
+        _allData.pakej = [];
+        snap2.forEach(d => _allData.pakej.push({ id: d.id, ...d.data() }));
+        console.log(`✅ pakej (no order): ${_allData.pakej.length} rekod`);
+        if (_allData.pakej.length === 0) await ciptaPakejDefault();
+      } catch(e2) {
+        console.error('❌ Pakej gagal:', e2.message);
+        _allData.pakej = [];
+      }
+    }
+  }
+
+  async function ciptaPakejDefault() {
+    const defaults = [
+      { nama:'Pakej Lengkap', harga:3500, popular:'tidak',
+        nota:'🎓 Semua 5 sijil STCW + pengalaman praktikal penuh',
+        kursusYa:['Basic Training (BT)|Latihan asas keselamatan','Designated Security Duties (DSD)|Latihan ISPS Code','BTOCT (Tanker)|Latihan kapal tangki','Ship Security Awareness (SSA)|Sijil keselamatan','Crowd Management|Pengurusan kecemasan','Penempatan Praktikal 6 Bulan|Di atas kapal'],
+        kursustidak:[] },
+      { nama:'Pakej Asas', harga:2800, popular:'ya',
+        nota:'💡 Sesuai untuk bermula — jimat kos awal',
+        kursusYa:['Basic Training (BT)|Latihan asas keselamatan','Designated Security Duties (DSD)|Latihan ISPS Code','BTOCT (Tanker)|Latihan kapal tangki','Ship Security Awareness (SSA)|Sijil keselamatan'],
+        kursustidak:['Crowd Management|Tidak termasuk','Penempatan Praktikal|Tidak termasuk'] }
+    ];
+    try {
+      for (const p of defaults) {
+        const ref = await addDoc(collection(db,'pakej'), { ...p, createdAt: serverTimestamp() });
+        _allData.pakej.push({ id: ref.id, ...p });
+      }
+      console.log('✅ Pakej default dicipta');
+    } catch(e) {
+      console.error('❌ Gagal cipta pakej default:', e.message);
+    }
   }
 
   window.refresh = async function() {
@@ -115,21 +162,23 @@
     document.getElementById('s-user').textContent   = u.length;
     document.getElementById('s-pakej').textContent  = _allData.pakej.length;
 
-    const baru    = p.filter(d => d.status === 'Baru').length;
+    const baru    = p.filter(d => d.status === 'Baru' || !d.status).length;
     const sahkan  = b.filter(d => d.status === 'Belum Disahkan').length;
-    document.getElementById('s-baru').textContent   = baru;
+    document.getElementById('s-baru').textContent    = baru;
     document.getElementById('s-pending').textContent = sahkan;
 
-    // Revenue estimate
     let total = 0;
     b.forEach(d => { const v = parseFloat((d.jumlah||'').replace(/[^0-9.]/g,'')); if(!isNaN(v)) total += v; });
     document.getElementById('s-revenue').textContent = total > 0 ? 'RM ' + total.toLocaleString() : '—';
 
-    // Notif badge
     const notif = baru + sahkan;
     const badge = document.getElementById('notif-badge');
     badge.textContent = notif;
     badge.style.display = notif > 0 ? 'flex' : 'none';
+
+    // Show Firestore rules warning if ALL data empty
+    const warn = document.getElementById('rules-warning');
+    if (warn) warn.style.display = (p.length===0 && b.length===0 && u.length===0) ? 'block' : 'none';
   }
 
   // ── TAB SWITCHING ──
@@ -1207,6 +1256,16 @@
       <div class="topbar-right">
         <button id="refresh-btn" onclick="refresh()">↺ Muat Semula</button>
       </div>
+    </div>
+
+    <!-- FIRESTORE RULES WARNING -->
+    <div id="rules-warning" style="display:none;margin:1rem 2rem 0;padding:1rem 1.3rem;background:#fff8f0;border:1.5px solid #ffcc80;border-radius:10px;font-size:0.82rem;color:#7d5a3c">
+      <strong style="color:#e67e22">⚠️ Tiada data dipaparkan?</strong> Ini mungkin disebabkan Firestore Security Rules menyekat bacaan.
+      Pergi ke <strong>Firebase Console → Firestore → Rules</strong> dan tukar kepada:
+      <code style="display:block;margin-top:0.5rem;padding:0.5rem 0.8rem;background:#fff3e0;border-radius:6px;font-size:0.75rem;color:#5d4037">
+        allow read, write: if request.auth != null;
+      </code>
+      Kemudian klik <strong>Publish</strong>.
     </div>
 
     <!-- STAT CARDS -->
