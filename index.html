@@ -202,66 +202,52 @@
     if (!container) return;
     container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)"><span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span> Memuatkan pakej...</div>';
     try {
-      const snap = await getDocs(query(collection(db, 'pakej'), orderBy('harga', 'asc')));
+      // Simple getDocs — no orderBy to avoid index requirement
+      const snap = await getDocs(collection(db, 'pakej'));
       const allDocs = [];
       snap.forEach(d => allDocs.push({ id: d.id, data: d.data() }));
 
-      // If more than 2 packages — delete all duplicates, keep only unique names
-      if (allDocs.length > 2) {
-        const seen = {};
-        const toDelete = [];
-        const toKeep   = [];
-        for (const d of allDocs) {
-          const nama = d.data.nama;
-          if (!seen[nama]) {
-            seen[nama] = true;
-            toKeep.push(d);
-          } else {
-            toDelete.push(d.id);
-          }
-        }
-        // Delete duplicates silently
-        for (const id of toDelete) {
-          await deleteDoc(doc(db, 'pakej', id));
-        }
-        container.innerHTML = '';
-        toKeep.forEach(d => { container.innerHTML += buatKadPakej(d.id, d.data); });
-        return;
-      }
+      // Sort by harga in JS
+      allDocs.sort((a, b) => (a.data.harga||0) - (b.data.harga||0));
 
-      // If empty — add defaults
       if (allDocs.length === 0) {
-        await muatPakejDefault(container);
+        pamerPakejStatik(container);
         return;
       }
 
-      // Normal — show packages
+      // Remove duplicates — keep unique names only
+      const seen = {};
+      const toKeep = [];
+      for (const d of allDocs) {
+        if (!seen[d.data.nama]) { seen[d.data.nama] = true; toKeep.push(d); }
+      }
+
       container.innerHTML = '';
-      allDocs.forEach(d => { container.innerHTML += buatKadPakej(d.id, d.data); });
+      toKeep.forEach(d => { container.innerHTML += buatKadPakej(d.id, d.data); });
 
     } catch (e) {
-      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--error)">⚠ Ralat memuatkan pakej.</div>';
+      console.log('Pakej error:', e.message);
+      // Rules blocked or offline — show static packages
+      pamerPakejStatik(container);
     }
   };
 
-  // Only runs ONCE when collection is empty
-  async function muatPakejDefault(container) {
-    const defaults = [
-      { nama:'Pakej Lengkap', harga:3500, popular:'tidak', nota:'🎓 Semua 5 sijil STCW + pengalaman praktikal penuh',
+  function pamerPakejStatik(container) {
+    const statik = [
+      { id:'s1', nama:'Pakej Lengkap', harga:3500, popular:'tidak',
+        nota:'🎓 Semua 5 sijil STCW + pengalaman praktikal penuh',
         kursusYa:['Basic Training (BT)|Latihan asas keselamatan dan survival di laut','Designated Security Duties (DSD)|Latihan tugas keselamatan kapal ISPS Code','BTOCT (Tanker)|Latihan asas kapal tangki minyak / kimia','Ship Security Awareness (SSA)|Sijil kesedaran keselamatan kapal','Crowd Management|Pengurusan penumpang dalam situasi kecemasan','Penempatan Praktikal 6 Bulan|Di atas kapal @ feri — pengalaman sebenar industri'],
         kursustidak:[] },
-      { nama:'Pakej Asas', harga:2800, popular:'ya', nota:'💡 Sesuai untuk bermula — jimat kos awal',
+      { id:'s2', nama:'Pakej Asas', harga:2800, popular:'ya',
+        nota:'💡 Sesuai untuk bermula — jimat kos awal',
         kursusYa:['Basic Training (BT)|Latihan asas keselamatan dan survival di laut','Designated Security Duties (DSD)|Latihan tugas keselamatan kapal ISPS Code','BTOCT (Tanker)|Latihan asas kapal tangki minyak / kimia','Ship Security Awareness (SSA)|Sijil kesedaran keselamatan kapal'],
         kursustidak:['Crowd Management|Tidak termasuk dalam pakej ini','Penempatan Praktikal|Tidak termasuk — boleh ditambah kemudian'] }
     ];
     container.innerHTML = '';
-    for (const p of defaults) {
-      const ref = await addDoc(collection(db, 'pakej'), { ...p, createdAt: serverTimestamp() });
-      container.innerHTML += buatKadPakej(ref.id, p);
-    }
+    statik.forEach(p => { container.innerHTML += buatKadPakej(p.id, p); });
   }
 
-  
+
   window.buatKadPakej = function(id, d) {
     const pop     = d.popular === 'ya';
     const badge   = pop ? '<div class="p-badge">⭐ Popular</div>' : '';
