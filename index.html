@@ -249,16 +249,36 @@
 
 
   window.buatKadPakej = function(id, d) {
-    const pop     = d.popular === 'ya';
-    const badge   = pop ? '<div class="p-badge">⭐ Popular</div>' : '';
-    const headBg  = pop ? 'background:linear-gradient(135deg,var(--blue),var(--blue-lt))' : 'background:linear-gradient(135deg,var(--navy),var(--blue-mid))';
-    const ya      = (d.kursusYa||[]).map(k=>{ const[n,s]=k.split('|'); return `<div class="p-item"><span class="yes">✓</span><div><div>${n}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`; }).join('');
-    const tidak   = (d.kursustidak||[]).map(k=>{ const[n,s]=k.split('|'); return `<div class="p-item dim"><span class="no">✗</span><div><div>${n}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`; }).join('');
-    const navUser = document.getElementById('nav-user');
-    const loggedIn = navUser && navUser.style.display !== 'none' && navUser.style.display !== '';
-    const btnLabel = loggedIn ? 'Pilih Pakej Ini →' : '🔒 Log Masuk untuk Pilih';
-    const btnStyle = loggedIn ? '' : 'background:linear-gradient(90deg,var(--muted),#8a9bb5);box-shadow:none;';
-    return `<div class="p-card${pop?' popular':''}" id="pakej-${id}"><div class="p-head" style="${headBg};position:relative;padding:1.6rem">${badge}<div class="p-tag">${d.nama}</div><h3>${d.nama}</h3><div class="p-price">Mulai dari <strong>RM ${parseInt(d.harga).toLocaleString()}</strong></div></div><div class="p-body">${ya}${tidak}${d.nota?`<div class="p-note">${d.nota}</div>`:''}</div><div class="p-foot"><button class="btn-hantar" style="${btnStyle}" onclick="pilihPakej('${d.nama}',${d.harga})">${btnLabel}</button></div></div>`;
+    const pop      = d.popular === 'ya';
+    const badge    = pop ? '<div class="p-badge">⭐ Popular</div>' : '';
+    const headBg   = pop ? 'background:linear-gradient(135deg,var(--blue),var(--blue-lt))' : 'background:linear-gradient(135deg,var(--navy),var(--blue-mid))';
+    const ya       = (d.kursusYa||[]).map(k=>{ const[n,s]=k.split('|'); return `<div class="p-item"><span class="yes">✓</span><div><div>${n}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`; }).join('');
+    const tidak    = (d.kursustidak||[]).map(k=>{ const[n,s]=k.split('|'); return `<div class="p-item dim"><span class="no">✗</span><div><div>${n}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`; }).join('');
+
+    // Use auth.currentUser for reliable check
+    const loggedIn  = auth.currentUser !== null;
+    const btnLabel  = loggedIn ? 'Pilih Pakej Ini →' : '🔒 Log Masuk untuk Pilih';
+    const btnStyle  = loggedIn ? '' : 'background:linear-gradient(90deg,#8a9bb5,#a0b0c8);box-shadow:none;cursor:pointer;';
+    const btnTitle  = loggedIn ? '' : 'title="Sila log masuk untuk memilih pakej"';
+
+    return `<div class="p-card${pop?' popular':''}" id="pakej-${id}">
+      <div class="p-head" style="${headBg};position:relative;padding:1.6rem">
+        ${badge}
+        <div class="p-tag">${d.nama}</div>
+        <h3>${d.nama}</h3>
+        <div class="p-price">Mulai dari <strong>RM ${parseInt(d.harga).toLocaleString()}</strong></div>
+      </div>
+      <div class="p-body">${ya}${tidak}${d.nota?`<div class="p-note">${d.nota}</div>`:''}</div>
+      <div class="p-foot">
+        <button class="btn-hantar" style="${btnStyle}" onclick="pilihPakej('${d.nama}',${d.harga})" ${btnTitle}>
+          ${btnLabel}
+        </button>
+        ${!loggedIn ? `<div style="text-align:center;margin-top:0.5rem;font-size:0.72rem;color:var(--muted)">
+          <a onclick="openM('login')" style="color:var(--blue-mid);cursor:pointer;font-weight:600">Log masuk</a> atau
+          <a onclick="openM('register')" style="color:var(--blue-mid);cursor:pointer;font-weight:600">daftar</a> untuk memilih
+        </div>` : ''}
+      </div>
+    </div>`;
   };
 
 </script>
@@ -1265,24 +1285,18 @@
 
   // ── PILIH PAKEJ ──
   function pilihPakej(nama, amt) {
-    // Check if user is logged in
-    const navUser = document.getElementById('nav-user');
-    const isLoggedIn = navUser && navUser.style.display !== 'none' && navUser.style.display !== '';
-
-    if (!isLoggedIn) {
-      // Show login prompt
+    if (!auth.currentUser) {
       showToast('⚠ Sila log masuk atau daftar dahulu untuk memilih pakej!');
       setTimeout(() => openM('login'), 800);
       return;
     }
-
     document.getElementById('pp-pakej').textContent   = nama;
-    document.getElementById('pp-penuh').textContent   = 'RM '+parseInt(amt).toLocaleString();
-    const dep = Math.round(amt*0.3);
-    document.getElementById('pp-deposit').textContent = 'RM '+dep.toLocaleString();
-    document.getElementById('pp-total').textContent   = 'RM '+dep.toLocaleString();
-    showToast('✓ '+nama+' dipilih!');
-    setTimeout(()=>document.getElementById('bayaran').scrollIntoView({behavior:'smooth'}),700);
+    document.getElementById('pp-penuh').textContent   = 'RM ' + parseInt(amt).toLocaleString();
+    const dep = Math.round(amt * 0.3);
+    document.getElementById('pp-deposit').textContent = 'RM ' + dep.toLocaleString();
+    document.getElementById('pp-total').textContent   = 'RM ' + dep.toLocaleString();
+    showToast('✓ ' + nama + ' dipilih!');
+    setTimeout(() => document.getElementById('bayaran').scrollIntoView({ behavior:'smooth' }), 700);
   }
 
   // ── PILIH KAEDAH ──
