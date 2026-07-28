@@ -32,11 +32,14 @@
     const navUser   = document.getElementById('nav-user');
     const userEmail = document.getElementById('user-email');
 
+    // Global flag accessible from non-module scripts
+    window._isLoggedIn = !!user;
+
     if (user) {
       navAuth.style.display = 'none';
       navUser.style.display = 'flex';
       userEmail.textContent = user.email;
-      } else {
+    } else {
       navAuth.style.display = 'flex';
       navUser.style.display = 'none';
     }
@@ -255,8 +258,8 @@
     const ya       = (d.kursusYa||[]).map(k=>{ const[n,s]=k.split('|'); return `<div class="p-item"><span class="yes">✓</span><div><div>${n}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`; }).join('');
     const tidak    = (d.kursustidak||[]).map(k=>{ const[n,s]=k.split('|'); return `<div class="p-item dim"><span class="no">✗</span><div><div>${n}</div>${s?`<div class="sub">${s}</div>`:''}</div></div>`; }).join('');
 
-    // Use auth.currentUser for reliable check
-    const loggedIn  = auth.currentUser !== null;
+    // Use global flag — auth.currentUser not accessible outside module
+    const loggedIn  = window._isLoggedIn === true;
     const btnLabel  = loggedIn ? 'Pilih Pakej Ini →' : '🔒 Log Masuk untuk Pilih';
     const btnStyle  = loggedIn ? '' : 'background:linear-gradient(90deg,#8a9bb5,#a0b0c8);box-shadow:none;cursor:pointer;';
     const btnTitle  = loggedIn ? '' : 'title="Sila log masuk untuk memilih pakej"';
@@ -1285,7 +1288,7 @@
 
   // ── PILIH PAKEJ ──
   function pilihPakej(nama, amt) {
-    if (!auth.currentUser) {
+    if (!window._isLoggedIn) {
       showToast('⚠ Sila log masuk atau daftar dahulu untuk memilih pakej!');
       setTimeout(() => openM('login'), 800);
       return;
