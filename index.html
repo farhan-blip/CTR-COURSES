@@ -26,6 +26,10 @@
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
+  // The booking form is in a normal script later in this file. Expose only the
+  // Firebase values it needs so that form can save registrations and payments.
+  Object.assign(window, { auth, db, collection, addDoc, serverTimestamp });
+
   window._isLoggedIn = false;
   window._authReady = false;
 
@@ -248,7 +252,7 @@
       }
 
       container.innerHTML = '';
-      toKeep.forEach(d => { container.innerHTML += buatKadPakej(d.id, d.data); });
+      toKeep.forEach(d => { container.innerHTML += window.buatKadPakej(d.id, d.data); });
 
     } catch (e) {
       console.log('Pakej error:', e.message);
@@ -269,7 +273,7 @@
         kursustidak:['Crowd Management|Tidak termasuk dalam pakej ini','Penempatan Praktikal|Tidak termasuk — boleh ditambah kemudian'] }
     ];
     container.innerHTML = '';
-    statik.forEach(p => { container.innerHTML += buatKadPakej(p.id, p); });
+    statik.forEach(p => { container.innerHTML += window.buatKadPakej(p.id, p); });
   }
 
 
@@ -1478,7 +1482,7 @@
   document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
 
   // Load packages on page load
-  window.addEventListener('load',()=>{ if(typeof muatPakej==='function') muatPakej(); });
+  window.addEventListener('load',()=>{ if(typeof window.muatPakej==='function') window.muatPakej(); });
 </script>
 </body>
 </html>
