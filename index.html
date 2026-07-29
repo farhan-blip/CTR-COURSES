@@ -490,6 +490,28 @@
   .adm-badge-new  { padding:0.2rem 0.65rem; background:#fff3e0; color:#e67e22; border-radius:20px; font-size:0.68rem; font-weight:700; }
   .adm-badge-done { padding:0.2rem 0.65rem; background:#e6f9f2; color:#0a9e6a; border-radius:20px; font-size:0.68rem; font-weight:700; }
 
+  /* ── BOOKING MODAL ── */
+  .bk-tab { flex:1; padding:0.7rem; text-align:center; font-size:0.78rem; font-weight:700; color:var(--muted); cursor:pointer; transition:all 0.2s; }
+  .aktif-bk-tab { background:var(--white); color:var(--blue); }
+  .bk-pay-opt { display:flex; align-items:center; gap:0.6rem; padding:0.7rem 0.9rem; border:1.5px solid var(--border); border-radius:9px; cursor:pointer; transition:all 0.2s; background:white; position:relative; }
+  .bk-pay-opt:hover { border-color:var(--blue-mid); transform:translateY(-1px); }
+  .aktif-pay { border-color:var(--blue); background:var(--pale); }
+  .bk-opt-name { font-size:0.78rem; font-weight:700; color:var(--text); }
+  .bk-opt-sub  { font-size:0.65rem; color:var(--muted); }
+  .bk-opt-check { margin-left:auto; width:18px; height:18px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:0.55rem; color:transparent; flex-shrink:0; transition:all 0.2s; }
+  .aktif-pay .bk-opt-check { background:var(--blue); border-color:var(--blue); color:white; }
+
+  /* ── BOOKING MODAL ── */
+  .bk-tab { flex:1; padding:0.75rem; text-align:center; font-size:0.78rem; font-weight:700; color:var(--muted); cursor:pointer; transition:all 0.2s; }
+  .aktif-bk-tab { background:var(--white); color:var(--blue); border-bottom:2px solid var(--blue); }
+  .bk-pay-opt { display:flex; align-items:center; gap:0.7rem; padding:0.75rem 0.9rem; border:1.5px solid var(--border); border-radius:9px; cursor:pointer; transition:all 0.2s; position:relative; background:white; }
+  .bk-pay-opt:hover { border-color:var(--blue-mid); transform:translateY(-1px); box-shadow:0 4px 12px var(--shadow); }
+  .bk-pay-opt.aktif-pay { border-color:var(--blue); background:var(--pale); }
+  .bk-opt-name { font-size:0.78rem; font-weight:700; color:var(--text); }
+  .bk-opt-sub  { font-size:0.65rem; color:var(--muted); margin-top:0.1rem; }
+  .bk-opt-check { margin-left:auto; width:18px; height:18px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:0.6rem; color:transparent; transition:all 0.2s; flex-shrink:0; }
+  .bk-pay-opt.aktif-pay .bk-opt-check { background:var(--blue); border-color:var(--blue); color:white; }
+
   footer { background:var(--navy); color:white; padding:4rem 5% 2rem; }
   .footer-inner { max-width:1160px; margin:0 auto; }
   .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem; margin-bottom:3rem; }
@@ -784,326 +806,190 @@
 
 <div class="pemisah"></div>
 
-<!-- PENDAFTARAN -->
-<section id="pendaftaran" class="sek" style="background:var(--white)">
+<!-- PENDAFTARAN & BAYARAN -->
+<section id="pendaftaran" class="sek" style="background:var(--pale2)">
   <div class="sek-wrap">
-    <div class="daftar-layout">
-      <div class="fade">
-        <div class="label">Pendaftaran</div>
-        <h2 class="sek-title">Daftar <span>Program</span></h2>
-        <p class="sek-sub">Isi borang untuk menempah tempat anda. Tempat adalah terhad setiap sesi.</p>
-        <div class="langkah-list">
-          <div class="langkah"><div class="l-num">1</div><div><h4>Isi Borang Pendaftaran</h4><p>Lengkapkan semua maklumat peribadi dan pilih pakej yang diminati.</p></div></div>
-          <div class="langkah"><div class="l-num">2</div><div><h4>Sediakan Dokumen Fasa 1</h4><p>Medical Check Up dan Seaman Card mesti sedia sebelum kursus bermula.</p></div></div>
-          <div class="langkah"><div class="l-num">3</div><div><h4>Bayar Deposit</h4><p>Bayar deposit untuk mengesahkan tempahan anda dalam sistem.</p></div></div>
-          <div class="langkah"><div class="l-num">4</div><div><h4>Mula Latihan</h4><p>Terima pengesahan dan sertai program pada tarikh ditetapkan.</p></div></div>
-        </div>
+    <div class="sek-head fade" style="text-align:center;max-width:600px;margin:0 auto 3rem">
+      <div class="label">Cara Mudah</div>
+      <h2 class="sek-title">Daftar & Bayar <span>Dalam Minit</span></h2>
+      <p class="sek-sub">Pilih pakej anda, isi maklumat ringkas, dan teruskan pembayaran — semuanya dalam satu langkah mudah.</p>
+    </div>
+
+    <!-- Steps indicator -->
+    <div class="fade" style="display:flex;justify-content:center;align-items:center;gap:0;margin-bottom:3.5rem">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.4rem">
+        <div style="width:44px;height:44px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1rem">1</div>
+        <div style="font-size:0.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--blue)">Pilih Pakej</div>
       </div>
-      <div class="form-kotak fade">
-        <div class="form-tajuk">Borang Pendaftaran</div>
-        <div class="form-sub">Lengkapkan semua maklumat dengan tepat 🔒</div>
-
-        <!-- STEP INDICATOR -->
-        <div class="reg-steps">
-          <div class="reg-step aktif-step" id="step-ind-1">
-            <div class="rs-num">1</div>
-            <div class="rs-lbl">Maklumat Peribadi</div>
-          </div>
-          <div class="rs-line"></div>
-          <div class="reg-step" id="step-ind-2">
-            <div class="rs-num">2</div>
-            <div class="rs-lbl">Persediaan Fasa 1</div>
-          </div>
-          <div class="rs-line"></div>
-          <div class="reg-step" id="step-ind-3">
-            <div class="rs-num">3</div>
-            <div class="rs-lbl">Pilih Pakej</div>
-          </div>
-        </div>
-
-        <div class="berjaya" id="bk-success">✅ Pendaftaran berjaya disimpan! Kami akan menghubungi anda dalam masa 1-2 hari bekerja.</div>
-
-        <!-- STEP 1 — Maklumat Peribadi -->
-        <div id="reg-step-1">
-          <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1.5px solid var(--pale)">Langkah 1 — Maklumat Peribadi</div>
-          <div class="f2">
-            <div class="medan"><label>Nama Penuh *</label><input type="text" id="b-nama" placeholder="Ahmad bin Ali"></div>
-            <div class="medan">
-              <label>No. KP / Pasport *</label>
-              <input type="text" id="b-kp" placeholder="XXXXXX-XX-XXXX" maxlength="14" oninput="fmtKP(this,'b-kp-status')">
-              <div id="b-kp-status" style="font-size:0.72rem;margin-top:0.3rem;min-height:1rem"></div>
-            </div>
-          </div>
-          <div class="f2">
-            <div class="medan"><label>No. Telefon *</label><input type="tel" id="b-tel" placeholder="01X-XXXXXXXX"></div>
-            <div class="medan"><label>E-mel *</label><input type="email" id="b-emel" placeholder="nama@email.com"></div>
-          </div>
-          <div class="ralat" id="bk-error-1"></div>
-          <button class="btn-hantar" onclick="regStep1Next()" style="border-radius:8px">Seterusnya → Persediaan Fasa 1</button>
-        </div>
-
-        <!-- STEP 2 — Persediaan Fasa 1 -->
-        <div id="reg-step-2" style="display:none">
-          <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1.5px solid var(--pale)">Langkah 2 — Persediaan Asas (Fasa 1)</div>
-
-          <!-- Info box -->
-          <div style="background:#fff8f0;border:1.5px solid #ffe0b2;border-radius:10px;padding:1.1rem 1.2rem;margin-bottom:1.2rem">
-            <div style="font-size:0.78rem;font-weight:700;color:#e67e22;margin-bottom:0.6rem">⚠️ Wajib Diselesaikan Sebelum Kursus</div>
-            <p style="font-size:0.8rem;color:#7d5a3c;line-height:1.6">Sebelum mengikuti kursus Fasa 2, anda <strong>mesti</strong> menyiapkan kedua-dua dokumen berikut. Sila maklumkan status semasa anda:</p>
-          </div>
-
-          <!-- Medical Check Up status -->
-          <div class="fasa1-item" id="fasa1-medical">
-            <div class="fasa1-icon">🏥</div>
-            <div style="flex:1">
-              <div class="fasa1-title">Marine Medical Check Up</div>
-              <div class="fasa1-sub">Pemeriksaan perubatan maritim oleh doktor bertauliah KKM</div>
-              <div class="fasa1-radio-group">
-                <label class="fasa1-radio"><input type="radio" name="status-medical" value="sudah"> ✅ Sudah ada sijil</label>
-                <label class="fasa1-radio"><input type="radio" name="status-medical" value="proses"> 🔄 Sedang dalam proses</label>
-                <label class="fasa1-radio"><input type="radio" name="status-medical" value="belum"> ❌ Belum lagi</label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Seaman Card status -->
-          <div class="fasa1-item" id="fasa1-seaman" style="margin-top:0.8rem">
-            <div class="fasa1-icon">🪪</div>
-            <div style="flex:1">
-              <div class="fasa1-title">Seaman Card (Kad Kelasi)</div>
-              <div class="fasa1-sub">Dikeluarkan oleh Jabatan Laut Malaysia (JLM)</div>
-              <div class="fasa1-radio-group">
-                <label class="fasa1-radio"><input type="radio" name="status-seaman" value="sudah"> ✅ Sudah ada kad</label>
-                <label class="fasa1-radio"><input type="radio" name="status-seaman" value="proses"> 🔄 Sedang dalam proses</label>
-                <label class="fasa1-radio"><input type="radio" name="status-seaman" value="belum"> ❌ Belum lagi</label>
-              </div>
-              <!-- Show seaman card number if they have it -->
-              <div id="seaman-no-wrap" style="display:none;margin-top:0.6rem">
-                <input type="text" id="b-uni" placeholder="Masukkan No. Kad Kelasi anda" style="width:100%;padding:0.65rem 0.9rem;background:var(--pale2);border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.85rem;outline:none">
-              </div>
-            </div>
-          </div>
-
-          <!-- Bantuan note -->
-          <div style="margin-top:1rem;padding:0.8rem 1rem;background:var(--pale);border-left:3px solid var(--blue-mid);border-radius:0 8px 8px 0;font-size:0.78rem;color:var(--blue);line-height:1.6">
-            💡 Pihak kami boleh membantu proses permohonan Seaman Card. Hubungi kami di <strong>013-6039641</strong> untuk maklumat lanjut.
-          </div>
-
-          <div class="ralat" id="bk-error-2" style="margin-top:0.8rem"></div>
-          <div style="display:flex;gap:0.7rem;margin-top:1rem">
-            <button onclick="regStepBack(1)" class="btn-line" style="flex:0.4">← Kembali</button>
-            <button onclick="regStep2Next()" class="btn-hantar" style="flex:1;border-radius:8px">Seterusnya → Pilih Pakej</button>
-          </div>
-        </div>
-
-        <!-- STEP 3 — Pilih Pakej -->
-        <div id="reg-step-3" style="display:none">
-          <div style="font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1.5px solid var(--pale)">Langkah 3 — Pilih Pakej Program</div>
-
-          <!-- Summary of step 1 & 2 -->
-          <div id="reg-summary" style="background:var(--pale);border-radius:8px;padding:0.9rem 1.1rem;margin-bottom:1.2rem;font-size:0.82rem;color:var(--text2)"></div>
-
-          <div class="f2">
-            <div class="medan">
-              <label>Pilihan Pakej *</label>
-              <select id="b-pakej">
-                <option value="">-- Pilih Pakej --</option>
-                <option value="Fasa 1 Sahaja">Fasa 1 Sahaja (Medical + Seaman Card)</option>
-                <option value="Fasa 2 — Pakej Lengkap (RM 3,500)">Fasa 2 — Pakej Lengkap (RM 3,500)</option>
-                <option value="Fasa 2 — Pakej Asas (RM 2,800)">Fasa 2 — Pakej Asas (RM 2,800)</option>
-                <option value="Fasa 1 + Pakej Lengkap">Fasa 1 + Pakej Lengkap</option>
-                <option value="Fasa 1 + Pakej Asas">Fasa 1 + Pakej Asas</option>
-              </select>
-            </div>
-            <div class="medan"><label>Tarikh Mula Pilihan</label><input type="date" id="b-tarikh"></div>
-          </div>
-          <div class="medan"><label>Maklumat Tambahan</label><textarea rows="3" id="b-nota" placeholder="Soalan, keperluan khas, atau maklumat lain..."></textarea></div>
-          <div style="display:flex;align-items:center;gap:0.7rem;margin-bottom:0.8rem">
-            <input type="checkbox" id="b-agree" style="width:15px;height:15px;accent-color:var(--blue);flex-shrink:0">
-            <label for="b-agree" style="font-size:0.78rem;color:var(--muted);cursor:pointer">Saya bersetuju dengan <a onclick="openM('terma')" style="color:var(--blue-mid);cursor:pointer">terma &amp; syarat</a> program ini.</label>
-          </div>
-          <div class="ralat" id="bk-error"></div>
-          <div style="display:flex;gap:0.7rem">
-            <button onclick="regStepBack(2)" class="btn-line" style="flex:0.4">← Kembali</button>
-            <button class="btn-hantar" id="bk-btn" onclick="submitPendaftaran()" style="flex:1;border-radius:8px">Hantar Pendaftaran →</button>
-          </div>
-        </div>
-
+      <div style="width:80px;height:2px;background:linear-gradient(90deg,var(--blue),var(--border));margin-bottom:1.2rem"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.4rem">
+        <div style="width:44px;height:44px;background:var(--blue-mid);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1rem">2</div>
+        <div style="font-size:0.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--blue-mid)">Isi Maklumat</div>
       </div>
+      <div style="width:80px;height:2px;background:linear-gradient(90deg,var(--blue-mid),var(--border));margin-bottom:1.2rem"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.4rem">
+        <div style="width:44px;height:44px;background:var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700;font-size:1rem">3</div>
+        <div style="font-size:0.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Bayar</div>
+      </div>
+    </div>
+
+    <!-- Package cards -->
+    <div class="pakej-grid fade" id="pakej-container">
+      <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)">
+        <span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span>
+        Memuatkan pakej...
+      </div>
+    </div>
+
+    <!-- OR divider -->
+    <div class="fade" style="text-align:center;margin-top:2rem;font-size:0.8rem;color:var(--muted)">
+      Perlukan bantuan? Hubungi kami di 
+      <a href="https://wa.me/60136039641" target="_blank" style="color:var(--blue-mid);font-weight:700">013-6039641</a>
     </div>
   </div>
 </section>
 
-<div class="pemisah"></div>
+<!-- BOOKING MODAL -->
+<div class="overlay" id="m-booking">
+  <div class="modal" style="max-width:520px;padding:0;overflow:hidden;border-radius:18px">
+    <button class="modal-tutup" onclick="closeM('booking')" style="z-index:10;top:1rem;right:1rem">✕</button>
 
-<!-- BAYARAN -->
-<section id="bayaran" class="sek" style="background:var(--white)">
-  <div class="sek-wrap">
-
-    <div class="sek-head fade">
-      <div class="label">Pembayaran</div>
-      <h2 class="sek-title">Kaedah <span>Pembayaran</span></h2>
-      <p class="sek-sub">Pilih kaedah pembayaran yang sesuai untuk anda. Semua transaksi adalah selamat dan disulitkan.</p>
+    <!-- Modal header -->
+    <div style="background:linear-gradient(135deg,var(--navy),var(--blue-mid));padding:1.8rem 2rem;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.05)"></div>
+      <div style="position:relative;z-index:2">
+        <div style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:0.4rem">Pakej Dipilih</div>
+        <div id="bk-pakej-nama" style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:2px;color:white;line-height:1">—</div>
+        <div id="bk-pakej-harga" style="font-size:0.88rem;color:rgba(255,255,255,0.7);margin-top:0.3rem">—</div>
+      </div>
     </div>
 
-    <div class="fade" style="display:grid;grid-template-columns:1.2fr 0.8fr;gap:2.5rem;align-items:start">
+    <!-- Modal body -->
+    <div style="padding:1.8rem 2rem;max-height:70vh;overflow-y:auto">
 
-      <!-- LEFT — Payment method + Form -->
-      <div>
-        <!-- Step indicator -->
-        <div style="display:flex;align-items:center;gap:0;margin-bottom:2rem">
-          <div style="display:flex;align-items:center;gap:0.5rem">
-            <div style="width:28px;height:28px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:700">1</div>
-            <span style="font-size:0.8rem;font-weight:700;color:var(--blue)">Kaedah Bayaran</span>
+      <!-- Step tabs -->
+      <div style="display:flex;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);margin-bottom:1.5rem;background:var(--pale2)">
+        <div class="bk-tab aktif-bk-tab" id="bkt-1">1. Maklumat</div>
+        <div class="bk-tab" id="bkt-2" style="border-left:1.5px solid var(--border)">2. Bayaran</div>
+      </div>
+
+      <!-- STEP 1: Maklumat -->
+      <div id="bk-step-1">
+        <div class="modal-input-group">
+          <label>Nama Penuh *</label>
+          <div class="modal-input-wrap"><span class="modal-input-icon">👤</span><input type="text" id="bk-nama" placeholder="Ahmad bin Ali"></div>
+        </div>
+        <div class="modal-input-group">
+          <label>No. KP / Pasport *</label>
+          <div class="modal-input-wrap"><span class="modal-input-icon">🪪</span><input type="text" id="bk-kp" placeholder="XXXXXX-XX-XXXX" maxlength="14" oninput="fmtKP(this,'bk-kp-status')"></div>
+          <div id="bk-kp-status" style="font-size:0.72rem;margin-top:0.3rem;min-height:1rem;padding-left:0.3rem"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+          <div class="modal-input-group">
+            <label>No. Telefon *</label>
+            <div class="modal-input-wrap"><span class="modal-input-icon">📞</span><input type="tel" id="bk-tel" placeholder="01X-XXXXXXXX"></div>
           </div>
-          <div style="flex:1;height:2px;background:var(--border);margin:0 0.75rem"></div>
-          <div style="display:flex;align-items:center;gap:0.5rem">
-            <div style="width:28px;height:28px;background:var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.75rem;font-weight:700">2</div>
-            <span style="font-size:0.8rem;font-weight:600;color:var(--muted)">Maklumat</span>
+          <div class="modal-input-group">
+            <label>E-mel *</label>
+            <div class="modal-input-wrap"><span class="modal-input-icon">✉</span><input type="email" id="bk-emel" placeholder="nama@email.com"></div>
           </div>
-          <div style="flex:1;height:2px;background:var(--border);margin:0 0.75rem"></div>
-          <div style="display:flex;align-items:center;gap:0.5rem">
-            <div style="width:28px;height:28px;background:var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.75rem;font-weight:700">3</div>
-            <span style="font-size:0.8rem;font-weight:600;color:var(--muted)">Sahkan</span>
+        </div>
+        <div class="modal-input-group">
+          <label>No. Kad Kelasi (jika ada)</label>
+          <div class="modal-input-wrap"><span class="modal-input-icon">🚢</span><input type="text" id="bk-seaman" placeholder="Nombor Seaman Card"></div>
+        </div>
+        <div class="modal-input-group">
+          <label>Tarikh Mula Pilihan</label>
+          <div class="modal-input-wrap"><span class="modal-input-icon">📅</span><input type="date" id="bk-tarikh"></div>
+        </div>
+
+        <!-- Fasa 1 status quick check -->
+        <div style="background:var(--pale);border-radius:10px;padding:1rem 1.2rem;margin-bottom:1rem;border:1.5px solid var(--border)">
+          <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:0.7rem">📋 Status Persediaan Fasa 1</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem">
+            <div>
+              <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:0.3rem">🏥 Medical Check Up</div>
+              <select id="bk-medical" style="width:100%;padding:0.45rem 0.7rem;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.78rem;color:var(--text);background:white;outline:none">
+                <option value="sudah">✅ Sudah ada</option>
+                <option value="proses">🔄 Dalam proses</option>
+                <option value="belum">❌ Belum lagi</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:0.75rem;font-weight:600;color:var(--text2);margin-bottom:0.3rem">🪪 Seaman Card</div>
+              <select id="bk-seaman-status" style="width:100%;padding:0.45rem 0.7rem;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.78rem;color:var(--text);background:white;outline:none">
+                <option value="sudah">✅ Sudah ada</option>
+                <option value="proses">🔄 Dalam proses</option>
+                <option value="belum">❌ Belum lagi</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="ralat" id="bk-error-1"></div>
+        <button class="btn-hantar" onclick="bkStep1Next()" style="border-radius:10px;font-size:0.92rem">
+          Seterusnya → Kaedah Bayaran
+        </button>
+      </div>
+
+      <!-- STEP 2: Bayaran -->
+      <div id="bk-step-2" style="display:none">
+
+        <!-- Order summary -->
+        <div style="background:var(--navy);border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1.2rem">
+          <div style="font-size:0.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:0.8rem">Ringkasan Pesanan</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;font-size:0.82rem;border-bottom:1px solid rgba(255,255,255,0.1)">
+            <span style="color:rgba(255,255,255,0.6)">Pakej</span>
+            <span id="bk-sum-pakej" style="color:white;font-weight:700;font-size:0.8rem;text-align:right;max-width:60%">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;font-size:0.82rem;border-bottom:1px solid rgba(255,255,255,0.1)">
+            <span style="color:rgba(255,255,255,0.6)">Harga Penuh</span>
+            <span id="bk-sum-penuh" style="color:white;font-weight:700">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;font-size:0.82rem">
+            <span style="color:rgba(255,255,255,0.6)">Deposit (30%)</span>
+            <span id="bk-sum-deposit" style="color:white;font-weight:700">—</span>
+          </div>
+          <div style="margin-top:0.8rem;padding-top:0.8rem;border-top:1px solid rgba(255,255,255,0.15);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:0.82rem;color:rgba(255,255,255,0.7);font-weight:600">Bayar Hari Ini</span>
+            <span id="bk-sum-total" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:white;letter-spacing:1px">—</span>
           </div>
         </div>
 
         <!-- Payment methods -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1.5rem">
-          <div class="pay-pro aktif" onclick="pilihKaedah(this,'FPX / Online Banking')">
-            <div class="pay-pro-inner">
-              <div class="pay-pro-icon">🏦</div>
-              <div>
-                <div class="pay-pro-name">FPX / Online Banking</div>
-                <div class="pay-pro-desc">Maybank2u, CIMB, RHB</div>
-              </div>
-              <div class="pay-pro-check" id="chk-0">✓</div>
-            </div>
-            <div class="pay-pro-tag">Disyorkan</div>
-          </div>
-          <div class="pay-pro" onclick="pilihKaedah(this,'Kad Kredit / Debit')">
-            <div class="pay-pro-inner">
-              <div class="pay-pro-icon">💳</div>
-              <div>
-                <div class="pay-pro-name">Kad Kredit / Debit</div>
-                <div class="pay-pro-desc">Visa, Mastercard, Amex</div>
-              </div>
-              <div class="pay-pro-check">✓</div>
-            </div>
-          </div>
-          <div class="pay-pro" onclick="pilihKaedah(this,'DuitNow / QR')">
-            <div class="pay-pro-inner">
-              <div class="pay-pro-icon">📱</div>
-              <div>
-                <div class="pay-pro-name">DuitNow / QR</div>
-                <div class="pay-pro-desc">Imbas & bayar serta-merta</div>
-              </div>
-              <div class="pay-pro-check">✓</div>
-            </div>
-          </div>
-          <div class="pay-pro" onclick="pilihKaedah(this,'PTPK / MARA / Biasiswa')">
-            <div class="pay-pro-inner">
-              <div class="pay-pro-icon">🎓</div>
-              <div>
-                <div class="pay-pro-name">PTPK / MARA</div>
-                <div class="pay-pro-desc">Pinjaman & biasiswa</div>
-              </div>
-              <div class="pay-pro-check">✓</div>
-            </div>
-          </div>
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:0.7rem">Kaedah Bayaran</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;margin-bottom:1.2rem">
+          <div class="bk-pay-opt aktif-pay" onclick="piliKaedahBk(this,'FPX / Online Banking')"><span>🏦</span><div><div class="bk-opt-name">FPX / Online Banking</div><div class="bk-opt-sub">Maybank, CIMB, RHB</div></div><div class="bk-opt-check">✓</div></div>
+          <div class="bk-pay-opt" onclick="piliKaedahBk(this,'Kad Kredit / Debit')"><span>💳</span><div><div class="bk-opt-name">Kad Kredit / Debit</div><div class="bk-opt-sub">Visa, Mastercard</div></div><div class="bk-opt-check">✓</div></div>
+          <div class="bk-pay-opt" onclick="piliKaedahBk(this,'DuitNow / QR')"><span>📱</span><div><div class="bk-opt-name">DuitNow / QR</div><div class="bk-opt-sub">Imbas & bayar</div></div><div class="bk-opt-check">✓</div></div>
+          <div class="bk-pay-opt" onclick="piliKaedahBk(this,'PTPK / MARA')"><span>🎓</span><div><div class="bk-opt-name">PTPK / MARA</div><div class="bk-opt-sub">Pinjaman & biasiswa</div></div><div class="bk-opt-check">✓</div></div>
         </div>
 
-        <!-- Payment form -->
-        <div style="background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:1.8rem;position:relative;overflow:hidden">
-          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--blue-lt))"></div>
-          <div style="font-size:0.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:1.2rem">Maklumat Pembayar</div>
-          <div class="berjaya" id="pay-success">✅ Rekod bayaran berjaya disimpan! Pihak kami akan mengesahkan pembayaran anda.</div>
-          <div class="f2">
-            <div class="medan"><label>Nama Penuh *</label><input type="text" id="pay-nama" placeholder="Nama seperti dalam kad / bank"></div>
-            <div class="medan"><label>No. Telefon *</label><input type="tel" id="pay-tel" placeholder="01X-XXXXXXXX"></div>
-          </div>
-          <div id="kad-medan" style="display:none">
-            <div style="font-size:0.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:0.8rem 0 1rem">Maklumat Kad</div>
-            <div class="medan"><label>Nombor Kad</label><input type="text" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" oninput="fmtKad(this)"></div>
-            <div class="f2">
-              <div class="medan"><label>Tarikh Luput</label><input type="text" placeholder="MM / YY" maxlength="5"></div>
-              <div class="medan"><label>CVV</label><input type="text" placeholder="• • •" maxlength="3"></div>
-            </div>
-          </div>
+        <!-- Security note -->
+        <div style="display:flex;align-items:center;gap:0.6rem;padding:0.75rem 0.9rem;background:var(--pale);border-radius:8px;margin-bottom:1rem">
+          <span style="font-size:1rem">🔒</span>
+          <span style="font-size:0.72rem;color:var(--muted)">Bayaran selamat & disulitkan — SSL 256-bit · Firebase Protected</span>
+        </div>
 
-          <!-- Security badges -->
-          <div style="display:flex;align-items:center;gap:1rem;padding:0.9rem 1rem;background:var(--pale2);border-radius:8px;margin-bottom:1.2rem">
-            <div style="font-size:1.2rem">🔒</div>
-            <div>
-              <div style="font-size:0.78rem;font-weight:700;color:var(--text)">Pembayaran Selamat & Disulitkan</div>
-              <div style="font-size:0.7rem;color:var(--muted);margin-top:0.1rem">SSL 256-bit · FPX Malaysia · Data dilindungi</div>
-            </div>
-          </div>
+        <div style="display:flex;align-items:flex-start;gap:0.6rem;margin-bottom:1rem">
+          <input type="checkbox" id="bk-agree" style="width:14px;height:14px;accent-color:var(--blue);margin-top:3px;flex-shrink:0">
+          <label for="bk-agree" style="font-size:0.76rem;color:var(--muted);cursor:pointer">Saya bersetuju dengan <a onclick="openM('terma')" style="color:var(--blue-mid);cursor:pointer">terma &amp; syarat</a> dan mengesahkan maklumat yang diberikan adalah tepat.</label>
+        </div>
 
-          <div class="ralat" id="pay-error"></div>
-          <button class="btn-hantar" id="pay-btn" onclick="submitBayaran()" style="font-size:0.9rem;letter-spacing:0.5px">
-            Teruskan Pembayaran →
+        <div class="berjaya" id="bk-success">✅ Pendaftaran berjaya! Kami akan menghubungi anda dalam masa 1-2 hari bekerja.</div>
+        <div class="ralat" id="bk-error-2"></div>
+
+        <div style="display:flex;gap:0.7rem">
+          <button onclick="bkStepBack()" class="btn-line" style="flex:0.4;border-radius:10px">← Kembali</button>
+          <button class="btn-hantar" id="bk-submit-btn" onclick="submitBooking()" style="flex:1;border-radius:10px;font-size:0.92rem">
+            Sahkan & Hantar →
           </button>
-        </div>
-      </div>
-
-      <!-- RIGHT — Order summary -->
-      <div style="position:sticky;top:80px">
-        <div style="background:var(--navy);border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(11,45,94,0.2)">
-
-          <!-- Header -->
-          <div style="padding:1.5rem 1.8rem;border-bottom:1px solid rgba(255,255,255,0.1)">
-            <div style="font-size:0.65rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:0.3rem">Ringkasan Pesanan</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;color:white">Bayaran Anda</div>
-          </div>
-
-          <!-- Package info -->
-          <div style="padding:1.5rem 1.8rem;border-bottom:1px solid rgba(255,255,255,0.08)">
-            <div style="font-size:0.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:0.8rem">Program</div>
-            <div id="pp-pakej" style="font-size:0.95rem;font-weight:700;color:white">— Pilih pakej dahulu</div>
-          </div>
-
-          <!-- Breakdown -->
-          <div style="padding:1.5rem 1.8rem;border-bottom:1px solid rgba(255,255,255,0.08)">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;font-size:0.83rem">
-              <span style="color:rgba(255,255,255,0.55)">Harga Penuh</span>
-              <span id="pp-penuh" style="color:rgba(255,255,255,0.8);font-weight:600">—</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;font-size:0.83rem">
-              <span style="color:rgba(255,255,255,0.55)">Kaedah Bayaran</span>
-              <span id="pp-kaedah" style="color:rgba(255,255,255,0.8);font-weight:600;font-size:0.78rem;text-align:right;max-width:55%">FPX / Online Banking</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;font-size:0.83rem">
-              <span style="color:rgba(255,255,255,0.55)">Deposit (30%)</span>
-              <span id="pp-deposit" style="color:rgba(255,255,255,0.8);font-weight:600">—</span>
-            </div>
-          </div>
-
-          <!-- Total -->
-          <div style="padding:1.5rem 1.8rem">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2rem">
-              <span style="font-size:0.85rem;font-weight:600;color:rgba(255,255,255,0.7)">Jumlah Bayar Hari Ini</span>
-              <span id="pp-total" style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:white;letter-spacing:1px">—</span>
-            </div>
-            <div style="padding:0.8rem;background:rgba(255,255,255,0.07);border-radius:8px;font-size:0.75rem;color:rgba(255,255,255,0.5);line-height:1.5;text-align:center">
-              Baki yuran akan dibayar sebelum kursus bermula
-            </div>
-          </div>
-        </div>
-
-        <!-- Help box -->
-        <div style="margin-top:1rem;padding:1rem 1.2rem;background:var(--pale);border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:flex-start;gap:0.75rem">
-          <div style="font-size:1.2rem;flex-shrink:0">💬</div>
-          <div>
-            <div style="font-size:0.8rem;font-weight:700;color:var(--text);margin-bottom:0.2rem">Perlukan bantuan?</div>
-            <div style="font-size:0.75rem;color:var(--muted);line-height:1.5">Hubungi kami di <strong style="color:var(--blue)">013-6039641</strong> untuk pertanyaan berkaitan pembayaran.</div>
-          </div>
         </div>
       </div>
 
     </div>
   </div>
-</section>
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -1442,6 +1328,144 @@
       if (wrap) wrap.style.display = e.target.value === 'sudah' ? 'block' : 'none';
     }
   });
+
+  // ── BOOKING MODAL ──
+  let _bkPakej = '', _bkHarga = 0, _bkKaedah = 'FPX / Online Banking';
+
+  window.pilihPakej = function(nama, amt) {
+    if (!window._isLoggedIn) {
+      showToast('⚠ Sila log masuk atau daftar dahulu untuk memilih pakej!');
+      setTimeout(() => openM('login'), 800);
+      return;
+    }
+    _bkPakej = nama;
+    _bkHarga = amt;
+
+    // Set header
+    document.getElementById('bk-pakej-nama').textContent  = nama;
+    document.getElementById('bk-pakej-harga').textContent = 'Mulai dari RM ' + parseInt(amt).toLocaleString();
+
+    // Set summary
+    document.getElementById('bk-sum-pakej').textContent   = nama;
+    document.getElementById('bk-sum-penuh').textContent   = 'RM ' + parseInt(amt).toLocaleString();
+    const dep = Math.round(amt * 0.3);
+    document.getElementById('bk-sum-deposit').textContent = 'RM ' + dep.toLocaleString();
+    document.getElementById('bk-sum-total').textContent   = 'RM ' + dep.toLocaleString();
+
+    // Reset to step 1
+    document.getElementById('bk-step-1').style.display = 'block';
+    document.getElementById('bk-step-2').style.display = 'none';
+    document.getElementById('bkt-1').className = 'bk-tab aktif-bk-tab';
+    document.getElementById('bkt-2').className = 'bk-tab';
+    document.getElementById('bk-error-1').textContent = '';
+    document.getElementById('bk-success').style.display = 'none';
+
+    openM('booking');
+  };
+
+  window.bkStep1Next = function() {
+    const nama  = document.getElementById('bk-nama').value.trim();
+    const kp    = document.getElementById('bk-kp').value.trim();
+    const tel   = document.getElementById('bk-tel').value.trim();
+    const emel  = document.getElementById('bk-emel').value.trim();
+    const errEl = document.getElementById('bk-error-1');
+    errEl.textContent = '';
+
+    if (!nama)  { errEl.textContent = '⚠ Sila masukkan nama penuh.'; return; }
+    if (!kp)    { errEl.textContent = '⚠ Sila masukkan No. KP.'; return; }
+    if (!/^\d{6}-\d{2}-\d{4}$/.test(kp)) { errEl.textContent = '⚠ Format No. KP tidak sah. Gunakan XXXXXX-XX-XXXX.'; return; }
+    if (!tel)   { errEl.textContent = '⚠ Sila masukkan no. telefon.'; return; }
+    if (!emel)  { errEl.textContent = '⚠ Sila masukkan e-mel.'; return; }
+
+    document.getElementById('bk-step-1').style.display = 'none';
+    document.getElementById('bk-step-2').style.display = 'block';
+    document.getElementById('bkt-1').className = 'bk-tab';
+    document.getElementById('bkt-2').className = 'bk-tab aktif-bk-tab';
+  };
+
+  window.bkStepBack = function() {
+    document.getElementById('bk-step-1').style.display = 'block';
+    document.getElementById('bk-step-2').style.display = 'none';
+    document.getElementById('bkt-1').className = 'bk-tab aktif-bk-tab';
+    document.getElementById('bkt-2').className = 'bk-tab';
+  };
+
+  window.piliKaedahBk = function(el, kaedah) {
+    document.querySelectorAll('.bk-pay-opt').forEach(m => m.classList.remove('aktif-pay'));
+    el.classList.add('aktif-pay');
+    _bkKaedah = kaedah;
+  };
+
+  window.submitBooking = async function() {
+    const agree = document.getElementById('bk-agree').checked;
+    const errEl = document.getElementById('bk-error-2');
+    errEl.textContent = '';
+
+    if (!agree) { errEl.textContent = '⚠ Sila bersetuju dengan terma & syarat.'; return; }
+
+    const nama    = document.getElementById('bk-nama').value.trim();
+    const kp      = document.getElementById('bk-kp').value.trim();
+    const tel     = document.getElementById('bk-tel').value.trim();
+    const emel    = document.getElementById('bk-emel').value.trim();
+    const seaman  = document.getElementById('bk-seaman').value.trim();
+    const tarikh  = document.getElementById('bk-tarikh').value;
+    const medical = document.getElementById('bk-medical').value;
+    const seamanS = document.getElementById('bk-seaman-status').value;
+    const dep     = Math.round(_bkHarga * 0.3);
+
+    const btn = document.getElementById('bk-submit-btn');
+    btn.innerHTML = '<span class="spinner"></span>Menghantar...';
+    btn.disabled  = true;
+    tunjukLoader('Menyimpan pendaftaran...', 'Data sedang dihantar ke Firebase');
+
+    try {
+      // Save registration
+      await addDoc(collection(db, 'pendaftaran'), {
+        nama, kp, tel, emel, seamanCard: seaman,
+        pakej: _bkPakej, tarikh,
+        statusMedical: medical,
+        statusSeaman:  seamanS,
+        status: 'Baru',
+        submittedAt: serverTimestamp(),
+        uid: auth.currentUser ? auth.currentUser.uid : 'tetamu'
+      });
+
+      // Save payment record
+      await addDoc(collection(db, 'bayaran'), {
+        nama, tel,
+        program: _bkPakej,
+        method:  _bkKaedah,
+        jumlah: 'RM ' + dep.toLocaleString(),
+        status: 'Belum Disahkan',
+        submittedAt: serverTimestamp(),
+        uid: auth.currentUser ? auth.currentUser.uid : 'tetamu'
+      });
+
+      document.getElementById('bk-success').style.display = 'block';
+      btn.innerHTML = 'Sahkan & Hantar →';
+      btn.disabled  = false;
+      showToast('✅ Pendaftaran berjaya! Kami akan hubungi anda segera.');
+
+      // Reset form after 3 seconds and close
+      setTimeout(() => {
+        closeM('booking');
+        // Clear form
+        ['bk-nama','bk-kp','bk-tel','bk-emel','bk-seaman','bk-tarikh'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        document.getElementById('bk-agree').checked = false;
+        document.getElementById('bk-success').style.display = 'none';
+      }, 3000);
+
+    } catch(e) {
+      errEl.textContent = '⚠ Ralat: ' + e.message;
+      btn.innerHTML = 'Sahkan & Hantar →';
+      btn.disabled  = false;
+    } finally {
+      sembunyiLoader();
+    }
+  };
 
   // ── SCROLL FADE ──
   const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('masuk');obs.unobserve(e.target);}}),{threshold:0.08});
