@@ -8,7 +8,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail }
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, setPersistence, browserLocalPersistence }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, orderBy, query, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -26,14 +26,24 @@
   const auth = getAuth(app);
   const db   = getFirestore(app);
 
-  // ── PACKAGES ──
-  onAuthStateChanged(auth, (user) => {
+  window._isLoggedIn = false;
+  window._authReady = false;
+
+  // Keep the Firebase session after a refresh or page navigation.
+  async function initialiseAuth() {
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+    } catch (error) {
+      console.error('Firebase persistence error:', error);
+    }
+
+    onAuthStateChanged(auth, (user) => {
     const navAuth   = document.getElementById('nav-auth');
     const navUser   = document.getElementById('nav-user');
     const userEmail = document.getElementById('user-email');
 
-    // Global flag accessible from non-module scripts
-    window._isLoggedIn = !!user;
+    window._isLoggedIn = Boolean(user);
+    window._authReady = true;
 
     if (user) {
       navAuth.style.display = 'none';
@@ -43,8 +53,11 @@
       navAuth.style.display = 'flex';
       navUser.style.display = 'none';
     }
-    muatPakej();
-  });
+    window.muatPakej?.();
+    });
+  }
+
+  initialiseAuth();
 
   // ── REGISTER ──
   window.doRegister = async function() {
@@ -93,11 +106,20 @@
     btn.innerHTML = '<span class="spinner"></span>Sedang log masuk...'; btn.disabled = true;
     tunjukLoader('Log masuk...', 'Mengesahkan maklumat anda');
     try {
+      await setPersistence(auth, browserLocalPersistence);
       await signInWithEmailAndPassword(auth, email, pass);
       closeM('login');
       showToast('✓ Berjaya log masuk! Selamat datang kembali.');
     } catch (e) {
-      errEl.textContent = '⚠ E-mel atau kata laluan tidak betul.';
+      const messages = {
+        'auth/invalid-credential': '⚠ E-mel atau kata laluan tidak betul.',
+        'auth/user-not-found': '⚠ Akaun ini tidak ditemui.',
+        'auth/wrong-password': '⚠ Kata laluan tidak betul.',
+        'auth/too-many-requests': '⚠ Terlalu banyak cubaan. Sila tunggu sebentar.',
+        'auth/unauthorized-domain': '⚠ Domain laman ini belum dibenarkan dalam Firebase.'
+      };
+      console.error('Login failed:', e.code, e.message);
+      errEl.textContent = messages[e.code] || '⚠ Log masuk gagal. Sila cuba lagi.';
     } finally { btn.innerHTML = 'Log Masuk →'; btn.disabled = false; sembunyiLoader(); }
   };
 
@@ -1171,22 +1193,6 @@
 
   // ── FASA TABS ──
   function tukarFasa(i) { document.querySelectorAll('.f-tab').forEach((t,idx)=>t.classList.toggle('active',idx===i)); document.querySelectorAll('.f-panel').forEach((p,idx)=>p.classList.toggle('active',idx===i)); }
-
-  // ── PILIH PAKEJ ──
-  function pilihPakej(nama, amt) {
-    if (!window._isLoggedIn) {
-      showToast('⚠ Sila log masuk atau daftar dahulu untuk memilih pakej!');
-      setTimeout(() => openM('login'), 800);
-      return;
-    }
-    document.getElementById('pp-pakej').textContent   = nama;
-    document.getElementById('pp-penuh').textContent   = 'RM ' + parseInt(amt).toLocaleString();
-    const dep = Math.round(amt * 0.3);
-    document.getElementById('pp-deposit').textContent = 'RM ' + dep.toLocaleString();
-    document.getElementById('pp-total').textContent   = 'RM ' + dep.toLocaleString();
-    showToast('✓ ' + nama + ' dipilih!');
-    setTimeout(() => document.getElementById('bayaran').scrollIntoView({ behavior:'smooth' }), 700);
-  }
 
   // ── PILIH KAEDAH ──
   function pilihKaedah(el,kaedah) {
