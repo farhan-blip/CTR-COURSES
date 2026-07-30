@@ -241,15 +241,23 @@
   };
 
   // ── PACKAGES ──
+  // The page has two package sections, so update both containers.
   window.muatPakej = async function() {
-    const container = document.getElementById('pakej-container');
-    if (!container) return;
+    const containers = Array.from(document.querySelectorAll('.pakej-container-js'));
+    if (containers.length === 0) {
+      console.warn('Tiada bekas pakej ditemui.');
+      return;
+    }
 
-    container.innerHTML = `
+    const loadingHtml = `
       <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)">
         <span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span>
         Memuatkan pakej...
       </div>`;
+
+    containers.forEach(container => {
+      container.innerHTML = loadingHtml;
+    });
 
     try {
       const packageRequest = getDocs(collection(db, 'pakej'));
@@ -259,6 +267,7 @@
 
       const snap = await Promise.race([packageRequest, timeoutRequest]);
       const allDocs = [];
+
       snap.forEach(documentSnapshot => {
         allDocs.push({
           id: documentSnapshot.id,
@@ -267,11 +276,6 @@
       });
 
       allDocs.sort((a, b) => Number(a.data.harga || 0) - Number(b.data.harga || 0));
-
-      if (allDocs.length === 0) {
-        pamerPakejStatik(container);
-        return;
-      }
 
       const seenNames = new Set();
       const uniquePackages = allDocs.filter(packageDocument => {
@@ -282,20 +286,22 @@
       });
 
       if (uniquePackages.length === 0) {
-        pamerPakejStatik(container);
+        containers.forEach(container => pamerPakejStatik(container));
         return;
       }
 
-      container.innerHTML = '';
-      uniquePackages.forEach(packageDocument => {
-        container.insertAdjacentHTML(
-          'beforeend',
-          window.buatKadPakej(packageDocument.id, packageDocument.data)
-        );
+      const cardsHtml = uniquePackages.map(packageDocument =>
+        window.buatKadPakej(packageDocument.id, packageDocument.data)
+      ).join('');
+
+      containers.forEach(container => {
+        container.innerHTML = cardsHtml;
       });
+
+      console.log(`Pakej berjaya dipaparkan dalam ${containers.length} bahagian.`);
     } catch (error) {
       console.warn('Pakej Firebase tidak dapat dimuatkan. Pakej statik dipaparkan:', error);
-      pamerPakejStatik(container);
+      containers.forEach(container => pamerPakejStatik(container));
     }
   };
 
@@ -861,7 +867,7 @@
     </div>
 
     <div class="f-panel" id="panel-1">
-      <div class="pakej-grid" id="pakej-container">
+      <div class="pakej-grid pakej-container-js" id="pakej-container-fasa">
         <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)"><span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span> Memuatkan pakej...</div>
       </div>
     </div>
@@ -898,7 +904,7 @@
     </div>
 
     <!-- Package cards -->
-    <div class="pakej-grid fade" id="pakej-container">
+    <div class="pakej-grid fade pakej-container-js" id="pakej-container-daftar">
       <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)">
         <span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span>
         Memuatkan pakej...
