@@ -41,6 +41,7 @@
     query,
     serverTimestamp
   });
+
   window._firebaseReady = true;
   window.dispatchEvent(new Event('firebase-ready'));
 
@@ -243,34 +244,57 @@
   window.muatPakej = async function() {
     const container = document.getElementById('pakej-container');
     if (!container) return;
-    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)"><span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span> Memuatkan pakej...</div>';
-    try {
-      // Simple getDocs — no orderBy to avoid index requirement
-      const snap = await getDocs(collection(db, 'pakej'));
-      const allDocs = [];
-      snap.forEach(d => allDocs.push({ id: d.id, data: d.data() }));
 
-      // Sort by harga in JS
-      allDocs.sort((a, b) => (a.data.harga||0) - (b.data.harga||0));
+    container.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)">
+        <span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span>
+        Memuatkan pakej...
+      </div>`;
+
+    try {
+      const packageRequest = getDocs(collection(db, 'pakej'));
+      const timeoutRequest = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Pakej mengambil masa terlalu lama untuk dimuatkan.')), 8000);
+      });
+
+      const snap = await Promise.race([packageRequest, timeoutRequest]);
+      const allDocs = [];
+      snap.forEach(documentSnapshot => {
+        allDocs.push({
+          id: documentSnapshot.id,
+          data: documentSnapshot.data()
+        });
+      });
+
+      allDocs.sort((a, b) => Number(a.data.harga || 0) - Number(b.data.harga || 0));
 
       if (allDocs.length === 0) {
         pamerPakejStatik(container);
         return;
       }
 
-      // Remove duplicates — keep unique names only
-      const seen = {};
-      const toKeep = [];
-      for (const d of allDocs) {
-        if (!seen[d.data.nama]) { seen[d.data.nama] = true; toKeep.push(d); }
+      const seenNames = new Set();
+      const uniquePackages = allDocs.filter(packageDocument => {
+        const packageName = String(packageDocument.data.nama || '').trim();
+        if (!packageName || seenNames.has(packageName)) return false;
+        seenNames.add(packageName);
+        return true;
+      });
+
+      if (uniquePackages.length === 0) {
+        pamerPakejStatik(container);
+        return;
       }
 
       container.innerHTML = '';
-      toKeep.forEach(d => { container.innerHTML += window.buatKadPakej(d.id, d.data); });
-
-    } catch (e) {
-      console.log('Pakej error:', e.message);
-      // Rules blocked or offline — show static packages
+      uniquePackages.forEach(packageDocument => {
+        container.insertAdjacentHTML(
+          'beforeend',
+          window.buatKadPakej(packageDocument.id, packageDocument.data)
+        );
+      });
+    } catch (error) {
+      console.warn('Pakej Firebase tidak dapat dimuatkan. Pakej statik dipaparkan:', error);
       pamerPakejStatik(container);
     }
   };
@@ -1425,7 +1449,10 @@
     const errEl = document.getElementById('bk-error-2');
     errEl.textContent = '';
 
-    if (!agree) { errEl.textContent = '⚠ Sila bersetuju dengan terma & syarat.'; return; }
+    if (!agree) {
+      errEl.textContent = '⚠ Sila bersetuju dengan terma & syarat.';
+      return;
+    }
 
     const nama    = document.getElementById('bk-nama').value.trim();
     const kp      = document.getElementById('bk-kp').value.trim();
@@ -1435,62 +1462,89 @@
     const tarikh  = document.getElementById('bk-tarikh').value;
     const medical = document.getElementById('bk-medical').value;
     const seamanS = document.getElementById('bk-seaman-status').value;
-    const dep     = Math.round(_bkHarga * 0.3);
 
+    if (!nama || !kp || !tel || !emel || !tarikh) {
+      errEl.textContent = '⚠ Sila lengkapkan semua maklumat wajib.';
+      return;
+    }
+
+    if (!_bkPakej || !_bkHarga) {
+      errEl.textContent = '⚠ Sila pilih pakej terlebih dahulu.';
+      return;
+    }
+
+    const dep = Math.round(_bkHarga * 0.3);
     const btn = document.getElementById('bk-submit-btn');
     btn.innerHTML = '<span class="spinner"></span>Menghantar...';
-    btn.disabled  = true;
+    btn.disabled = true;
     tunjukLoader('Menyimpan pendaftaran...', 'Data sedang dihantar ke Firebase');
 
     try {
-      if (!window._firebaseReady || !window.addDoc || !window.collection || !window.db || !window.serverTimestamp) {
+      if (
+        !window._firebaseReady ||
+        !window.addDoc ||
+        !window.collection ||
+        !window.db ||
+        !window.serverTimestamp
+      ) {
         throw new Error('Firebase belum bersedia. Sila muat semula halaman dan cuba lagi.');
       }
 
-      // Save registration
-      await window.addDoc(window.collection(window.db, 'pendaftaran'), {
-        nama, kp, tel, emel, seamanCard: seaman,
-        pakej: _bkPakej, tarikh,
-        statusMedical: medical,
-        statusSeaman:  seamanS,
-        status: 'Baru',
-        submittedAt: window.serverTimestamp(),
-        uid: window.auth?.currentUser ? window.auth.currentUser.uid : 'tetamu'
-      });
+      const currentUid = window.auth?.currentUser?.uid || 'tetamu';
 
-      // Save payment record
-      await window.addDoc(window.collection(window.db, 'bayaran'), {
-        nama, tel,
-        program: _bkPakej,
-        method:  _bkKaedah,
-        jumlah: 'RM ' + dep.toLocaleString(),
-        status: 'Belum Disahkan',
-        submittedAt: window.serverTimestamp(),
-        uid: window.auth?.currentUser ? window.auth.currentUser.uid : 'tetamu'
-      });
+      await window.addDoc(
+        window.collection(window.db, 'pendaftaran'),
+        {
+          nama,
+          kp,
+          tel,
+          emel,
+          seamanCard: seaman,
+          pakej: _bkPakej,
+          harga: _bkHarga,
+          tarikh,
+          statusMedical: medical,
+          statusSeaman: seamanS,
+          status: 'Baru',
+          submittedAt: window.serverTimestamp(),
+          uid: currentUid
+        }
+      );
+
+      await window.addDoc(
+        window.collection(window.db, 'bayaran'),
+        {
+          nama,
+          tel,
+          emel,
+          program: _bkPakej,
+          hargaPenuh: _bkHarga,
+          method: _bkKaedah,
+          jumlah: 'RM ' + dep.toLocaleString(),
+          status: 'Belum Disahkan',
+          submittedAt: window.serverTimestamp(),
+          uid: currentUid
+        }
+      );
 
       document.getElementById('bk-success').style.display = 'block';
-      btn.innerHTML = 'Sahkan & Hantar →';
-      btn.disabled  = false;
       showToast('✅ Pendaftaran berjaya! Kami akan hubungi anda segera.');
 
-      // Reset form after 3 seconds and close
       setTimeout(() => {
         closeM('booking');
-        // Clear form
         ['bk-nama','bk-kp','bk-tel','bk-emel','bk-seaman','bk-tarikh'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.value = '';
+          const field = document.getElementById(id);
+          if (field) field.value = '';
         });
         document.getElementById('bk-agree').checked = false;
         document.getElementById('bk-success').style.display = 'none';
       }, 3000);
-
-    } catch(e) {
-      errEl.textContent = '⚠ Ralat: ' + e.message;
-      btn.innerHTML = 'Sahkan & Hantar →';
-      btn.disabled  = false;
+    } catch (error) {
+      console.error('Booking error:', error);
+      errEl.textContent = '⚠ Ralat: ' + error.message;
     } finally {
+      btn.innerHTML = 'Sahkan & Hantar →';
+      btn.disabled = false;
       sembunyiLoader();
     }
   };
@@ -1499,12 +1553,23 @@
   const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('masuk');obs.unobserve(e.target);}}),{threshold:0.08});
   document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
 
-  // Load packages on page load
-  window.addEventListener('load', () => {
-    if (typeof window.muatPakej === 'function') {
-      window.muatPakej();
-    }
-  });
+  // Load packages when the page is ready. The guard prevents duplicate loads.
+  let packageLoadingStarted = false;
+
+  function startPackageLoading() {
+    if (packageLoadingStarted) return;
+    if (typeof window.muatPakej !== 'function') return;
+    packageLoadingStarted = true;
+    window.muatPakej();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startPackageLoading, { once: true });
+  } else {
+    startPackageLoading();
+  }
+
+  window.addEventListener('firebase-ready', startPackageLoading, { once: true });
 </script>
 </body>
 </html>
