@@ -41,7 +41,6 @@
     query,
     serverTimestamp
   });
-
   window._firebaseReady = true;
   window.dispatchEvent(new Event('firebase-ready'));
 
@@ -241,67 +240,49 @@
   };
 
   // ── PACKAGES ──
-  // The page has two package sections, so update both containers.
   window.muatPakej = async function() {
-    const containers = Array.from(document.querySelectorAll('.pakej-container-js'));
-    if (containers.length === 0) {
-      console.warn('Tiada bekas pakej ditemui.');
-      return;
-    }
+    const container = document.getElementById('pakej-container');
+    if (!container) return;
 
-    const loadingHtml = `
-      <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)">
-        <span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span>
-        Memuatkan pakej...
-      </div>`;
-
-    containers.forEach(container => {
-      container.innerHTML = loadingHtml;
-    });
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)"><span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span> Memuatkan pakej...</div>';
 
     try {
-      const packageRequest = getDocs(collection(db, 'pakej'));
+      const firebaseRequest = getDocs(collection(db, 'pakej'));
       const timeoutRequest = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Pakej mengambil masa terlalu lama untuk dimuatkan.')), 8000);
+        setTimeout(() => reject(new Error('Firebase timeout')), 8000);
       });
 
-      const snap = await Promise.race([packageRequest, timeoutRequest]);
+      const snap = await Promise.race([firebaseRequest, timeoutRequest]);
       const allDocs = [];
-
-      snap.forEach(documentSnapshot => {
-        allDocs.push({
-          id: documentSnapshot.id,
-          data: documentSnapshot.data()
-        });
-      });
+      snap.forEach(d => allDocs.push({ id: d.id, data: d.data() }));
 
       allDocs.sort((a, b) => Number(a.data.harga || 0) - Number(b.data.harga || 0));
 
-      const seenNames = new Set();
-      const uniquePackages = allDocs.filter(packageDocument => {
-        const packageName = String(packageDocument.data.nama || '').trim();
-        if (!packageName || seenNames.has(packageName)) return false;
-        seenNames.add(packageName);
-        return true;
-      });
-
-      if (uniquePackages.length === 0) {
-        containers.forEach(container => pamerPakejStatik(container));
+      if (allDocs.length === 0) {
+        pamerPakejStatik(container);
         return;
       }
 
-      const cardsHtml = uniquePackages.map(packageDocument =>
-        window.buatKadPakej(packageDocument.id, packageDocument.data)
-      ).join('');
-
-      containers.forEach(container => {
-        container.innerHTML = cardsHtml;
+      const seen = new Set();
+      const uniqueDocs = allDocs.filter(item => {
+        const nama = String(item.data.nama || '').trim();
+        if (!nama || seen.has(nama)) return false;
+        seen.add(nama);
+        return true;
       });
 
-      console.log(`Pakej berjaya dipaparkan dalam ${containers.length} bahagian.`);
+      if (uniqueDocs.length === 0) {
+        pamerPakejStatik(container);
+        return;
+      }
+
+      container.innerHTML = '';
+      uniqueDocs.forEach(item => {
+        container.insertAdjacentHTML('beforeend', window.buatKadPakej(item.id, item.data));
+      });
     } catch (error) {
-      console.warn('Pakej Firebase tidak dapat dimuatkan. Pakej statik dipaparkan:', error);
-      containers.forEach(container => pamerPakejStatik(container));
+      console.warn('Pakej Firebase tidak dapat dimuatkan. Menggunakan pakej statik:', error);
+      pamerPakejStatik(container);
     }
   };
 
@@ -316,8 +297,11 @@
         kursusYa:['Basic Training (BT)|Latihan asas keselamatan dan survival di laut','Designated Security Duties (DSD)|Latihan tugas keselamatan kapal ISPS Code','BTOCT (Tanker)|Latihan asas kapal tangki minyak / kimia','Ship Security Awareness (SSA)|Sijil kesedaran keselamatan kapal'],
         kursustidak:['Crowd Management|Tidak termasuk dalam pakej ini','Penempatan Praktikal|Tidak termasuk — boleh ditambah kemudian'] }
     ];
+
     container.innerHTML = '';
-    statik.forEach(p => { container.innerHTML += window.buatKadPakej(p.id, p); });
+    statik.forEach(p => {
+      container.insertAdjacentHTML('beforeend', window.buatKadPakej(p.id, p));
+    });
   }
 
 
@@ -867,8 +851,26 @@
     </div>
 
     <div class="f-panel" id="panel-1">
-      <div class="pakej-grid pakej-container-js" id="pakej-container-fasa">
-        <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)"><span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span> Memuatkan pakej...</div>
+      <div class="doc-grid">
+        <div class="doc-card">
+          <div class="doc-head"><div class="ico">🛟</div><div><h4>Latihan Keselamatan Maritim</h4><p>Kursus dan sijil asas industri</p></div></div>
+          <div class="doc-body">
+            <div class="doc-item"><span class="ck">✓</span>Basic Training (BT) — keselamatan dan survival di laut.</div>
+            <div class="doc-item"><span class="ck">✓</span>Designated Security Duties (DSD) — tugas keselamatan kapal.</div>
+            <div class="doc-item"><span class="ck">✓</span>BTOCT, Ship Security Awareness dan Crowd Management mengikut pakej.</div>
+          </div>
+        </div>
+        <div class="doc-card">
+          <div class="doc-head"><div class="ico">🚢</div><div><h4>Penempatan Praktikal</h4><p>Pengalaman sebenar dalam industri</p></div></div>
+          <div class="doc-body">
+            <div class="doc-item"><span class="ck">✓</span>Penempatan praktikal sehingga 6 bulan bergantung pada pakej.</div>
+            <div class="doc-item"><span class="ck">✓</span>Peluang menjalani latihan di atas kapal atau feri.</div>
+            <div class="doc-item"><span class="ck">✓</span>Membina pengalaman kerja sebelum memulakan kerjaya pelaut.</div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:2rem">
+        <a href="#pendaftaran" class="btn-fill" style="display:inline-block;text-decoration:none;padding:0.75rem 1.5rem">Lihat & Pilih Pakej Program →</a>
       </div>
     </div>
   </div>
@@ -904,7 +906,7 @@
     </div>
 
     <!-- Package cards -->
-    <div class="pakej-grid fade pakej-container-js" id="pakej-container-daftar">
+    <div class="pakej-grid fade" id="pakej-container">
       <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted)">
         <span class="spinner" style="border-color:rgba(11,45,94,0.2);border-top-color:var(--blue)"></span>
         Memuatkan pakej...
@@ -1455,10 +1457,7 @@
     const errEl = document.getElementById('bk-error-2');
     errEl.textContent = '';
 
-    if (!agree) {
-      errEl.textContent = '⚠ Sila bersetuju dengan terma & syarat.';
-      return;
-    }
+    if (!agree) { errEl.textContent = '⚠ Sila bersetuju dengan terma & syarat.'; return; }
 
     const nama    = document.getElementById('bk-nama').value.trim();
     const kp      = document.getElementById('bk-kp').value.trim();
@@ -1468,89 +1467,62 @@
     const tarikh  = document.getElementById('bk-tarikh').value;
     const medical = document.getElementById('bk-medical').value;
     const seamanS = document.getElementById('bk-seaman-status').value;
+    const dep     = Math.round(_bkHarga * 0.3);
 
-    if (!nama || !kp || !tel || !emel || !tarikh) {
-      errEl.textContent = '⚠ Sila lengkapkan semua maklumat wajib.';
-      return;
-    }
-
-    if (!_bkPakej || !_bkHarga) {
-      errEl.textContent = '⚠ Sila pilih pakej terlebih dahulu.';
-      return;
-    }
-
-    const dep = Math.round(_bkHarga * 0.3);
     const btn = document.getElementById('bk-submit-btn');
     btn.innerHTML = '<span class="spinner"></span>Menghantar...';
-    btn.disabled = true;
+    btn.disabled  = true;
     tunjukLoader('Menyimpan pendaftaran...', 'Data sedang dihantar ke Firebase');
 
     try {
-      if (
-        !window._firebaseReady ||
-        !window.addDoc ||
-        !window.collection ||
-        !window.db ||
-        !window.serverTimestamp
-      ) {
+      if (!window._firebaseReady || !window.addDoc || !window.collection || !window.db || !window.serverTimestamp) {
         throw new Error('Firebase belum bersedia. Sila muat semula halaman dan cuba lagi.');
       }
 
-      const currentUid = window.auth?.currentUser?.uid || 'tetamu';
+      // Save registration
+      await window.addDoc(window.collection(window.db, 'pendaftaran'), {
+        nama, kp, tel, emel, seamanCard: seaman,
+        pakej: _bkPakej, tarikh,
+        statusMedical: medical,
+        statusSeaman:  seamanS,
+        status: 'Baru',
+        submittedAt: window.serverTimestamp(),
+        uid: window.auth && window.auth.currentUser ? window.auth.currentUser.uid : 'tetamu'
+      });
 
-      await window.addDoc(
-        window.collection(window.db, 'pendaftaran'),
-        {
-          nama,
-          kp,
-          tel,
-          emel,
-          seamanCard: seaman,
-          pakej: _bkPakej,
-          harga: _bkHarga,
-          tarikh,
-          statusMedical: medical,
-          statusSeaman: seamanS,
-          status: 'Baru',
-          submittedAt: window.serverTimestamp(),
-          uid: currentUid
-        }
-      );
-
-      await window.addDoc(
-        window.collection(window.db, 'bayaran'),
-        {
-          nama,
-          tel,
-          emel,
-          program: _bkPakej,
-          hargaPenuh: _bkHarga,
-          method: _bkKaedah,
-          jumlah: 'RM ' + dep.toLocaleString(),
-          status: 'Belum Disahkan',
-          submittedAt: window.serverTimestamp(),
-          uid: currentUid
-        }
-      );
+      // Save payment record
+      await window.addDoc(window.collection(window.db, 'bayaran'), {
+        nama, tel,
+        program: _bkPakej,
+        method:  _bkKaedah,
+        jumlah: 'RM ' + dep.toLocaleString(),
+        status: 'Belum Disahkan',
+        submittedAt: window.serverTimestamp(),
+        uid: window.auth && window.auth.currentUser ? window.auth.currentUser.uid : 'tetamu'
+      });
 
       document.getElementById('bk-success').style.display = 'block';
+      btn.innerHTML = 'Sahkan & Hantar →';
+      btn.disabled  = false;
       showToast('✅ Pendaftaran berjaya! Kami akan hubungi anda segera.');
 
+      // Reset form after 3 seconds and close
       setTimeout(() => {
         closeM('booking');
+        // Clear form
         ['bk-nama','bk-kp','bk-tel','bk-emel','bk-seaman','bk-tarikh'].forEach(id => {
-          const field = document.getElementById(id);
-          if (field) field.value = '';
+          const el = document.getElementById(id);
+          if (el) el.value = '';
         });
         document.getElementById('bk-agree').checked = false;
         document.getElementById('bk-success').style.display = 'none';
       }, 3000);
-    } catch (error) {
-      console.error('Booking error:', error);
-      errEl.textContent = '⚠ Ralat: ' + error.message;
-    } finally {
+
+    } catch(e) {
+      errEl.textContent = '⚠ Ralat: ' + e.message;
       btn.innerHTML = 'Sahkan & Hantar →';
-      btn.disabled = false;
+      btn.disabled  = false;
+    } finally {
       sembunyiLoader();
     }
   };
@@ -1559,23 +1531,8 @@
   const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('masuk');obs.unobserve(e.target);}}),{threshold:0.08});
   document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
 
-  // Load packages when the page is ready. The guard prevents duplicate loads.
-  let packageLoadingStarted = false;
-
-  function startPackageLoading() {
-    if (packageLoadingStarted) return;
-    if (typeof window.muatPakej !== 'function') return;
-    packageLoadingStarted = true;
-    window.muatPakej();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startPackageLoading, { once: true });
-  } else {
-    startPackageLoading();
-  }
-
-  window.addEventListener('firebase-ready', startPackageLoading, { once: true });
+  // Load packages on page load
+  window.addEventListener('load',()=>{ if(typeof window.muatPakej==='function') window.muatPakej(); });
 </script>
 </body>
 </html>
