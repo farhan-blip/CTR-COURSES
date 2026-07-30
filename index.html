@@ -28,7 +28,21 @@
 
   // The booking form is in a normal script later in this file. Expose only the
   // Firebase values it needs so that form can save registrations and payments.
-  Object.assign(window, { auth, db, collection, addDoc, serverTimestamp });
+  Object.assign(window, {
+    auth,
+    db,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc,
+    updateDoc,
+    orderBy,
+    query,
+    serverTimestamp
+  });
+  window._firebaseReady = true;
+  window.dispatchEvent(new Event('firebase-ready'));
 
   window._isLoggedIn = false;
   window._authReady = false;
@@ -1429,26 +1443,30 @@
     tunjukLoader('Menyimpan pendaftaran...', 'Data sedang dihantar ke Firebase');
 
     try {
+      if (!window._firebaseReady || !window.addDoc || !window.collection || !window.db || !window.serverTimestamp) {
+        throw new Error('Firebase belum bersedia. Sila muat semula halaman dan cuba lagi.');
+      }
+
       // Save registration
-      await addDoc(collection(db, 'pendaftaran'), {
+      await window.addDoc(window.collection(window.db, 'pendaftaran'), {
         nama, kp, tel, emel, seamanCard: seaman,
         pakej: _bkPakej, tarikh,
         statusMedical: medical,
         statusSeaman:  seamanS,
         status: 'Baru',
-        submittedAt: serverTimestamp(),
-        uid: auth.currentUser ? auth.currentUser.uid : 'tetamu'
+        submittedAt: window.serverTimestamp(),
+        uid: window.auth?.currentUser ? window.auth.currentUser.uid : 'tetamu'
       });
 
       // Save payment record
-      await addDoc(collection(db, 'bayaran'), {
+      await window.addDoc(window.collection(window.db, 'bayaran'), {
         nama, tel,
         program: _bkPakej,
         method:  _bkKaedah,
         jumlah: 'RM ' + dep.toLocaleString(),
         status: 'Belum Disahkan',
-        submittedAt: serverTimestamp(),
-        uid: auth.currentUser ? auth.currentUser.uid : 'tetamu'
+        submittedAt: window.serverTimestamp(),
+        uid: window.auth?.currentUser ? window.auth.currentUser.uid : 'tetamu'
       });
 
       document.getElementById('bk-success').style.display = 'block';
@@ -1482,7 +1500,11 @@
   document.querySelectorAll('.fade').forEach(el=>obs.observe(el));
 
   // Load packages on page load
-  window.addEventListener('load',()=>{ if(typeof window.muatPakej==='function') window.muatPakej(); });
+  window.addEventListener('load', () => {
+    if (typeof window.muatPakej === 'function') {
+      window.muatPakej();
+    }
+  });
 </script>
 </body>
 </html>
